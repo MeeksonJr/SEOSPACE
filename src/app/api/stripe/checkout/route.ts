@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       req.headers.get("origin") ||
-      "http://localhost:3000";
+      "https://seospace-kappa.vercel.app";
 
     // If STRIPE_SECRET_KEY is configured, create a custom Checkout Session
     if (stripeSecret && stripeSecret.startsWith("sk_") && priceId) {

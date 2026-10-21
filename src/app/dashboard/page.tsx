@@ -492,7 +492,7 @@ function DashboardContent() {
   const embedSnippet = `<iframe src="${
     typeof window !== "undefined"
       ? window.location.origin
-      : "https://seospace.io"
+      : "https://seospace-kappa.vercel.app"
   }/widget?agency=${encodeURIComponent(
     whiteLabel.agencyName
   )}&color=${encodeURIComponent(
