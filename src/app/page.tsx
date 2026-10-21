@@ -332,6 +332,36 @@ export default function LandingPage() {
                 AI SEO Editor
               </Link>
               <Link
+                href="/compare"
+                className={
+                  heroDark
+                    ? "text-slate-300 hover:text-white transition"
+                    : "text-slate-600 hover:text-slate-950 transition"
+                }
+              >
+                Battlecard
+              </Link>
+              <Link
+                href="/tools"
+                className={
+                  heroDark
+                    ? "text-slate-300 hover:text-white transition"
+                    : "text-slate-600 hover:text-slate-950 transition"
+                }
+              >
+                Free Tools
+              </Link>
+              <Link
+                href="/docs"
+                className={
+                  heroDark
+                    ? "text-slate-300 hover:text-white transition"
+                    : "text-slate-600 hover:text-slate-950 transition"
+                }
+              >
+                API Docs
+              </Link>
+              <Link
                 href="/widget"
                 className={
                   heroDark

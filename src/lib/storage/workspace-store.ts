@@ -529,6 +529,11 @@ export function getWhiteLabelConfig(): WhiteLabelConfig {
 export function saveWhiteLabelConfig(config: WhiteLabelConfig): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(WHITELABEL_STORAGE_KEY, JSON.stringify(config));
+  fetch("/api/db", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "save_whitelabel", whiteLabel: config }),
+  }).catch(() => {});
 }
 
 export function getCapturedLeads(): CapturedLead[] {
@@ -566,6 +571,11 @@ export function addCapturedLead(
       LEADS_STORAGE_KEY,
       JSON.stringify([newLead, ...current])
     );
+    fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "save_lead", lead: newLead }),
+    }).catch(() => {});
   }
   return newLead;
 }
@@ -579,6 +589,14 @@ export function updateLeadStatus(
     l.id === id ? { ...l, status } : l
   );
   localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
+  const changed = updated.find((l) => l.id === id);
+  if (changed) {
+    fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "save_lead", lead: changed }),
+    }).catch(() => {});
+  }
   return updated;
 }
 
@@ -615,6 +633,11 @@ export function saveWorkspaceUser(user: Partial<WorkspaceUser>): WorkspaceUser {
     upsertAdminUser(updated);
   }
   return updated;
+}
+
+export function logoutWorkspaceUser(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(USER_STORAGE_KEY);
 }
 
 export function getAdminUsers(): WorkspaceUser[] {

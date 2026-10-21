@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,7 +16,10 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
-import { saveWorkspaceUser } from "@/lib/storage/workspace-store";
+import {
+  getAdminUsers,
+  saveWorkspaceUser,
+} from "@/lib/storage/workspace-store";
 
 interface AuthSplitScreenProps {
   initialMode?: "login" | "signup";
@@ -30,21 +33,35 @@ export function AuthSplitScreen({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro" | "agency">(
+    "agency"
+  );
+  const [authError, setAuthError] = useState("");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get("plan");
+    if (p === "starter" || p === "pro" || p === "agency") {
+      setSelectedPlan(p);
+    }
+  }, []);
+
   const onboardingSlides = [
     {
-      badge: "AI SEO & CRO Growth Engine",
+      badge: "AI SEO, CRO & DNS Growth Engine",
       title: "Turn Any URL Into a 90+ Score & Client-Ready Audit",
       subtitle:
-        "Inspect 35+ technical SEO, CRO copywriting, WCAG 2.2, and AI Search (GEO) signals in under 15 seconds.",
+        "Inspect 35+ technical SEO, CRO copywriting, WCAG 2.2, Cloudflare DoH DNS, and AI Search (GEO) signals in seconds.",
     },
     {
       badge: "Real-Time AI Content Studio",
       title: "Write & Optimize Articles with Live 0–100 Scoring",
       subtitle:
-        "Our built-in AI Assistant rewrites headlines, meta descriptions, and content structure while you type.",
+        "Seospace Neural Engine v4.2 rewrites headlines, meta descriptions, and content structure while you type.",
     },
     {
       badge: "Agency White-Label Suite",
@@ -56,17 +73,64 @@ export function AuthSplitScreen({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setAuthError("");
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setAuthError("Please enter a valid work email address.");
+      return;
+    }
+
+    if (mode === "magic") {
+      setMagicLinkSent(true);
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      setAuthError("Password must be at least 6 characters long.");
+      return;
+    }
+
     setLoading(true);
+    const existingUsers = getAdminUsers();
+    const matched = existingUsers.find(
+      (u) => u.email.toLowerCase() === cleanEmail
+    );
+
+    const planToAssign = matched?.plan || selectedPlan;
+    saveWorkspaceUser({
+      id: matched?.id,
+      name:
+        name.trim() ||
+        matched?.name ||
+        cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
+      email: cleanEmail,
+      plan: planToAssign,
+      creditsUsed: matched?.creditsUsed ?? 4,
+      creditsLimit:
+        planToAssign === "agency"
+          ? 999
+          : planToAssign === "pro"
+          ? 100
+          : 3,
+    });
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 350);
+  }
+
+  function handleVerifyMagicLink() {
+    setLoading(true);
+    const cleanEmail = (email || "zaim@seospace.io").trim().toLowerCase();
     saveWorkspaceUser({
       name:
         name.trim() ||
-        (email ? email.split("@")[0].replace(/[^a-zA-Z]/g, " ") : "Zaim Maulana"),
-      email: email.trim() || "zaim@seospace.io",
-      plan: "agency",
+        cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
+      email: cleanEmail,
+      plan: selectedPlan,
     });
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 500);
+    router.push("/dashboard");
   }
 
   function handleInstantDemo() {
@@ -84,7 +148,7 @@ export function AuthSplitScreen({
   return (
     <div className="min-h-screen bg-slate-100/80 flex items-center justify-center p-4 sm:p-6 lg:p-10">
       <div className="w-full max-w-6xl bg-white rounded-[32px] border border-slate-200/90 shadow-2xl shadow-slate-300/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[700px]">
-        {/* LEFT COLUMN: Clean Onboarding & Login Form (Flighti + Seospace Style) */}
+        {/* LEFT COLUMN: Clean Onboarding & Login Form */}
         <div className="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
@@ -118,7 +182,11 @@ export function AuthSplitScreen({
             <div className="mt-6 grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200/70 text-xs font-semibold">
               <button
                 type="button"
-                onClick={() => setMode("login")}
+                onClick={() => {
+                  setMode("login");
+                  setMagicLinkSent(false);
+                  setAuthError("");
+                }}
                 className={`py-2 rounded-lg transition cursor-pointer ${
                   mode === "login"
                     ? "bg-white text-slate-950 shadow-2xs"
@@ -129,7 +197,11 @@ export function AuthSplitScreen({
               </button>
               <button
                 type="button"
-                onClick={() => setMode("signup")}
+                onClick={() => {
+                  setMode("signup");
+                  setMagicLinkSent(false);
+                  setAuthError("");
+                }}
                 className={`py-2 rounded-lg transition cursor-pointer ${
                   mode === "signup"
                     ? "bg-white text-slate-950 shadow-2xs"
@@ -140,7 +212,10 @@ export function AuthSplitScreen({
               </button>
               <button
                 type="button"
-                onClick={() => setMode("magic")}
+                onClick={() => {
+                  setMode("magic");
+                  setAuthError("");
+                }}
                 className={`py-2 rounded-lg transition cursor-pointer ${
                   mode === "magic"
                     ? "bg-white text-slate-950 shadow-2xs"
@@ -188,89 +263,117 @@ export function AuthSplitScreen({
               <div className="h-px bg-slate-200 flex-1" />
             </div>
 
-            {/* Email Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
+            {authError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+                {authError}
+              </div>
+            )}
+
+            {mode === "magic" && magicLinkSent ? (
+              <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Magic Sign-In Link Dispatched!</span>
+                </div>
+                <p className="text-xs text-emerald-700 leading-relaxed">
+                  We sent an encrypted one-time sign-in link to{" "}
+                  <strong>{email}</strong>. Click below to verify and enter your
+                  workspace immediately.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleVerifyMagicLink}
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition"
+                >
+                  ✓ Verify Magic Link &amp; Enter Workspace →
+                </button>
+              </div>
+            ) : (
+              /* Email Form */
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {mode === "signup" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Full Name or Agency Name
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Zaim Maulana / Apex Agency"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Full Name or Agency Name
+                    Work Email Address
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Zaim Maulana / Apex Agency"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@agency.com"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
                     />
                   </div>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Work Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@agency.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
-                  />
-                </div>
-              </div>
-
-              {mode !== "magic" && (
-                <div>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <label className="font-semibold text-slate-700">
-                      Password
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setMode("magic")}
-                      className="text-blue-600 hover:underline font-medium cursor-pointer"
-                    >
-                      Forgot password?
-                    </button>
+                {mode !== "magic" && (
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <label className="font-semibold text-slate-700">
+                        Password (min. 6 characters)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setMode("magic")}
+                        className="text-blue-600 hover:underline font-medium cursor-pointer"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••••••"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
+                      />
+                    </div>
                   </div>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
-                    />
-                  </div>
-                </div>
-              )}
+                )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
-              >
-                <span>
-                  {loading
-                    ? "Entering Workspace..."
-                    : mode === "login"
-                    ? "Sign In to Workspace"
-                    : mode === "signup"
-                    ? "Create Free Account"
-                    : "Send Magic Login Link"}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
+                >
+                  <span>
+                    {loading
+                      ? "Entering Workspace..."
+                      : mode === "login"
+                      ? "Sign In to Workspace"
+                      : mode === "signup"
+                      ? `Create ${selectedPlan.toUpperCase()} Account`
+                      : "Send Magic Login Link"}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
           </div>
 
           {/* 1-Click Instant Demo Sandbox for Flippa Buyers */}
@@ -300,13 +403,11 @@ export function AuthSplitScreen({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Interactive Onboarding Showcase (Flighti + Seospace Dark Preview) */}
+        {/* RIGHT COLUMN: Interactive Onboarding Showcase */}
         <div className="lg:col-span-6 bg-[#050814] text-white p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden bg-seospace-dark-grid">
-          {/* Ambient radial glow */}
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none" />
 
-          {/* Top Trust Pill */}
           <div className="relative z-10 flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-blue-300 border border-white/10">
               <Sparkles className="w-3.5 h-3.5" />{" "}
@@ -319,7 +420,6 @@ export function AuthSplitScreen({
             </div>
           </div>
 
-          {/* Center Floating Interactive Seospace Score & Checklist Card */}
           <div className="relative z-10 my-8 bg-[#0C1226]/95 border border-slate-800 rounded-3xl p-6 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div>
@@ -332,14 +432,14 @@ export function AuthSplitScreen({
                 </div>
               </div>
               <span className="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-semibold">
-                ✨ AI Assistant
+                ✨ Seospace Neural Engine v4.2
               </span>
             </div>
 
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
               <div>
                 <SegmentedGauge
-                  score={90}
+                  score={92}
                   sublabel="Your Score is Excellent"
                   theme="dark"
                   size="sm"
@@ -348,19 +448,19 @@ export function AuthSplitScreen({
 
               <div className="space-y-2.5 text-xs">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Active Suggestions
+                  Active Diagnostics
                 </div>
                 <div className="flex items-center gap-2 text-slate-200">
                   <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
                     ✓
                   </span>
-                  <span>Primary H1 & Meta Title aligned</span>
+                  <span>Primary H1 &amp; Meta Title aligned</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-200">
                   <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
                     ✓
                   </span>
-                  <span>Sub-200ms Edge TTFB Speed</span>
+                  <span>Cloudflare 1.1.1.1 SPF + DMARC Verified</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-200">
                   <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
@@ -380,7 +480,6 @@ export function AuthSplitScreen({
             </div>
           </div>
 
-          {/* Bottom Onboarding Carousel Text & Dots (Flighti Dribbble Shot Pattern) */}
           <div className="relative z-10">
             <h2 className="text-2xl font-bold leading-snug">
               {onboardingSlides[slideIndex].title}
@@ -406,7 +505,7 @@ export function AuthSplitScreen({
               </div>
               <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>SOC2 & GDPR Compliant</span>
+                <span>SOC2 &amp; GDPR Compliant</span>
               </div>
             </div>
           </div>

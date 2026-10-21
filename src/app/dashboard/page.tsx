@@ -500,7 +500,8 @@ function DashboardContent() {
   )}" width="100%" height="460" style="border:none;border-radius:16px;overflow:hidden;" title="Free Instant Website SEO & CRO Audit"></iframe>`;
 
   const latestAudit = audits[0];
-  const activeArticleId = articles[currentArticleIdx]?.id || "art-voice-one";
+  const activeArticleId =
+    articles[currentArticleIdx]?.id || "art-voiceone-guide";
 
   const filteredLibraryArticles = useMemo(() => {
     if (libraryDomainFilter === "all") return articles;
@@ -508,7 +509,7 @@ function DashboardContent() {
   }, [articles, libraryDomainFilter]);
 
   return (
-    <div className="h-screen overflow-hidden bg-[#F4F6F9] flex flex-col lg:flex-row text-slate-900">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F6F9] flex flex-col lg:flex-row text-slate-900">
       {/* CONSTANT NON-SCROLLING LEFT SIDEBAR */}
       <aside className="w-full lg:w-64 lg:h-screen bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col justify-between p-4 shrink-0 lg:overflow-hidden">
         <div>
@@ -635,6 +636,27 @@ function DashboardContent() {
               <Eye className="w-4 h-4 text-slate-400" />
               <span>View Shareable Article</span>
             </Link>
+            <Link
+              href="/compare"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <Globe className="w-4 h-4 text-blue-600" />
+              <span>Competitor Battlecard</span>
+            </Link>
+            <Link
+              href="/tools"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <Code className="w-4 h-4 text-emerald-600" />
+              <span>Free SEO &amp; DNS Tools</span>
+            </Link>
+            <Link
+              href="/docs"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <LayoutGrid className="w-4 h-4 text-indigo-600" />
+              <span>REST API Playground</span>
+            </Link>
             <button
               onClick={() => setActiveTab("whitelabel")}
               className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
@@ -662,14 +684,14 @@ function DashboardContent() {
               href="/login"
               className="text-[10px] font-semibold text-slate-400 hover:text-slate-700"
             >
-              Switch
+              Sign Out
             </Link>
           </div>
         </div>
       </aside>
 
       {/* FULL-WIDTH INDEPENDENTLY SCROLLABLE RIGHT WORKSPACE AREA */}
-      <main className="flex-1 min-w-0 h-full overflow-y-auto">
+      <main className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
         {/* ============================================================
             TAB 1: 100% DATA-DRIVEN EXECUTIVE INTELLIGENCE DASHBOARD
            ============================================================ */}
