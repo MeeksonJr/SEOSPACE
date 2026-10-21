@@ -188,6 +188,13 @@ export default function AuditReportPage() {
               )}
             </span>
 
+            <Link
+              href={`/compare?primary=${encodeURIComponent(report.url)}`}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>⚔️ Compare vs. Competitor</span>
+            </Link>
+
             <button
               onClick={() => handleLiveRescan(undefined, true)}
               disabled={rescanning}
@@ -580,6 +587,94 @@ export default function AuditReportPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Live Cloudflare 1.1.1.1 DNS, Email Security, Wayback & AI Crawler Intelligence */}
+          {report.metadata?.dns && (
+            <div className="pt-4 border-t border-slate-100 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                  CLOUDFLARE 1.1.1.1 DNS-OVER-HTTPS • EMAIL SECURITY &amp; AI CRAWLER ACCESS
+                </div>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Zero-Key Public Intelligence Layer
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                    Mail Provider &amp; SPF
+                  </div>
+                  <div className="font-bold text-slate-900 mt-1">
+                    {report.metadata.dns.mailProvider}
+                  </div>
+                  <div
+                    className={`mt-1 font-semibold ${
+                      report.metadata.dns.hasSpf
+                        ? "text-emerald-600"
+                        : "text-rose-600"
+                    }`}
+                  >
+                    SPF: {report.metadata.dns.hasSpf ? "✓ Configured" : "✕ Missing"}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                    DMARC Anti-Spoofing Policy
+                  </div>
+                  <div
+                    className={`font-bold mt-1 ${
+                      report.metadata.dns.hasDmarc
+                        ? "text-emerald-600"
+                        : "text-rose-600"
+                    }`}
+                  >
+                    {report.metadata.dns.hasDmarc
+                      ? `✓ Active (p=${report.metadata.dns.dmarcPolicy})`
+                      : "✕ Missing _dmarc TXT"}
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-500 mt-1 truncate">
+                    {report.metadata.dns.dmarcRecord ||
+                      `_dmarc.${report.domain} not set`}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                    A Records &amp; Nameservers
+                  </div>
+                  <div className="font-mono font-semibold text-slate-900 mt-1 truncate">
+                    IP: {report.metadata.dns.aRecords?.[0] || "Edge Anycast"}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1 truncate">
+                    NS: {report.metadata.dns.nameservers?.slice(0, 2).join(", ") || "Cloudflare"}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                    Domain Age &amp; AI Crawlers
+                  </div>
+                  <div className="font-bold text-slate-900 mt-1">
+                    {report.metadata.domainHistory?.firstSeenYear
+                      ? `Since ${report.metadata.domainHistory.firstSeenYear} (${report.metadata.domainHistory.domainAgeYears} yrs)`
+                      : "Active Domain"}
+                  </div>
+                  <div className="text-[11px] text-emerald-700 font-semibold mt-1">
+                    GPTBot:{" "}
+                    {report.metadata.robotsAnalysis?.allowsGptBot !== false
+                      ? "✓ Allowed"
+                      : "Blocked"}{" "}
+                    • ClaudeBot:{" "}
+                    {report.metadata.robotsAnalysis?.allowsClaudeBot !== false
+                      ? "✓ Allowed"
+                      : "Blocked"}
+                  </div>
+                </div>
               </div>
             </div>
           )}
