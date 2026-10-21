@@ -44,6 +44,47 @@ export interface AiRewriteSuggestion {
   rationale: string;
 }
 
+export interface DnsIntelligence {
+  aRecords: string[];
+  ipv6Support: boolean;
+  mxRecords: string[];
+  mailProvider: string;
+  hasSpf: boolean;
+  spfRecord: string;
+  hasDmarc: boolean;
+  dmarcRecord: string;
+  dmarcPolicy: string;
+  nameservers: string[];
+}
+
+export interface DomainHistory {
+  firstSeenYear: number | null;
+  domainAgeYears: number | null;
+  waybackSnapshotUrl: string | null;
+}
+
+export interface RobotsAnalysis {
+  found: boolean;
+  allowsGptBot: boolean;
+  allowsClaudeBot: boolean;
+  allowsPerplexityBot: boolean;
+  allowsGoogleExtended: boolean;
+  disallowRulesCount: number;
+  declaredSitemaps: string[];
+}
+
+export interface SitemapAnalysis {
+  found: boolean;
+  urlCount: number;
+  isSitemapIndex: boolean;
+}
+
+export interface CommunitySignals {
+  hnMentionsCount: number;
+  topStoryTitle?: string;
+  topStoryPoints?: number;
+}
+
 export interface AuditReport {
   id: string;
   url: string;
@@ -79,7 +120,11 @@ export interface AuditReport {
     ogType?: string;
     twitterCard?: string;
     rawMetaTags?: Record<string, string>;
-    extractionSource?: "RapidAPI + Live DOM" | "Live DOM";
+    extractionSource?:
+      | "RapidAPI + Cloudflare DoH + Live DOM"
+      | "RapidAPI + Live DOM"
+      | "Cloudflare DoH + Live DOM"
+      | "Live DOM";
     hasRobotsTxt: boolean;
     hasSitemapXml: boolean;
     hasLlmsTxt: boolean;
@@ -89,7 +134,25 @@ export interface AuditReport {
     missingAltCount: number;
     internalLinks: number;
     externalLinks: number;
+    dns?: DnsIntelligence;
+    domainHistory?: DomainHistory;
+    robotsAnalysis?: RobotsAnalysis;
+    sitemapAnalysis?: SitemapAnalysis;
+    communitySignals?: CommunitySignals;
   };
+}
+
+export interface DomainComparisonRecord {
+  id: string;
+  primaryUrl: string;
+  competitorUrl: string;
+  primaryDomain: string;
+  competitorDomain: string;
+  primaryScore: number;
+  competitorScore: number;
+  winnerDomain: string;
+  scoreDelta: number;
+  createdAt: string;
 }
 
 export interface WhiteLabelConfig {

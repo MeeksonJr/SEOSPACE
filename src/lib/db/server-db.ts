@@ -1,16 +1,35 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
-import { AuditReport } from "@/types/audit";
-import { SAMPLE_AUDITS } from "@/lib/sample-audits";
+import {
+  AuditReport,
+  CapturedLead,
+  DomainComparisonRecord,
+  WhiteLabelConfig,
+} from "@/types/audit";
+import {
+  DEFAULT_WHITELABEL_CONFIG,
+  SAMPLE_AUDITS,
+  SAMPLE_CAPTURED_LEADS,
+} from "@/lib/sample-audits";
 import { INITIAL_ARTICLES, SavedArticle } from "@/lib/storage/workspace-store";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const DB_FILE = path.join(DATA_DIR, "seospace-db.json");
+const LOCAL_DATA_DIR = path.join(process.cwd(), ".data");
+const LOCAL_DB_FILE = path.join(LOCAL_DATA_DIR, "seospace-db.json");
+const TMP_DB_FILE = path.join(os.tmpdir(), "seospace-db.json");
 
 export interface ServerDatabaseSchema {
   audits: AuditReport[];
   articles: SavedArticle[];
+  leads: CapturedLead[];
+  comparisons: DomainComparisonRecord[];
+  whiteLabel: WhiteLabelConfig;
   updatedAt: string;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __SEOSPACE_MEM_DB__: ServerDatabaseSchema | undefined;
 }
 
 export function normalizeUrlKey(input: string): string {
@@ -26,27 +45,68 @@ function getInitialDb(): ServerDatabaseSchema {
   return {
     audits: Object.values(SAMPLE_AUDITS),
     articles: INITIAL_ARTICLES,
+    leads: SAMPLE_CAPTURED_LEADS,
+    comparisons: [
+      {
+        id: "cmp-voiceone-vs-stripe",
+        primaryUrl: "https://voice-one.com/services/",
+        competitorUrl: "https://stripe.com",
+        primaryDomain: "voice-one.com",
+        competitorDomain: "stripe.com",
+        primaryScore: 64,
+        competitorScore: 92,
+        winnerDomain: "stripe.com",
+        scoreDelta: 28,
+        createdAt: "2026-10-21T17:30:00Z",
+      },
+    ],
+    whiteLabel: DEFAULT_WHITELABEL_CONFIG,
     updatedAt: new Date().toISOString(),
   };
 }
 
+function resolveDbFileToRead(): string | null {
+  try {
+    if (fs.existsSync(TMP_DB_FILE)) return TMP_DB_FILE;
+  } catch {
+    // ignore
+  }
+  try {
+    if (fs.existsSync(LOCAL_DB_FILE)) return LOCAL_DB_FILE;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export function readServerDb(): ServerDatabaseSchema {
   try {
-    if (!fs.existsSync(DB_FILE)) {
+    const fileToRead = resolveDbFileToRead();
+    let parsed: Partial<ServerDatabaseSchema> | null = null;
+
+    if (fileToRead) {
+      const raw = fs.readFileSync(fileToRead, "utf-8");
+      parsed = JSON.parse(raw) as Partial<ServerDatabaseSchema>;
+    } else if (globalThis.__SEOSPACE_MEM_DB__) {
+      parsed = globalThis.__SEOSPACE_MEM_DB__;
+    }
+
+    if (!parsed) {
       const initial = getInitialDb();
       writeServerDb(initial);
       return initial;
     }
-    const raw = fs.readFileSync(DB_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as ServerDatabaseSchema;
 
-    // Deduplicate audits by normalized URL key while preserving sample audits
-    const rawAudits = Array.isArray(parsed.audits)
-      ? parsed.audits
-      : Object.values(SAMPLE_AUDITS);
+    const memAudits = globalThis.__SEOSPACE_MEM_DB__?.audits || [];
+    const rawAudits = Array.isArray(parsed.audits) ? parsed.audits : [];
     const seenUrls = new Set<string>();
     const dedupedAudits: AuditReport[] = [];
-    for (const a of [...rawAudits, ...Object.values(SAMPLE_AUDITS)]) {
+
+    for (const a of [
+      ...memAudits,
+      ...rawAudits,
+      ...Object.values(SAMPLE_AUDITS),
+    ]) {
       if (!a || !a.url) continue;
       const key = normalizeUrlKey(a.url);
       if (!seenUrls.has(key)) {
@@ -55,28 +115,61 @@ export function readServerDb(): ServerDatabaseSchema {
       }
     }
 
-    return {
+    const db: ServerDatabaseSchema = {
       audits: dedupedAudits,
-      articles: Array.isArray(parsed.articles)
-        ? parsed.articles
-        : INITIAL_ARTICLES,
+      articles:
+        Array.isArray(parsed.articles) && parsed.articles.length > 0
+          ? parsed.articles
+          : globalThis.__SEOSPACE_MEM_DB__?.articles || INITIAL_ARTICLES,
+      leads:
+        Array.isArray(parsed.leads) && parsed.leads.length > 0
+          ? parsed.leads
+          : globalThis.__SEOSPACE_MEM_DB__?.leads || SAMPLE_CAPTURED_LEADS,
+      comparisons: Array.isArray(parsed.comparisons)
+        ? parsed.comparisons
+        : globalThis.__SEOSPACE_MEM_DB__?.comparisons || getInitialDb().comparisons,
+      whiteLabel:
+        parsed.whiteLabel ||
+        globalThis.__SEOSPACE_MEM_DB__?.whiteLabel ||
+        DEFAULT_WHITELABEL_CONFIG,
       updatedAt: parsed.updatedAt || new Date().toISOString(),
     };
+
+    globalThis.__SEOSPACE_MEM_DB__ = db;
+    return db;
   } catch {
-    return getInitialDb();
+    if (globalThis.__SEOSPACE_MEM_DB__) {
+      return globalThis.__SEOSPACE_MEM_DB__;
+    }
+    const fallback = getInitialDb();
+    globalThis.__SEOSPACE_MEM_DB__ = fallback;
+    return fallback;
   }
 }
 
 export function writeServerDb(data: ServerDatabaseSchema): void {
+  const stamped: ServerDatabaseSchema = {
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  globalThis.__SEOSPACE_MEM_DB__ = stamped;
+  const serialized = JSON.stringify(stamped, null, 2);
+
+  // Always write to os.tmpdir() (writable on Vercel serverless AND local OS)
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(TMP_DB_FILE, serialized, "utf-8");
+  } catch {
+    // ignore
+  }
+
+  // Also write to .data/seospace-db.json when running locally
+  try {
+    if (!process.env.VERCEL) {
+      if (!fs.existsSync(LOCAL_DATA_DIR)) {
+        fs.mkdirSync(LOCAL_DATA_DIR, { recursive: true });
+      }
+      fs.writeFileSync(LOCAL_DB_FILE, serialized, "utf-8");
     }
-    fs.writeFileSync(
-      DB_FILE,
-      JSON.stringify({ ...data, updatedAt: new Date().toISOString() }, null, 2),
-      "utf-8"
-    );
   } catch {
     // On read-only serverless file systems, fail gracefully
   }
@@ -134,4 +227,33 @@ export function saveArticleToServerDb(article: SavedArticle): SavedArticle {
     : [article, ...db.articles];
   writeServerDb(db);
   return article;
+}
+
+export function saveComparisonToServerDb(
+  comparison: DomainComparisonRecord
+): DomainComparisonRecord {
+  const db = readServerDb();
+  const filtered = (db.comparisons || []).filter((c) => c.id !== comparison.id);
+  db.comparisons = [comparison, ...filtered].slice(0, 50);
+  writeServerDb(db);
+  return comparison;
+}
+
+export function saveLeadToServerDb(lead: CapturedLead): CapturedLead {
+  const db = readServerDb();
+  const exists = (db.leads || []).some((l) => l.id === lead.id);
+  db.leads = exists
+    ? db.leads.map((l) => (l.id === lead.id ? lead : l))
+    : [lead, ...(db.leads || [])];
+  writeServerDb(db);
+  return lead;
+}
+
+export function saveWhiteLabelToServerDb(
+  config: WhiteLabelConfig
+): WhiteLabelConfig {
+  const db = readServerDb();
+  db.whiteLabel = config;
+  writeServerDb(db);
+  return config;
 }

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  findAuditInServerDb,
   readServerDb,
   saveArticleToServerDb,
   saveAuditToServerDb,
+  saveComparisonToServerDb,
+  saveLeadToServerDb,
+  saveWhiteLabelToServerDb,
   writeServerDb,
 } from "@/lib/db/server-db";
 
@@ -12,11 +16,13 @@ export async function GET(req: NextRequest) {
   const articleId = req.nextUrl.searchParams.get("articleId");
 
   if (auditId) {
-    const found = db.audits.find(
-      (a) =>
-        a.id === auditId ||
-        a.domain.replace(/[^a-z0-9]+/gi, "-").toLowerCase() === auditId
-    );
+    const found =
+      findAuditInServerDb(auditId) ||
+      db.audits.find(
+        (a) =>
+          a.id === auditId ||
+          a.domain.replace(/[^a-z0-9]+/gi, "-").toLowerCase() === auditId
+      );
     return NextResponse.json({ audit: found || null });
   }
 
@@ -39,7 +45,34 @@ export async function POST(req: NextRequest) {
 
     if (body.type === "save_article" && body.article) {
       const saved = saveArticleToServerDb(body.article);
-      return NextResponse.json({ ok: true, article: saved, db: readServerDb() });
+      return NextResponse.json({
+        ok: true,
+        article: saved,
+        db: readServerDb(),
+      });
+    }
+
+    if (body.type === "save_comparison" && body.comparison) {
+      const saved = saveComparisonToServerDb(body.comparison);
+      return NextResponse.json({
+        ok: true,
+        comparison: saved,
+        db: readServerDb(),
+      });
+    }
+
+    if (body.type === "save_lead" && body.lead) {
+      const saved = saveLeadToServerDb(body.lead);
+      return NextResponse.json({ ok: true, lead: saved, db: readServerDb() });
+    }
+
+    if (body.type === "save_whitelabel" && body.whiteLabel) {
+      const saved = saveWhiteLabelToServerDb(body.whiteLabel);
+      return NextResponse.json({
+        ok: true,
+        whiteLabel: saved,
+        db: readServerDb(),
+      });
     }
 
     if (body.type === "delete_audit" && body.id) {

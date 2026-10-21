@@ -1,8 +1,13 @@
 import {
   AuditCheckItem,
   AuditReport,
+  CommunitySignals,
+  DnsIntelligence,
+  DomainHistory,
   PillarKey,
   PillarScore,
+  RobotsAnalysis,
+  SitemapAnalysis,
 } from "@/types/audit";
 
 interface RapidApiMetadataResponse {
@@ -15,6 +20,18 @@ interface RapidApiMetadataResponse {
   canonical?: string;
   metaTags?: Record<string, string>;
   ogTags?: Record<string, string>;
+}
+
+interface DohAnswer {
+  name: string;
+  type: number;
+  TTL: number;
+  data: string;
+}
+
+interface DohResponse {
+  Status: number;
+  Answer?: DohAnswer[];
 }
 
 function extractTagContent(html: string, regex: RegExp): string {
@@ -125,6 +142,230 @@ async function fetchViaRapidApi(
   }
 }
 
+async function queryCloudflareDoh(
+  name: string,
+  type: "A" | "AAAA" | "MX" | "TXT" | "NS"
+): Promise<string[]> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 2400);
+    const res = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(
+        name
+      )}&type=${type}`,
+      {
+        headers: { Accept: "application/dns-json" },
+        signal: c.signal,
+      }
+    );
+    clearTimeout(t);
+    if (!res.ok) return [];
+    const json = (await res.json()) as DohResponse;
+    return (json.Answer || []).map((a) =>
+      a.data.replace(/^"|"$/g, "").trim()
+    );
+  } catch {
+    return [];
+  }
+}
+
+export async function inspectDomainDns(
+  domain: string
+): Promise<DnsIntelligence> {
+  const [aRecords, aaaaRecords, mxRecords, txtRecords, dmarcTxt, nsRecords] =
+    await Promise.all([
+      queryCloudflareDoh(domain, "A"),
+      queryCloudflareDoh(domain, "AAAA"),
+      queryCloudflareDoh(domain, "MX"),
+      queryCloudflareDoh(domain, "TXT"),
+      queryCloudflareDoh(`_dmarc.${domain}`, "TXT"),
+      queryCloudflareDoh(domain, "NS"),
+    ]);
+
+  const spfRecord =
+    txtRecords.find((r) => /v=spf1/i.test(r)) || "";
+  const dmarcRecord =
+    dmarcTxt.find((r) => /v=DMARC1/i.test(r)) || "";
+  const dmarcPolicyMatch = dmarcRecord.match(/p\s*=\s*([a-zA-Z]+)/i);
+  const dmarcPolicy = dmarcPolicyMatch
+    ? dmarcPolicyMatch[1].toLowerCase()
+    : dmarcRecord
+    ? "configured"
+    : "missing";
+
+  const mxJoined = mxRecords.join(" ").toLowerCase();
+  let mailProvider = mxRecords.length > 0 ? "Custom Mail Server" : "No MX Configured";
+  if (mxJoined.includes("google") || mxJoined.includes("aspmx")) {
+    mailProvider = "Google Workspace";
+  } else if (mxJoined.includes("outlook") || mxJoined.includes("protection.outlook")) {
+    mailProvider = "Microsoft 365";
+  } else if (mxJoined.includes("amazonses")) {
+    mailProvider = "Amazon SES";
+  } else if (mxJoined.includes("protonmail")) {
+    mailProvider = "ProtonMail";
+  } else if (mxJoined.includes("cloudflare")) {
+    mailProvider = "Cloudflare Email Routing";
+  }
+
+  return {
+    aRecords: aRecords.slice(0, 4),
+    ipv6Support: aaaaRecords.length > 0,
+    mxRecords: mxRecords.slice(0, 4),
+    mailProvider,
+    hasSpf: Boolean(spfRecord),
+    spfRecord,
+    hasDmarc: Boolean(dmarcRecord),
+    dmarcRecord,
+    dmarcPolicy,
+    nameservers: nsRecords.slice(0, 4),
+  };
+}
+
+async function fetchWaybackHistory(domain: string): Promise<DomainHistory> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 2400);
+    const res = await fetch(
+      `https://archive.org/wayback/available?url=${encodeURIComponent(
+        domain
+      )}&timestamp=19980101`,
+      { signal: c.signal }
+    );
+    clearTimeout(t);
+    if (!res.ok) {
+      return {
+        firstSeenYear: null,
+        domainAgeYears: null,
+        waybackSnapshotUrl: `https://web.archive.org/web/*/${domain}`,
+      };
+    }
+    const data = await res.json();
+    const closest = data?.archived_snapshots?.closest;
+    if (closest?.timestamp) {
+      const year = parseInt(String(closest.timestamp).slice(0, 4), 10);
+      const currentYear = new Date().getFullYear();
+      if (!isNaN(year) && year >= 1995 && year <= currentYear) {
+        return {
+          firstSeenYear: year,
+          domainAgeYears: Math.max(1, currentYear - year),
+          waybackSnapshotUrl:
+            closest.url || `https://web.archive.org/web/*/${domain}`,
+        };
+      }
+    }
+    return {
+      firstSeenYear: null,
+      domainAgeYears: null,
+      waybackSnapshotUrl: `https://web.archive.org/web/*/${domain}`,
+    };
+  } catch {
+    return {
+      firstSeenYear: null,
+      domainAgeYears: null,
+      waybackSnapshotUrl: `https://web.archive.org/web/*/${domain}`,
+    };
+  }
+}
+
+async function fetchCommunitySignals(
+  domain: string
+): Promise<CommunitySignals> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 2200);
+    const res = await fetch(
+      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(
+        domain
+      )}&tags=story&hitsPerPage=5`,
+      { signal: c.signal }
+    );
+    clearTimeout(t);
+    if (!res.ok) return { hnMentionsCount: 0 };
+    const data = await res.json();
+    const nbHits = typeof data?.nbHits === "number" ? data.nbHits : 0;
+    const topHit = Array.isArray(data?.hits) ? data.hits[0] : null;
+    return {
+      hnMentionsCount: nbHits,
+      topStoryTitle: topHit?.title || undefined,
+      topStoryPoints:
+        typeof topHit?.points === "number" ? topHit.points : undefined,
+    };
+  } catch {
+    return { hnMentionsCount: 0 };
+  }
+}
+
+async function inspectRobotsAndSitemap(origin: string): Promise<{
+  robotsAnalysis: RobotsAnalysis;
+  sitemapAnalysis: SitemapAnalysis;
+  hasLlmsTxt: boolean;
+}> {
+  const fetchTextFast = async (path: string): Promise<{ ok: boolean; text: string }> => {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 2500);
+      const r = await fetch(`${origin}${path}`, {
+        method: "GET",
+        signal: c.signal,
+      });
+      clearTimeout(t);
+      if (r.status >= 200 && r.status < 400) {
+        const txt = await r.text();
+        return { ok: true, text: txt.slice(0, 25000) };
+      }
+      return { ok: false, text: "" };
+    } catch {
+      return { ok: false, text: "" };
+    }
+  };
+
+  const [robotsRes, sitemapRes, llmsRes] = await Promise.all([
+    fetchTextFast("/robots.txt"),
+    fetchTextFast("/sitemap.xml"),
+    fetchTextFast("/llms.txt"),
+  ]);
+
+  const rText = robotsRes.text || "";
+  const checkAiBotAllowed = (botName: string): boolean => {
+    const regex = new RegExp(
+      `User-agent:\\s*${botName}[\\s\\S]*?(?=User-agent:|$)`,
+      "i"
+    );
+    const block = rText.match(regex)?.[0] || "";
+    if (/Disallow:\s*\/\s*$/m.test(block)) return false;
+    return true;
+  };
+
+  const disallowMatches = rText.match(/^Disallow:\s*\S+/gim) || [];
+  const sitemapDeclarations = (rText.match(/^Sitemap:\s*(\S+)/gim) || []).map(
+    (s) => s.replace(/^Sitemap:\s*/i, "").trim()
+  );
+
+  const robotsAnalysis: RobotsAnalysis = {
+    found: robotsRes.ok && rText.length > 5,
+    allowsGptBot: checkAiBotAllowed("GPTBot"),
+    allowsClaudeBot: checkAiBotAllowed("ClaudeBot"),
+    allowsPerplexityBot: checkAiBotAllowed("PerplexityBot"),
+    allowsGoogleExtended: checkAiBotAllowed("Google-Extended"),
+    disallowRulesCount: disallowMatches.length,
+    declaredSitemaps: sitemapDeclarations.slice(0, 5),
+  };
+
+  const sText = sitemapRes.text || "";
+  const locMatches = sText.match(/<loc>/gi) || [];
+  const sitemapAnalysis: SitemapAnalysis = {
+    found: sitemapRes.ok && (locMatches.length > 0 || /<urlset|<sitemapindex/i.test(sText)),
+    urlCount: locMatches.length,
+    isSitemapIndex: /<sitemapindex/i.test(sText),
+  };
+
+  return {
+    robotsAnalysis,
+    sitemapAnalysis,
+    hasLlmsTxt: llmsRes.ok && llmsRes.text.length > 10 && !/<html/i.test(llmsRes.text),
+  };
+}
+
 export async function scanLiveUrl(
   rawInput: string
 ): Promise<{ report: AuditReport; bodyExcerpt: string }> {
@@ -149,10 +390,16 @@ export async function scanLiveUrl(
   let html = "";
   let responseTimeMs = 0;
   const headers: Record<string, string> = {};
-  let domFetchSucceeded = false;
 
-  // Run RapidAPI Metadata Extraction AND Direct DOM Fetch in parallel
-  const [rapidData] = await Promise.all([
+  // Run RapidAPI Metadata + Direct DOM Fetch + Cloudflare DoH DNS + Wayback + HN + Robots/Sitemap in parallel!
+  const [
+    rapidData,
+    ,
+    dns,
+    domainHistory,
+    communitySignals,
+    crawlerFiles,
+  ] = await Promise.all([
     fetchViaRapidApi(cleanUrl),
     (async () => {
       try {
@@ -173,35 +420,20 @@ export async function scanLiveUrl(
           headers[key.toLowerCase()] = val;
         });
         html = await res.text();
-        domFetchSucceeded = html.length > 80;
       } catch {
         responseTimeMs = Date.now() - startTime;
-        domFetchSucceeded = false;
       }
     })(),
+    inspectDomainDns(domain),
+    fetchWaybackHistory(domain),
+    fetchCommunitySignals(domain),
+    inspectRobotsAndSitemap(origin),
   ]);
 
-  // Probe /robots.txt, /sitemap.xml, /llms.txt
-  const probeUrl = async (path: string): Promise<boolean> => {
-    try {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 2800);
-      const r = await fetch(`${origin}${path}`, {
-        method: "GET",
-        signal: c.signal,
-      });
-      clearTimeout(t);
-      return r.status >= 200 && r.status < 400;
-    } catch {
-      return false;
-    }
-  };
-
-  const [hasRobotsTxt, hasSitemapXml, hasLlmsTxt] = await Promise.all([
-    probeUrl("/robots.txt"),
-    probeUrl("/sitemap.xml"),
-    probeUrl("/llms.txt"),
-  ]);
+  const { robotsAnalysis, sitemapAnalysis, hasLlmsTxt } = crawlerFiles;
+  const hasRobotsTxt = robotsAnalysis.found;
+  const hasSitemapXml =
+    sitemapAnalysis.found || robotsAnalysis.declaredSitemaps.length > 0;
 
   const rawMetaTags: Record<string, string> = {
     ...(rapidData?.metaTags || {}),
@@ -402,8 +634,10 @@ export async function scanLiveUrl(
     title: "Robots Indexing, Sitemap.xml & Robots.txt",
     description: indexingBlocked
       ? `CRITICAL: meta robots contains '${robotsMeta}', blocking search engines from indexing this page!`
-      : `robots.txt: ${hasRobotsTxt ? "Found" : "Missing"} | sitemap.xml: ${
-          hasSitemapXml ? "Found" : "Missing"
+      : `robots.txt: ${hasRobotsTxt ? `Found (${robotsAnalysis.disallowRulesCount} rules)` : "Missing"} | sitemap.xml: ${
+          hasSitemapXml
+            ? `Found (${sitemapAnalysis.urlCount || "indexed"} URLs)`
+            : "Missing"
         } | meta robots: ${robotsMeta || "index, follow"}`,
     severity: indexingBlocked
       ? "critical"
@@ -454,7 +688,6 @@ export async function scanLiveUrl(
 
   // --- PILLAR 2: CRO & SOCIAL PREVIEW ARCHITECTURE ---
   // 5. Primary H1 Heading Check (35 pts)
-  const hasRealDomH1 = h1List.length > 0;
   const h1Pts =
     h1List.length === 1 ? 35 : h1List.length > 1 ? 22 : h1 ? 15 : 0;
   checks.push({
@@ -591,20 +824,34 @@ export async function scanLiveUrl(
     codeSnippet: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "${brandName}",\n  "url": "${origin}",\n  "description": ${JSON.stringify(description || title)}\n}\n</script>`,
   });
 
-  // 10. LLMs.txt Manifest Check (30 pts)
-  const llmsPts = hasLlmsTxt ? 30 : 8;
+  // 10. LLMs.txt & AI Bot Access Check (30 pts)
+  const aiBotsAllowed =
+    robotsAnalysis.allowsGptBot &&
+    robotsAnalysis.allowsClaudeBot &&
+    robotsAnalysis.allowsPerplexityBot;
+  const llmsPts = (hasLlmsTxt ? 18 : 6) + (aiBotsAllowed ? 12 : 2);
   checks.push({
     id: "geo-llms",
     pillar: "geo",
-    title: "LLMs.txt Generative Search Manifest (/llms.txt)",
-    description: hasLlmsTxt
-      ? "Verified /llms.txt manifest at domain root."
-      : "No /llms.txt manifest found at domain root. Adding /llms.txt provides AI crawlers a clean markdown index of your core pages.",
-    severity: hasLlmsTxt ? "pass" : "warning",
+    title: "LLMs.txt Manifest & AI Crawler Access (GPTBot / ClaudeBot)",
+    description: `${
+      hasLlmsTxt
+        ? "Verified /llms.txt manifest at domain root."
+        : "No /llms.txt manifest found at domain root."
+    } AI Crawlers in robots.txt: GPTBot (${
+      robotsAnalysis.allowsGptBot ? "Allowed" : "Blocked"
+    }), ClaudeBot (${
+      robotsAnalysis.allowsClaudeBot ? "Allowed" : "Blocked"
+    }), PerplexityBot (${
+      robotsAnalysis.allowsPerplexityBot ? "Allowed" : "Blocked"
+    }).`,
+    severity: hasLlmsTxt && aiBotsAllowed ? "pass" : "warning",
     pointsEarned: llmsPts,
     pointsMax: 30,
-    currentValue: hasLlmsTxt ? "Active at /llms.txt" : "Missing /llms.txt",
-    recommendedValue: "Publish /llms.txt at root domain",
+    currentValue: `llms.txt: ${hasLlmsTxt ? "Active" : "Missing"} | AI Bots: ${
+      aiBotsAllowed ? "Allowed" : "Restricted"
+    }`,
+    recommendedValue: "Publish /llms.txt & allow AI answer crawlers in /robots.txt",
     impactScore: 7,
     difficulty: "Easy",
     codeSnippet: `# ${brandName}\n> ${description || title}\n\n## Key Pages\n- [${title || brandName}](${cleanUrl})`,
@@ -685,12 +932,12 @@ export async function scanLiveUrl(
     difficulty: "Easy",
   });
 
-  // --- PILLAR 5: SECURITY & EDGE VITALS ---
-  // 14. HTTPS & Security Headers (60 pts)
+  // --- PILLAR 5: SECURITY, DNS & EDGE VITALS ---
+  // 14. HTTPS & Security Headers (40 pts)
   const hasHsts = Boolean(headers["strict-transport-security"]);
   const hasCsp = Boolean(headers["content-security-policy"]);
   const secPts =
-    (sslSecure ? 35 : 0) + (hasHsts ? 13 : 5) + (hasCsp ? 12 : 4);
+    (sslSecure ? 24 : 0) + (hasHsts ? 8 : 3) + (hasCsp ? 8 : 3);
   checks.push({
     id: "sec-headers",
     pillar: "security",
@@ -702,7 +949,7 @@ export async function scanLiveUrl(
     }`,
     severity: !sslSecure ? "critical" : hasHsts && hasCsp ? "pass" : "warning",
     pointsEarned: secPts,
-    pointsMax: 60,
+    pointsMax: 40,
     currentValue: `SSL: ${sslSecure ? "Yes" : "No"} | Generator: ${
       generator || "Hidden"
     }`,
@@ -711,15 +958,48 @@ export async function scanLiveUrl(
     difficulty: "Medium",
   });
 
-  // 15. Server Response Time / TTFB (40 pts)
+  // 15. DNS Email Deliverability & Anti-Spoofing (SPF + DMARC + MX) via Cloudflare DoH (30 pts)
+  const dnsPts =
+    (dns.hasSpf ? 12 : 2) +
+    (dns.hasDmarc ? 12 : 0) +
+    (dns.mxRecords.length > 0 ? 6 : 2);
+  checks.push({
+    id: "sec-dns-dmarc",
+    pillar: "security",
+    title: `DNS Email Security & Anti-Spoofing (SPF: ${
+      dns.hasSpf ? "Yes" : "No"
+    } | DMARC: ${dns.hasDmarc ? dns.dmarcPolicy : "Missing"})`,
+    description: `Live Cloudflare 1.1.1.1 DoH DNS query for ${domain}: Mail Provider: ${
+      dns.mailProvider
+    } | SPF: ${dns.hasSpf ? dns.spfRecord.slice(0, 65) : "Missing"} | DMARC: ${
+      dns.hasDmarc ? dns.dmarcRecord.slice(0, 65) : `Missing _dmarc.${domain} TXT record`
+    }.`,
+    severity:
+      dns.hasSpf && dns.hasDmarc
+        ? "pass"
+        : dns.hasSpf || dns.hasDmarc
+        ? "warning"
+        : "critical",
+    pointsEarned: dnsPts,
+    pointsMax: 30,
+    currentValue: `SPF: ${dns.hasSpf ? "Configured" : "Missing"} | DMARC: ${
+      dns.hasDmarc ? `Active (${dns.dmarcPolicy})` : "Missing"
+    }`,
+    recommendedValue: "Valid v=spf1 TXT + _dmarc v=DMARC1; p=quarantine/reject",
+    impactScore: 8,
+    difficulty: "Easy",
+    codeSnippet: `_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}; pct=100"`,
+  });
+
+  // 16. Server Response Time / TTFB (30 pts)
   const speedPts =
     responseTimeMs <= 400
-      ? 40
-      : responseTimeMs <= 900
       ? 30
+      : responseTimeMs <= 900
+      ? 22
       : responseTimeMs <= 1800
-      ? 18
-      : 8;
+      ? 14
+      : 6;
   checks.push({
     id: "sec-speed",
     pillar: "security",
@@ -735,7 +1015,7 @@ export async function scanLiveUrl(
         ? "warning"
         : "critical",
     pointsEarned: speedPts,
-    pointsMax: 40,
+    pointsMax: 30,
     currentValue: `${responseTimeMs}ms response time`,
     recommendedValue: "< 500ms edge TTFB with CDN caching",
     impactScore: 8,
@@ -790,7 +1070,7 @@ export async function scanLiveUrl(
       label: "AI Search & GEO Readiness",
       score: geoScore,
       grade: getLetterGrade(geoScore),
-      summary: `JSON-LD (${hasJsonLd ? "Yes" : "Missing"}), /llms.txt (${hasLlmsTxt ? "Yes" : "Missing"}), Freshness.`,
+      summary: `JSON-LD (${hasJsonLd ? "Yes" : "Missing"}), /llms.txt (${hasLlmsTxt ? "Yes" : "Missing"}), AI Bots.`,
       passedCount: checks.filter((c) => c.pillar === "geo" && c.severity === "pass").length,
       warningCount: checks.filter((c) => c.pillar === "geo" && c.severity === "warning").length,
       criticalCount: checks.filter((c) => c.pillar === "geo" && c.severity === "critical").length,
@@ -807,10 +1087,10 @@ export async function scanLiveUrl(
     },
     security: {
       key: "security",
-      label: "Security & Edge Vitals",
+      label: "Security, DNS & Edge Vitals",
       score: securityScore,
       grade: getLetterGrade(securityScore),
-      summary: `SSL (${sslSecure ? "HTTPS" : "HTTP"}), Response ${responseTimeMs}ms.`,
+      summary: `SSL (${sslSecure ? "HTTPS" : "HTTP"}), SPF/DMARC (${dns.hasDmarc ? "Active" : "Missing"}), ${responseTimeMs}ms.`,
       passedCount: checks.filter((c) => c.pillar === "security" && c.severity === "pass").length,
       warningCount: checks.filter((c) => c.pillar === "security" && c.severity === "warning").length,
       criticalCount: checks.filter((c) => c.pillar === "security" && c.severity === "critical").length,
@@ -838,13 +1118,17 @@ export async function scanLiveUrl(
       wordCount,
       executiveSummary: `${cleanUrl} scored ${overallScore}/100 (${getLetterGrade(
         overallScore
-      )}) based on real metadata & DOM inspection (${criticalIssuesCount} critical issues, ${warningIssuesCount} warnings). ${
+      )}) based on live RapidAPI, Cloudflare DoH DNS, and DOM inspection (${criticalIssuesCount} critical issues, ${warningIssuesCount} warnings). ${
         titleIsDuplicated
           ? "The <title> tag is duplicated back-to-back and must be shortened under 60 chars. "
           : ""
       }${
         disablesZoom
           ? "The viewport meta tag blocks user pinch-to-zoom (user-scalable=0), causing a WCAG 2.2 accessibility penalty. "
+          : ""
+      }${
+        !dns.hasDmarc
+          ? `Domain ${domain} is missing a _dmarc TXT record for email anti-spoofing.`
           : ""
       }`,
       estimatedConversionLift: `+${Math.max(
@@ -909,7 +1193,9 @@ export async function scanLiveUrl(
         ogType,
         twitterCard,
         rawMetaTags,
-        extractionSource: rapidData ? "RapidAPI + Live DOM" : "Live DOM",
+        extractionSource: rapidData
+          ? "RapidAPI + Cloudflare DoH + Live DOM"
+          : "Cloudflare DoH + Live DOM",
         hasRobotsTxt,
         hasSitemapXml,
         hasLlmsTxt,
@@ -919,6 +1205,11 @@ export async function scanLiveUrl(
         missingAltCount,
         internalLinks,
         externalLinks,
+        dns,
+        domainHistory,
+        robotsAnalysis,
+        sitemapAnalysis,
+        communitySignals,
       },
     },
   };
