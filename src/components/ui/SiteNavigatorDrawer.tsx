@@ -173,13 +173,31 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    heading: "Administration & Authentication",
+    heading: "Administration, Legal & Public Manifests",
     items: [
       {
         href: "/admin",
         label: "SaaS Owner Admin Portal",
         desc: "MRR control center, user tiers & API health check",
         icon: Activity,
+      },
+      {
+        href: "/security",
+        label: "Security, SOC2 & Crawler Manifests",
+        desc: "Live /robots.txt, /sitemap.xml, /llms.txt & RLS status",
+        icon: ShieldCheck,
+      },
+      {
+        href: "/legal/privacy",
+        label: "Privacy Policy & GDPR / CCPA DPA",
+        desc: "Subprocessors, data retention & zero AI training policy",
+        icon: FileText,
+      },
+      {
+        href: "/legal/terms",
+        label: "Terms of Service & Agency License",
+        desc: "Commercial white-label PDF rights & 30-day guarantee",
+        icon: BookOpen,
       },
       {
         href: "/login",

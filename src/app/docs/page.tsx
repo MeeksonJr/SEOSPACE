@@ -15,6 +15,11 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import {
+  PublicFooter,
+  ThemeToggleButton,
+  usePublicTheme,
+} from "@/components/ui/PublicChrome";
 
 const ENDPOINTS = [
   {
@@ -72,6 +77,7 @@ const ENDPOINTS = [
 ];
 
 export default function ApiDocsPage() {
+  const { isDark, toggleTheme } = usePublicTheme(false);
   const [selectedEndpoint, setSelectedEndpoint] = useState(ENDPOINTS[0]);
   const [requestBody, setRequestBody] = useState(ENDPOINTS[0].defaultBody);
   const [responseJson, setResponseJson] = useState<string>(
@@ -118,37 +124,69 @@ export default function ApiDocsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 pb-20">
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+        isDark ? "bg-[#050814] text-white" : "bg-[#F4F6F9] text-slate-900"
+      }`}
+    >
       {/* Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <header
+        className={`border-b sticky top-0 z-30 transition-colors ${
+          isDark
+            ? "bg-[#050814]/90 border-slate-800/80 backdrop-blur-md"
+            : "bg-white/90 border-slate-200 backdrop-blur-md"
+        }`}
+      >
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-3 min-h-[4rem] flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/" className="shrink-0">
-              <SeospaceLogo />
+              <SeospaceLogo darkText={!isDark} />
             </Link>
-            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            <span
+              className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
+                isDark
+                  ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
+                  : "bg-blue-50 text-blue-700 border-blue-200"
+              }`}
+            >
               <Terminal className="w-3.5 h-3.5" /> Developer REST API &amp;
               Webhook Reference (v4.2)
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-semibold shrink-0">
-            <OpenSiteNavigatorButton label="All Pages" />
+            <OpenSiteNavigatorButton
+              variant={isDark ? "dark" : "light"}
+              label="All Pages"
+            />
+            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} />
             <Link
               href="/compare"
-              className="hidden lg:inline-flex px-3 py-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
+              className={`hidden lg:inline-flex px-3 py-2 rounded-xl transition ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-900"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+              }`}
             >
               Competitor Battlecard
             </Link>
             <Link
               href="/tools"
-              className="hidden lg:inline-flex px-3 py-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
+              className={`hidden lg:inline-flex px-3 py-2 rounded-xl transition ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-900"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+              }`}
             >
               Free SEO &amp; DNS Tools
             </Link>
             <Link
               href="/dashboard"
-              className="px-3 sm:px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white inline-flex items-center gap-1.5 transition"
+              className={`px-3 sm:px-4 py-2 rounded-xl inline-flex items-center gap-1.5 transition ${
+                isDark
+                  ? "bg-blue-600 hover:bg-blue-500 text-white"
+                  : "bg-slate-950 hover:bg-slate-800 text-white"
+              }`}
             >
               <ArrowLeft className="w-3.5 h-3.5" />{" "}
               <span className="hidden sm:inline">Workspace</span> Dashboard
@@ -157,7 +195,7 @@ export default function ApiDocsPage() {
         </div>
       </header>
 
-      <div className="w-full max-w-[1440px] mx-auto px-6 pt-8 space-y-8">
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 pt-8 pb-20 space-y-8 flex-1">
         {/* Hero Banner */}
         <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-2">
@@ -178,7 +216,13 @@ export default function ApiDocsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Endpoint List & Request Editor */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-3">
+            <div
+              className={`rounded-3xl border p-6 space-y-3 ${
+                isDark
+                  ? "bg-[#0B1022] border-slate-800"
+                  : "bg-white border-slate-200"
+              }`}
+            >
               <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 SELECT PRODUCTION ENDPOINT
               </div>
@@ -194,7 +238,11 @@ export default function ApiDocsPage() {
                     }}
                     className={`w-full text-left p-4 rounded-2xl border transition cursor-pointer ${
                       active
-                        ? "bg-blue-50/80 border-blue-500"
+                        ? isDark
+                          ? "bg-blue-600/20 border-blue-500"
+                          : "bg-blue-50/80 border-blue-500"
+                        : isDark
+                        ? "bg-slate-950/80 border-slate-800 hover:bg-slate-900"
                         : "bg-slate-50/70 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -202,14 +250,26 @@ export default function ApiDocsPage() {
                       <span className="px-2 py-0.5 rounded bg-blue-600 text-white text-[10px] font-mono font-bold">
                         {ep.method}
                       </span>
-                      <span className="font-mono text-xs font-bold text-slate-900">
+                      <span
+                        className={`font-mono text-xs font-bold ${
+                          isDark ? "text-white" : "text-slate-900"
+                        }`}
+                      >
                         {ep.path}
                       </span>
                     </div>
-                    <div className="text-xs font-bold text-slate-800 mt-1.5">
+                    <div
+                      className={`text-xs font-bold mt-1.5 ${
+                        isDark ? "text-slate-200" : "text-slate-800"
+                      }`}
+                    >
                       {ep.title}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                    <p
+                      className={`text-[11px] mt-0.5 leading-relaxed ${
+                        isDark ? "text-slate-400" : "text-slate-500"
+                      }`}
+                    >
                       {ep.description}
                     </p>
                   </button>
@@ -218,38 +278,55 @@ export default function ApiDocsPage() {
             </div>
 
             {/* Webhook Event Reference */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600">
+            <div
+              className={`rounded-3xl border p-6 space-y-3 ${
+                isDark
+                  ? "bg-[#0B1022] border-slate-800"
+                  : "bg-white border-slate-200"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-500">
                 <Webhook className="w-4 h-4" /> Outbound Webhook Events
               </div>
               <div className="space-y-2 text-xs">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="font-mono font-bold text-slate-900">
-                    audit.completed
+                {[
+                  {
+                    event: "audit.completed",
+                    desc: "Fires whenever a URL scan completes with full 5-pillar scores and DNS intelligence.",
+                  },
+                  {
+                    event: "lead.captured",
+                    desc: "Fires when a prospect submits their email via the White-Label Embeddable Audit Widget.",
+                  },
+                  {
+                    event: "article.generated",
+                    desc: "Fires when Seospace Neural Engine v4.2 finishes generating a 95+/100 SEO article.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.event}
+                    className={`p-3 rounded-xl border ${
+                      isDark
+                        ? "bg-slate-950 border-slate-800"
+                        : "bg-slate-50 border-slate-200"
+                    }`}
+                  >
+                    <div
+                      className={`font-mono font-bold ${
+                        isDark ? "text-blue-300" : "text-slate-900"
+                      }`}
+                    >
+                      {item.event}
+                    </div>
+                    <div
+                      className={`mt-0.5 ${
+                        isDark ? "text-slate-400" : "text-slate-500"
+                      }`}
+                    >
+                      {item.desc}
+                    </div>
                   </div>
-                  <div className="text-slate-500 mt-0.5">
-                    Fires whenever a URL scan completes with full 5-pillar scores
-                    and DNS intelligence.
-                  </div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="font-mono font-bold text-slate-900">
-                    lead.captured
-                  </div>
-                  <div className="text-slate-500 mt-0.5">
-                    Fires when a prospect submits their email via the
-                    White-Label Embeddable Audit Widget.
-                  </div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="font-mono font-bold text-slate-900">
-                    article.generated
-                  </div>
-                  <div className="text-slate-500 mt-0.5">
-                    Fires when Seospace Neural Engine v4.2 finishes generating a
-                    95+/100 SEO article.
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -343,6 +420,8 @@ export default function ApiDocsPage() {
           </div>
         </div>
       </div>
+
+      <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>
   );
 }
