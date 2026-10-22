@@ -2,20 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { scanLiveUrl } from "@/lib/scanner/url-scanner";
 import { enrichReportWithGemini } from "@/lib/ai/gemini-analyzer";
 import {
-  findAuditInServerDb,
+  findAuditInServerDbAsync,
   saveAuditToServerDb,
+  upsertAuditToSupabase,
 } from "@/lib/db/server-db";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const query =
-    searchParams.get("id") || searchParams.get("url") || "";
-  const found = findAuditInServerDb(query);
+  const query = searchParams.get("id") || searchParams.get("url") || "";
+  const found = await findAuditInServerDbAsync(query);
   if (found) {
     return NextResponse.json({
       report: found,
       cached: true,
-      mode: "saved-database-snapshot",
+      mode: "supabase-saved-snapshot",
     });
   }
   return NextResponse.json(
@@ -38,17 +38,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Unless explicitly asked to Fetch Latest (forceRefresh: true), return saved audit from database!
-    const existingSaved = findAuditInServerDb(rawUrl || existingId);
+    // 1. Unless explicitly asked to Fetch Latest (forceRefresh: true), return saved audit from Supabase / Server DB!
+    const existingSaved = await findAuditInServerDbAsync(rawUrl || existingId);
     if (!forceRefresh && existingSaved) {
       return NextResponse.json({
         report: existingSaved,
         cached: true,
-        mode: "saved-database-snapshot",
+        mode: "supabase-saved-snapshot",
       });
     }
 
-    // 2. Otherwise execute a fresh live scan (RapidAPI url-to-metadata + DOM + Seospace Neural Engine)
+    // 2. Otherwise execute a fresh live scan (RapidAPI url-to-metadata + Cloudflare DoH DNS + DOM + Seospace Neural Engine v4.2)
     const targetUrl = rawUrl || existingSaved?.url || "https://stripe.com";
     const { report: baseReport, bodyExcerpt } = await scanLiveUrl(targetUrl);
     const enrichedReport = await enrichReportWithGemini(
@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
       bodyExcerpt
     );
 
-    // Preserve stable ID if updating an existing saved URL
     const reportToSave = existingSaved
       ? { ...enrichedReport, id: existingId || existingSaved.id }
       : existingId
@@ -64,6 +63,7 @@ export async function POST(req: NextRequest) {
       : enrichedReport;
 
     const savedReport = saveAuditToServerDb(reportToSave);
+    await upsertAuditToSupabase(savedReport);
 
     return NextResponse.json({
       report: savedReport,

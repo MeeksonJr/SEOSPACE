@@ -17,6 +17,7 @@ import {
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import {
   getAdminUsers,
   saveWorkspaceUser,
@@ -72,7 +73,7 @@ export function AuthSplitScreen({
     },
   ];
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setAuthError("");
 
@@ -83,6 +84,19 @@ export function AuthSplitScreen({
     }
 
     if (mode === "magic") {
+      try {
+        const supabase = getBrowserSupabaseClient();
+        if (supabase) {
+          await supabase.auth.signInWithOtp({
+            email: cleanEmail,
+            options: {
+              emailRedirectTo: `${window.location.origin}/dashboard`,
+            },
+          });
+        }
+      } catch {
+        // Proceed with instant magic verification card
+      }
       setMagicLinkSent(true);
       return;
     }
@@ -93,32 +107,71 @@ export function AuthSplitScreen({
     }
 
     setLoading(true);
-    const existingUsers = getAdminUsers();
-    const matched = existingUsers.find(
-      (u) => u.email.toLowerCase() === cleanEmail
-    );
+    try {
+      // 1. Provision / sync user in Supabase Auth (auth.users) + public.profiles via server admin route
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: mode,
+          email: cleanEmail,
+          password: password.trim(),
+          name: name.trim(),
+          plan: selectedPlan,
+        }),
+      });
+      const data = await res.json();
 
-    const planToAssign = matched?.plan || selectedPlan;
-    saveWorkspaceUser({
-      id: matched?.id,
-      name:
-        name.trim() ||
-        matched?.name ||
-        cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
-      email: cleanEmail,
-      plan: planToAssign,
-      creditsUsed: matched?.creditsUsed ?? 4,
-      creditsLimit:
-        planToAssign === "agency"
-          ? 999
-          : planToAssign === "pro"
-          ? 100
-          : 3,
-    });
+      // 2. Establish browser Supabase Auth JWT session
+      const supabase = getBrowserSupabaseClient();
+      if (supabase) {
+        await supabase.auth
+          .signInWithPassword({
+            email: cleanEmail,
+            password: password.trim(),
+          })
+          .catch(() => {});
+      }
 
-    setTimeout(() => {
+      if (data?.user) {
+        saveWorkspaceUser(data.user);
+      } else {
+        const existingUsers = getAdminUsers();
+        const matched = existingUsers.find(
+          (u) => u.email.toLowerCase() === cleanEmail
+        );
+        const planToAssign = matched?.plan || selectedPlan;
+        saveWorkspaceUser({
+          id: matched?.id,
+          name:
+            name.trim() ||
+            matched?.name ||
+            cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
+          email: cleanEmail,
+          plan: planToAssign,
+          creditsUsed: matched?.creditsUsed ?? 4,
+          creditsLimit:
+            planToAssign === "agency"
+              ? 999
+              : planToAssign === "pro"
+              ? 100
+              : 3,
+        });
+      }
+
       router.push("/dashboard");
-    }, 350);
+    } catch {
+      saveWorkspaceUser({
+        name:
+          name.trim() ||
+          cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
+        email: cleanEmail,
+        plan: selectedPlan,
+      });
+      router.push("/dashboard");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleVerifyMagicLink() {

@@ -6,6 +6,7 @@ import {
   SAMPLE_AUDITS,
   SAMPLE_CAPTURED_LEADS,
 } from "@/lib/sample-audits";
+import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 
 const AUDITS_STORAGE_KEY = "seospace_saved_audits_v3";
 const WHITELABEL_STORAGE_KEY = "seospace_whitelabel_v3";
@@ -631,6 +632,16 @@ export function saveWorkspaceUser(user: Partial<WorkspaceUser>): WorkspaceUser {
   if (typeof window !== "undefined") {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updated));
     upsertAdminUser(updated);
+    fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sync",
+        email: updated.email,
+        name: updated.name,
+        plan: updated.plan,
+      }),
+    }).catch(() => {});
   }
   return updated;
 }
@@ -638,6 +649,14 @@ export function saveWorkspaceUser(user: Partial<WorkspaceUser>): WorkspaceUser {
 export function logoutWorkspaceUser(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(USER_STORAGE_KEY);
+  try {
+    const supabase = getBrowserSupabaseClient();
+    if (supabase) {
+      void supabase.auth.signOut();
+    }
+  } catch {
+    // ignore
+  }
 }
 
 export function getAdminUsers(): WorkspaceUser[] {

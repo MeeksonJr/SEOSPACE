@@ -45,11 +45,43 @@ export default function AdminPortalPage() {
   const [testingHealth, setTestingHealth] = useState(false);
 
   useEffect(() => {
+    // 1. Initial hydration from local workspace store
     setUsers(getAdminUsers());
     setTotalAudits(getSavedAudits().length);
     setTotalLeads(getCapturedLeads().length);
     setTotalArticles(getSavedArticles().length);
     runLiveSystemDiagnostic();
+
+    // 2. Fetch live users from Supabase PostgreSQL via /api/auth
+    fetch("/api/auth")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data?.users) && data.users.length > 0) {
+          const local = getAdminUsers();
+          const seen = new Set<string>();
+          const merged: WorkspaceUser[] = [];
+          for (const u of [...data.users, ...local]) {
+            if (!u || !u.email) continue;
+            const em = u.email.toLowerCase();
+            if (!seen.has(em)) {
+              seen.add(em);
+              merged.push(u);
+            }
+          }
+          setUsers(merged);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Sync live audits, articles, leads counts from Supabase via /api/db
+    fetch("/api/db")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data?.audits)) setTotalAudits(data.audits.length);
+        if (Array.isArray(data?.articles)) setTotalArticles(data.articles.length);
+        if (Array.isArray(data?.leads)) setTotalLeads(data.leads.length);
+      })
+      .catch(() => {});
   }, []);
 
   async function runLiveSystemDiagnostic() {
@@ -78,6 +110,18 @@ export default function AdminPortalPage() {
     };
     const nextList = upsertAdminUser(updatedUser);
     setUsers(nextList);
+
+    // Sync updated plan to Supabase PostgreSQL in background
+    fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sync",
+        email: user.email,
+        name: user.name,
+        plan: nextPlan,
+      }),
+    }).catch(() => {});
 
     const active = getWorkspaceUser();
     if (active.email.toLowerCase() === user.email.toLowerCase()) {
@@ -238,11 +282,11 @@ export default function AdminPortalPage() {
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs">
                 <div className="font-bold text-slate-900">
-                  RapidAPI url-to-metadata &amp; Server DB
+                  Supabase PostgreSQL &amp; RapidAPI
                 </div>
                 <p className="text-slate-600 mt-0.5">
                   {totalAudits} audits, {totalArticles} articles, and{" "}
-                  {totalLeads} leads persisted to .data/seospace-db.json.
+                  {totalLeads} leads persisted in live Supabase PostgreSQL.
                 </p>
               </div>
             </div>

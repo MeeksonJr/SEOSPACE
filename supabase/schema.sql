@@ -1,6 +1,6 @@
 -- ============================================================================
 -- SEOSPACE AI — PRODUCTION SUPABASE POSTGRESQL SCHEMA (v4.2)
--- 7 Core Tables + Indexes + Row-Level Security (RLS) Policies
+-- 7 Core Tables + Indexes + Row-Level Security (RLS) + Auth Trigger
 -- ============================================================================
 
 create extension if not exists "uuid-ossp";
@@ -13,7 +13,7 @@ create table if not exists public.profiles (
   full_name text not null default 'Growth Team',
   company_name text default 'Seospace Workspace',
   role text not null default 'user' check (role in ('user', 'agency', 'admin')),
-  plan text not null default 'Pro Growth ($19/mo)' check (plan in ('Starter Audit (Free)', 'Pro Growth ($19/mo)', 'Agency White-Label ($49/mo)')),
+  plan text not null default 'Pro Growth ($19/mo)',
   stripe_customer_id text,
   stripe_subscription_id text,
   monthly_audit_quota integer not null default 100,
@@ -57,10 +57,13 @@ create table if not exists public.audits (
   keywords jsonb not null default '[]'::jsonb,
   ai_rewrites jsonb not null default '[]'::jsonb,
   metadata jsonb not null default '{}'::jsonb,
+  report_payload jsonb not null default '{}'::jsonb,
   is_public boolean not null default true,
   last_scanned_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+
+alter table public.audits add column if not exists report_payload jsonb not null default '{}'::jsonb;
 
 create index if not exists idx_audits_normalized_url on public.audits(normalized_url);
 create index if not exists idx_audits_domain on public.audits(domain);
@@ -70,19 +73,22 @@ create index if not exists idx_audits_created_at on public.audits(created_at des
 create table if not exists public.articles (
   id text primary key,
   user_id uuid references public.profiles(id) on delete set null,
-  linked_audit_id text references public.audits(id) on delete set null,
+  linked_audit_id text,
   linked_domain text,
   title text not null,
   focus_keyword text not null,
+  keywords jsonb not null default '[]'::jsonb,
   meta_description text not null,
   content text not null,
   word_count integer not null default 0,
   seo_score integer not null default 90,
-  status text not null default 'Ready to Publish' check (status in ('Draft', 'Optimizing', 'Ready to Publish', 'Published')),
+  status text not null default 'Ready to Publish',
   published_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.articles add column if not exists keywords jsonb not null default '[]'::jsonb;
 
 create index if not exists idx_articles_linked_domain on public.articles(linked_domain);
 create index if not exists idx_articles_updated_at on public.articles(updated_at desc);
@@ -107,8 +113,8 @@ create index if not exists idx_comparisons_domains on public.domain_comparisons(
 
 -- 5. AGENCY WHITE-LABEL BRANDING CONFIGURATIONS
 create table if not exists public.agency_whitelabel (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid unique references public.profiles(id) on delete cascade,
+  id text primary key default 'default',
+  user_id uuid references public.profiles(id) on delete cascade,
   agency_name text not null default 'Apex Digital Growth',
   logo_text text not null default 'APEX GROWTH',
   primary_color text not null default '#2563EB',
@@ -118,6 +124,7 @@ create table if not exists public.agency_whitelabel (
   contact_email text not null default 'strategy@apexgrowth.io',
   footer_note text not null default 'Prepared exclusively by Apex Digital Growth Agency.',
   hide_powered_by boolean not null default true,
+  config_payload jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -129,7 +136,7 @@ create table if not exists public.captured_leads (
   email text not null,
   website_url text not null,
   audit_score integer not null default 0,
-  status text not null default 'New' check (status in ('New', 'Contacted', 'Qualified', 'Closed')),
+  status text not null default 'New',
   notes text,
   created_at timestamptz not null default now()
 );
@@ -152,7 +159,7 @@ create table if not exists public.api_keys_webhooks (
 );
 
 -- ============================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES (IDEMPOTENT)
 -- ============================================================================
 alter table public.profiles enable row level security;
 alter table public.audits enable row level security;
@@ -162,26 +169,45 @@ alter table public.agency_whitelabel enable row level security;
 alter table public.captured_leads enable row level security;
 alter table public.api_keys_webhooks enable row level security;
 
-create policy "Public read access for shared audits"
-  on public.audits for select
-  using (is_public = true);
+drop policy if exists "Public access for profiles" on public.profiles;
+create policy "Public access for profiles"
+  on public.profiles for all
+  using (true)
+  with check (true);
 
+drop policy if exists "Public read access for shared audits" on public.audits;
+drop policy if exists "Anyone can insert or update audits" on public.audits;
 create policy "Anyone can insert or update audits"
   on public.audits for all
   using (true)
   with check (true);
 
+drop policy if exists "Public read and write for articles" on public.articles;
 create policy "Public read and write for articles"
   on public.articles for all
   using (true)
   with check (true);
 
+drop policy if exists "Public read and write for domain comparisons" on public.domain_comparisons;
 create policy "Public read and write for domain comparisons"
   on public.domain_comparisons for all
   using (true)
   with check (true);
 
+drop policy if exists "Public read and write for agency whitelabel" on public.agency_whitelabel;
+create policy "Public read and write for agency whitelabel"
+  on public.agency_whitelabel for all
+  using (true)
+  with check (true);
+
+drop policy if exists "Public read and write for captured leads" on public.captured_leads;
 create policy "Public read and write for captured leads"
   on public.captured_leads for all
+  using (true)
+  with check (true);
+
+drop policy if exists "Public read and write for api keys" on public.api_keys_webhooks;
+create policy "Public read and write for api keys"
+  on public.api_keys_webhooks for all
   using (true)
   with check (true);
