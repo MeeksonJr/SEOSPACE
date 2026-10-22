@@ -24,7 +24,10 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
-import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import {
+  OpenSiteNavigatorButton,
+  triggerSiteNavigator,
+} from "@/components/ui/SiteNavigatorDrawer";
 import { PRICING_PLANS } from "@/lib/stripe/plans";
 import {
   findSavedAuditByUrl,
@@ -289,7 +292,7 @@ export default function LandingPage() {
               : "bg-white/85 border-slate-200/80"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-[4rem] sm:min-h-[5rem] flex flex-wrap items-center justify-between gap-2">
             <Link href="/" className="shrink-0">
               <SeospaceLogo darkText={!heroDark} />
             </Link>
@@ -378,11 +381,13 @@ export default function LandingPage() {
             </nav>
 
             <div className="flex items-center gap-2 shrink-0">
-              {/* Universal Site Navigator Button */}
-              <OpenSiteNavigatorButton
-                variant={heroDark ? "dark" : "light"}
-                label="All Pages"
-              />
+              {/* Universal Site Navigator Button (Shown on Desktop xl; Mobile/Tablet uses the single unified Menu button below) */}
+              <div className="hidden xl:block">
+                <OpenSiteNavigatorButton
+                  variant={heroDark ? "dark" : "light"}
+                  label="All Pages"
+                />
+              </div>
 
               {/* Toggle between Image 2 (Light Hero) and Image 3 (Dark Hero) */}
               <button
@@ -428,21 +433,27 @@ export default function LandingPage() {
                 Sign Up
               </Link>
 
-              {/* Mobile / Tablet Inline Menu Button */}
+              {/* Single Unified Mobile / Tablet Menu Button */}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle Navigation Menu"
-                className={`xl:hidden p-2 rounded-xl border transition cursor-pointer ${
+                className={`xl:hidden px-3 py-2 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
                   heroDark
                     ? "border-slate-700 bg-slate-900 text-white hover:bg-slate-800"
                     : "border-slate-200 bg-slate-100 text-slate-900 hover:bg-slate-200"
                 }`}
               >
                 {mobileMenuOpen ? (
-                  <X className="w-4 h-4" />
+                  <>
+                    <X className="w-4 h-4" />
+                    <span>Close</span>
+                  </>
                 ) : (
-                  <Menu className="w-4 h-4" />
+                  <>
+                    <Menu className="w-4 h-4" />
+                    <span>Menu</span>
+                  </>
                 )}
               </button>
             </div>
@@ -535,17 +546,16 @@ export default function LandingPage() {
                 >
                   REST API Docs
                 </Link>
-                <Link
-                  href="/widget"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2.5 rounded-xl border ${
-                    heroDark
-                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
-                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                  }`}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    triggerSiteNavigator(true);
+                  }}
+                  className="px-3 py-2.5 rounded-xl border border-blue-500/40 bg-blue-600/15 text-blue-500 font-bold text-left cursor-pointer"
                 >
-                  Agency Widget
-                </Link>
+                  All 16 Pages ↗
+                </button>
               </div>
               <div className="flex sm:hidden items-center gap-2 pt-1">
                 <Link
@@ -1386,16 +1396,16 @@ export default function LandingPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative rounded-2xl bg-white p-8 flex flex-col justify-between transition ${
+                  className={`relative rounded-2xl bg-white p-8 pt-9 flex flex-col justify-between transition ${
                     plan.highlighted
                       ? "border-2 border-blue-500 shadow-xl shadow-blue-500/10"
                       : "border border-slate-200 shadow-xs"
                   }`}
                 >
                   {plan.badge && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
                       <span
-                        className={`px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wide border ${
+                        className={`px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wide border shadow-2xs ${
                           plan.highlighted
                             ? "bg-blue-50 text-blue-600 border-blue-200"
                             : "bg-slate-900 text-white border-slate-800"

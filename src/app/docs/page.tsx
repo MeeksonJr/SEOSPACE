@@ -121,7 +121,7 @@ export default function ApiDocsPage() {
     <div className="min-h-screen bg-[#F4F6F9] text-slate-900 pb-20">
       {/* Navbar */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-3 min-h-[4rem] flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/" className="shrink-0">
               <SeospaceLogo />

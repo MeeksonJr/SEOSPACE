@@ -43,6 +43,21 @@ export function OpenSiteNavigatorButton({
   label?: string;
   className?: string;
 }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handleState = (e: Event) => {
+      const custom = e as CustomEvent<{ open: boolean }>;
+      if (typeof custom.detail?.open === "boolean") {
+        setDrawerOpen(custom.detail.open);
+      }
+    };
+    window.addEventListener("seospace:nav-state", handleState);
+    return () => window.removeEventListener("seospace:nav-state", handleState);
+  }, []);
+
+  if (drawerOpen) return null;
+
   const baseStyles =
     variant === "dark"
       ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-700"
@@ -54,10 +69,10 @@ export function OpenSiteNavigatorButton({
     <button
       type="button"
       onClick={() => triggerSiteNavigator(true)}
-      title="Open Universal Site Navigator (All Pages)"
+      title="Open Universal Site Navigator (All Pages • Ctrl+K)"
       className={`no-print px-3 py-2 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer shrink-0 ${baseStyles} ${className}`}
     >
-      <Menu className="w-3.5 h-3.5" />
+      <Compass className="w-3.5 h-3.5 text-blue-500" />
       <span>{label}</span>
     </button>
   );
@@ -218,30 +233,23 @@ export function SiteNavigatorDrawer() {
     setOpen(false);
   }, [pathname]);
 
-  return (
-    <>
-      {/* Universal Floating Quick-Jump Pill (Accessible on every page, mobile & desktop) */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open Universal Site Navigator"
-        className="no-print fixed bottom-4 right-4 z-40 px-3.5 py-2.5 rounded-full bg-slate-950/95 hover:bg-blue-600 text-white border border-slate-700/80 shadow-xl shadow-slate-950/30 backdrop-blur-md text-xs font-bold inline-flex items-center gap-2 transition cursor-pointer"
-      >
-        <Compass className="w-4 h-4 text-blue-400" />
-        <span>All Pages</span>
-        <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded border border-slate-700">
-          ⌘K
-        </kbd>
-      </button>
+  // Broadcast drawer open state so OpenSiteNavigatorButton hides when already open
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("seospace:nav-state", { detail: { open } })
+    );
+  }, [open]);
 
-      {/* Slide-Over Universal Navigation Drawer */}
-      {open && (
-        <div className="no-print fixed inset-0 z-50 flex justify-end">
-          {/* Backdrop */}
-          <div
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
-          />
+  if (!open) return null;
+
+  return (
+    <div className="no-print fixed inset-0 z-50 flex justify-end">
+      {/* Backdrop */}
+      <div
+        onClick={() => setOpen(false)}
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+      />
 
           {/* Drawer Content */}
           <aside className="relative z-10 w-full max-w-sm bg-slate-950 text-white h-full border-l border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
@@ -323,7 +331,5 @@ export function SiteNavigatorDrawer() {
             </div>
           </aside>
         </div>
-      )}
-    </>
   );
 }

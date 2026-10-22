@@ -363,17 +363,19 @@ export default function ArticlePreviewPage() {
               )}
               {copiedType === "markdown" ? "Copied MD!" : "Copy MD"}
             </button>
-            <button
-              onClick={() => handleCopy("html")}
-              className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
-            >
-              {copiedType === "html" ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-indigo-400" />
-              )}
-              {copiedType === "html" ? "Copied HTML!" : "Copy HTML"}
-            </button>
+            {activeView !== "html" && (
+              <button
+                onClick={() => handleCopy("html")}
+                className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
+              >
+                {copiedType === "html" ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-indigo-400" />
+                )}
+                {copiedType === "html" ? "Copied HTML!" : "Copy HTML"}
+              </button>
+            )}
             <button
               onClick={() => window.print()}
               className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
@@ -397,10 +399,14 @@ export default function ArticlePreviewPage() {
       </header>
 
       {/* Main Content Layout */}
-      <main className="w-full px-6 lg:px-10 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-10 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left 8 Columns: Article Preview / SERP / HTML */}
-          <div className="lg:col-span-8 space-y-6">
+          {/* Left 8 or 12 Columns: Article Preview / SERP / Scorecard / HTML */}
+          <div
+            className={`${
+              activeView === "scorecard" ? "lg:col-span-12" : "lg:col-span-8"
+            } space-y-6`}
+          >
             {/* Mobile View Switcher */}
             <div className="flex lg:hidden flex-wrap gap-2 print:hidden">
               {(["blog", "serp", "scorecard", "html"] as const).map((mode) => (
@@ -762,7 +768,8 @@ export default function ArticlePreviewPage() {
             )}
           </div>
 
-          {/* Right 4 Columns: Live Mathematical SEO Grader Sidebar */}
+          {/* Right 4 Columns: Live Mathematical SEO Grader Sidebar (Hidden when already viewing the full-width Scorecard tab) */}
+          {activeView !== "scorecard" && (
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 print:hidden">
             <div className="p-6 rounded-3xl bg-slate-900/75 border border-white/[0.08]">
               <div className="flex items-center justify-between mb-4">
@@ -901,6 +908,7 @@ export default function ArticlePreviewPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </main>
     </div>

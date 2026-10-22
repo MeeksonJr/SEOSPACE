@@ -35,15 +35,15 @@ export function SegmentedGauge({
     const totalTicks = 40;
     const activeTicks = Math.round((clamped / 100) * totalTicks);
     return (
-      <div className="relative flex flex-col items-center justify-center w-full">
-        <svg viewBox="0 0 220 128" className="w-full max-w-[230px] overflow-visible">
+      <div className="relative flex flex-col items-center justify-center w-full py-1">
+        <svg viewBox="0 0 220 118" className="w-full max-w-[220px] overflow-visible">
           {Array.from({ length: totalTicks }).map((_, idx) => {
             const angleDeg = -180 + (idx / (totalTicks - 1)) * 180;
             const angleRad = (angleDeg * Math.PI) / 180;
             const cx = 110;
-            const cy = 108;
-            const rInner = 70;
-            const rOuter = 92;
+            const cy = 104;
+            const rInner = 68;
+            const rOuter = 90;
             const x1 = cx + rInner * Math.cos(angleRad);
             const y1 = cy + rInner * Math.sin(angleRad);
             const x2 = cx + rOuter * Math.cos(angleRad);
@@ -74,22 +74,22 @@ export function SegmentedGauge({
               />
             );
           })}
-        </svg>
-        <div className="-mt-12 text-center">
-          <div
-            className={`text-3xl font-bold tracking-tight ${
-              theme === "dark" ? "text-white" : "text-slate-900"
-            }`}
+          <text
+            x="110"
+            y="96"
+            textAnchor="middle"
+            fill={theme === "dark" ? "#FFFFFF" : "#0F172A"}
+            style={{ fontSize: "28px", fontWeight: 800 }}
           >
             {clamped}%
-          </div>
-          <div
-            className={`text-xs font-medium mt-0.5 ${
-              theme === "dark" ? "text-slate-400" : "text-slate-500"
-            }`}
-          >
-            {label || "Optimal"}
-          </div>
+          </text>
+        </svg>
+        <div
+          className={`text-xs font-semibold text-center leading-snug mt-1 px-2 ${
+            theme === "dark" ? "text-slate-300" : "text-slate-600"
+          }`}
+        >
+          {label || "Optimal"}
         </div>
       </div>
     );
@@ -102,8 +102,8 @@ export function SegmentedGauge({
     size === "sm"
       ? "max-w-[170px]"
       : size === "lg"
-      ? "max-w-[260px]"
-      : "max-w-[220px]";
+      ? "max-w-[250px]"
+      : "max-w-[210px]";
 
   const blueShades = [
     "#1D4ED8",
@@ -118,9 +118,9 @@ export function SegmentedGauge({
   ];
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full">
+    <div className="relative flex flex-col items-center justify-center w-full py-1">
       <svg
-        viewBox="0 0 220 125"
+        viewBox="0 0 220 116"
         className={`w-full ${maxWidth} overflow-visible`}
       >
         {Array.from({ length: segments }).map((_, i) => {
@@ -133,8 +133,8 @@ export function SegmentedGauge({
           const startRad = (startDeg * Math.PI) / 180;
           const endRad = (endDeg * Math.PI) / 180;
           const cx = 110;
-          const cy = 105;
-          const r = 84;
+          const cy = 102;
+          const r = 82;
 
           const x1 = cx + r * Math.cos(startRad);
           const y1 = cy + r * Math.sin(startRad);
@@ -159,25 +159,26 @@ export function SegmentedGauge({
             />
           );
         })}
-      </svg>
-
-      <div className="-mt-11 text-center">
-        <div
-          className={`${
-            size === "sm" ? "text-xl" : "text-2xl"
-          } font-bold tracking-tight ${
-            theme === "dark" ? "text-white" : "text-slate-900"
-          }`}
+        <text
+          x="110"
+          y="96"
+          textAnchor="middle"
+          fill={theme === "dark" ? "#FFFFFF" : "#0F172A"}
+          style={{
+            fontSize: size === "sm" ? "23px" : "26px",
+            fontWeight: 800,
+          }}
         >
           {clamped}/100
-        </div>
-        <div
-          className={`text-xs font-medium mt-0.5 ${
-            theme === "dark" ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          {statusText}
-        </div>
+        </text>
+      </svg>
+
+      <div
+        className={`text-xs font-semibold text-center leading-snug mt-1.5 px-2 max-w-[240px] ${
+          theme === "dark" ? "text-slate-300" : "text-slate-600"
+        }`}
+      >
+        {statusText}
       </div>
     </div>
   );

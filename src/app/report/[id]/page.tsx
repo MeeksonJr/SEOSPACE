@@ -335,26 +335,14 @@ export default function AuditReportPage() {
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg font-medium">
+                  <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
                     Saved Snapshot:{" "}
+                    {new Date(report.createdAt).toLocaleDateString()}{" "}
                     {new Date(report.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleLiveRescan(undefined, true)}
-                    disabled={rescanning}
-                    className="no-print px-3 py-1 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition"
-                  >
-                    <RefreshCw
-                      className={`w-3 h-3 ${rescanning ? "animate-spin" : ""}`}
-                    />
-                    <span>
-                      {rescanning ? "Fetching..." : "Fetch Latest"}
-                    </span>
-                  </button>
                 </div>
               </div>
 
