@@ -62,6 +62,13 @@ export default function HomePage() {
   const calculatedMRR = clientCount * clientFee;
   const calculatedARR = calculatedMRR * 12;
 
+  // Business Revenue Leak Calculator State
+  const [leakVolume, setLeakVolume] = useState<number>(200);
+  const [leakAvgTicket, setLeakAvgTicket] = useState<number>(250);
+
+  const calculatedLeakMonthly = Math.round(leakVolume * leakAvgTicket * 0.09);
+  const calculatedLeakAnnual = calculatedLeakMonthly * 12;
+
   // Auto-trigger the live toast preview after 2.8 seconds to show interactive proof
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -286,6 +293,86 @@ export default function HomePage() {
                       <span>4–5★ happy clients are guided directly to Google with 1-click text copy. Public 5-star reviews increase by <strong className="text-emerald-700 dark:text-emerald-400">340%</strong>!</span>
                     </li>
                   </ul>
+                </div>
+              </div>
+
+              {/* Interactive Revenue-Leak Calculator */}
+              <div className="mt-8 pt-8 border-t border-slate-200 dark:border-zinc-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                  <div>
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Calculate Your Practice / Business Revenue at Risk</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Based on Harvard Business Review research: Every 1-star drop causes a 5–9% reduction in client bookings.
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                    Without Shield: -9% Leak
+                  </span>
+                </div>
+
+                <div className="grid md:grid-cols-12 gap-6 items-center">
+                  {/* Sliders (7 cols) */}
+                  <div className="md:col-span-7 space-y-5">
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                        <span>Monthly Customers / Patients Served:</span>
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          {leakVolume} / month
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={30}
+                        max={800}
+                        step={10}
+                        value={leakVolume}
+                        onChange={(e) => setLeakVolume(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                        <span>Average Transaction / Lifetime Booking Value:</span>
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          ${leakAvgTicket}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={50}
+                        max={1000}
+                        step={25}
+                        value={leakAvgTicket}
+                        onChange={(e) => setLeakAvgTicket(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Calculated Output Card (5 cols) */}
+                  <div className="md:col-span-5 p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 text-center space-y-2 shadow-lg">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold block">
+                      Estimated Revenue Protected by Shield
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                      +${calculatedLeakAnnual.toLocaleString()}
+                      <span className="text-xs font-medium text-slate-400 font-sans block mt-0.5">
+                        retained per year (+${calculatedLeakMonthly.toLocaleString()}/mo)
+                      </span>
+                    </div>
+                    <Link
+                      href="/r/apex-dental"
+                      target="_blank"
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm cursor-pointer mt-1"
+                    >
+                      <span>Test Practice Shield Live</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

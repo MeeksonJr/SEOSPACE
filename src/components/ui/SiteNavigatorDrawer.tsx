@@ -144,10 +144,16 @@ const NAV_SECTIONS = [
         icon: Star,
       },
       {
+        href: "/demo/apex-dental-site",
+        label: "Live Client Website Demo (Apex Dental)",
+        desc: "See TrustPulse review toasts live on a realistic clinic site",
+        icon: Globe,
+      },
+      {
         href: "/embed/widget-apex-wall",
         label: "Standalone Wall of Love iFrame",
         desc: "Embeddable masonry view of verified patient reviews",
-        icon: Globe,
+        icon: Sparkles,
       },
     ],
   },

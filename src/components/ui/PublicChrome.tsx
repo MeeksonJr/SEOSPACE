@@ -326,6 +326,7 @@ const FOOT_COLS: Array<{
   {
     title: "Live Demos",
     links: [
+      { href: "/demo/apex-dental-site", label: "Live Client Website Showcase" },
       { href: "/r/apex-dental", label: "Dental Clinic Review Funnel" },
       { href: "/r/bayview-auto", label: "German Auto Shop Funnel" },
       { href: "/embed/widget-apex-wall", label: "Standalone Wall of Love" },
