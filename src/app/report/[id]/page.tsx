@@ -210,7 +210,7 @@ export default function AuditReportPage() {
             </span>
             <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono">
               <Database className="w-3 h-3" />
-              {report.metadata?.extractionSource || "Seospace Edge Crawler + Live DOM"}
+              {(report.metadata?.extractionSource || "Seospace Edge Crawler + Live DOM").replace(/RapidAPI/gi, "Seospace Edge Crawler")}
             </span>
           </div>
 
