@@ -25,6 +25,7 @@ import {
   QrCode,
   Sliders,
   Send,
+  Edit3,
 } from "lucide-react";
 import { TrustPulseStore } from "@/lib/storage/trustpulse-store";
 import { Workspace } from "@/types/trustpulse";
@@ -44,7 +45,20 @@ export default function AgencyHubPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchStep, setSearchStep] = useState(0);
   const [detectedResult, setDetectedResult] = useState<GooglePlaceResult | null>(null);
+  const [isEditingDetected, setIsEditingDetected] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+
+  const handleUpdateDetectedField = (field: keyof GooglePlaceResult, val: string | number) => {
+    if (!detectedResult) return;
+    setDetectedResult((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, [field]: val };
+      if (field === "name" && typeof val === "string") {
+        updated.slug = val.toLowerCase().replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 36);
+      }
+      return updated;
+    });
+  };
 
   // Creation State
   const [isCreating, setIsCreating] = useState(false);
@@ -650,6 +664,14 @@ export default function AgencyHubPage() {
                             <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                               ✓ Auto-Detected
                             </span>
+                            <button
+                              type="button"
+                              onClick={() => setIsEditingDetected(!isEditingDetected)}
+                              className="px-2 py-0.5 rounded-md border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-2.5 h-2.5 text-slate-500" />
+                              <span>{isEditingDetected ? "Save Details" : "Edit Details"}</span>
+                            </button>
                           </div>
                           <p className="text-xs text-slate-500 font-medium mt-0.5">
                             {detectedResult.category}
@@ -676,6 +698,95 @@ export default function AgencyHubPage() {
                         </span>
                       </div>
                     </div>
+
+                    {/* INLINE EDIT ACCORDION */}
+                    {isEditingDetected && (
+                      <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-3 animate-in fade-in duration-100">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block border-b border-slate-100 pb-1.5">
+                          Customize Extracted Client Profile
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Business Name
+                            </label>
+                            <input
+                              type="text"
+                              value={detectedResult.name}
+                              onChange={(e) => handleUpdateDetectedField("name", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Industry Category
+                            </label>
+                            <select
+                              value={detectedResult.category}
+                              onChange={(e) => handleUpdateDetectedField("category", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium bg-white"
+                            >
+                              <option value="Dental & Healthcare">Dental & Healthcare</option>
+                              <option value="Hospitality & Dining">Hospitality & Dining</option>
+                              <option value="Legal & Professional Services">Legal & Professional Services</option>
+                              <option value="Aesthetics & Medical Spa">Aesthetics & Medical Spa</option>
+                              <option value="Automotive Services">Automotive Services</option>
+                              <option value="Home Services & Contracting">Home Services & Contracting</option>
+                              <option value="Local Business & Professional">Local Business & Professional</option>
+                            </select>
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Full Address (Street, City, State, Zip)
+                            </label>
+                            <input
+                              type="text"
+                              value={detectedResult.address}
+                              onChange={(e) => handleUpdateDetectedField("address", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Local Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              value={detectedResult.phone}
+                              onChange={(e) => handleUpdateDetectedField("phone", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Funnel Slug Preview
+                            </label>
+                            <input
+                              type="text"
+                              readOnly
+                              value={`/r/${detectedResult.slug}`}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs font-mono"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Direct Google Review URL
+                            </label>
+                            <input
+                              type="text"
+                              value={detectedResult.googleReviewUrl}
+                              onChange={(e) => handleUpdateDetectedField("googleReviewUrl", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-mono text-[11px]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Generated Review Link Callout */}
                     <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs">
@@ -710,7 +821,10 @@ export default function AgencyHubPage() {
                     <div className="flex items-center justify-end gap-2 pt-2">
                       <button
                         type="button"
-                        onClick={() => setDetectedResult(null)}
+                        onClick={() => {
+                          setDetectedResult(null);
+                          setIsEditingDetected(false);
+                        }}
                         className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl cursor-pointer"
                       >
                         Back
