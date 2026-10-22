@@ -57,9 +57,18 @@ html[data-sp-theme="dark"] {
     background-color: #f8fafc;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+    max-width: 100vw;
   }
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    max-width: 100vw;
+  }
+  .sp-page {
+    overflow-x: clip;
+    max-width: 100vw;
+    width: 100%;
   }
   .sp-page ::selection {
     background: var(--sp-accent);
@@ -161,7 +170,7 @@ html:not(.sp-js) [data-reveal] { opacity: 1; transform: none; }
 .sp-bob { animation: sp-bob 6s ease-in-out infinite; }
 .sp-bob-2 { animation: sp-bob 7.5s ease-in-out -2s infinite; }
 
-.sp-marquee { overflow: hidden; }
+.sp-marquee { overflow: hidden; width: 100%; max-width: 100%; }
 .sp-marquee-track { display: flex; width: max-content; animation: sp-marquee 34s linear infinite; }
 .sp-marquee:hover .sp-marquee-track { animation-play-state: paused; }
 @keyframes sp-marquee { to { transform: translateX(-50%); } }
