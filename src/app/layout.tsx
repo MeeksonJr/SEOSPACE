@@ -6,6 +6,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { SiteNavigatorDrawer } from "@/components/ui/SiteNavigatorDrawer";
+import { Analytics } from "@vercel/analytics/next";
 
 const display = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -118,6 +119,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
         />
         {children}
+        <Analytics />
         <SiteNavigatorDrawer />
       </body>
     </html>
