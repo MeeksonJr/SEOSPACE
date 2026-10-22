@@ -30,9 +30,9 @@ const themeBootScript = `try{var t=localStorage.getItem('seospace_theme_mode');d
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://seospace-kappa.vercel.app"),
-  title: "Seospace AI — Your Always-On AI SEO, CRO & Compliance Growth Engine",
+  title: "Seospace AI — Autonomous SEO, CRO & GEO Growth Engine",
   description:
-    "Automate your entire technical SEO, CRO copywriting, AI Search (GEO), live Cloudflare 1.1.1.1 DNS security, and WCAG 2.2 compliance workflow with instant client-ready White-Label PDF reports.",
+    "Automate technical SEO, CRO heuristics, AI Search (GEO) and Cloudflare DNS audits with instant white-label client PDF reports. Run your free live audit today.",
   keywords: [
     "AI SEO Audit",
     "CRO Audit SaaS",
@@ -49,17 +49,28 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Seospace AI — Autonomous SEO, CRO, GEO & DNS Growth Engine",
     description:
-      "35-point Technical SEO, CRO, AI Search (GEO), WCAG 2.2 & live DNS auditing + 0–100 Mathematical AI Article Studio and Agency White-Label PDF reports.",
+      "Automate technical SEO, CRO heuristics, AI Search (GEO) and Cloudflare DNS audits with instant white-label client PDF reports. Run your free live audit today.",
     url: "https://seospace-kappa.vercel.app",
     siteName: "Seospace AI",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "https://raw.githubusercontent.com/MeeksonJr/SEOSPACE/main/flippa-showcase/01-landing-page-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Seospace AI Autonomous SEO Platform",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Seospace AI — Your Always-On AI SEO & CRO Growth Engine",
+    title: "Seospace AI — Autonomous SEO, CRO, GEO & DNS Growth Engine",
     description:
-      "Run real-time Edge Crawler metadata + Cloudflare DoH DNS + DOM website audits and generate 95+/100 SEO articles in 1 click.",
+      "Automate technical SEO, CRO heuristics, AI Search (GEO) and Cloudflare DNS audits with instant white-label client PDF reports. Run your free live audit today.",
+    images: [
+      "https://raw.githubusercontent.com/MeeksonJr/SEOSPACE/main/flippa-showcase/01-landing-page-hero.png",
+    ],
   },
 };
 

@@ -202,11 +202,11 @@ export default function LandingPage() {
               {/* Left Column: Bold Typography & Live URL Audit Form (7 cols) */}
               <div className="lg:col-span-7 space-y-7" data-reveal data-delay="1">
                 <div>
-                  <div className="sp-display text-[clamp(2.8rem,7.5vw,7.2rem)] text-ink leading-[0.92]">
+                  <h1 className="sp-display text-[clamp(2.8rem,7.5vw,7.2rem)] text-ink leading-[0.92]">
                     Audit<span className="text-accent">+</span>
                     <br />
                     <span className="text-mute font-normal">Rank higher.</span>
-                  </div>
+                  </h1>
                   <p className="mt-5 text-base sm:text-xl text-mute max-w-xl leading-relaxed">
                     Automate your entire technical SEO, CRO heuristics, live Cloudflare DNS security, and AI Search (GEO) auditing — with an AI Content Studio and white-label client PDF reports.
                   </p>
