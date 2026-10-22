@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-sp-theme="dark"], [data-sp-theme="dark"] *, .dark, .dark *));
+
 /* ============================================================
-   STUDIO PAPER: Seospace public design system (see DESIGN.md)
-   Theme is driven by <html data-sp-theme="light|dark">
+   TRUSTPULSE DESIGN SYSTEM
+   Theme is driven by <html data-sp-theme="light|dark" class="light|dark">
    ============================================================ */
 
 :root,
-html[data-sp-theme="light"] {
+html[data-sp-theme="light"],
+html.light {
   --sp-paper: #ffffff;
   --sp-card: #ffffff;
   --sp-stage: #f8fafc;
@@ -20,7 +23,8 @@ html[data-sp-theme="light"] {
   --sp-dot: rgba(15, 23, 42, 0.05);
 }
 
-html[data-sp-theme="dark"] {
+html[data-sp-theme="dark"],
+html.dark {
   --sp-paper: #09090b;
   --sp-card: #121316;
   --sp-stage: #181a20;

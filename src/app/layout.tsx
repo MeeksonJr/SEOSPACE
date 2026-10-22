@@ -26,7 +26,7 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-const themeBootScript = `try{var t=localStorage.getItem('trustpulse_theme_mode');document.documentElement.dataset.spTheme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.spTheme='light'}`;
+const themeBootScript = `try{var t=localStorage.getItem('trustpulse_theme_mode');var isDark=t==='dark';document.documentElement.dataset.spTheme=isDark?'dark':'light';if(isDark){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');}else{document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}}catch(e){document.documentElement.dataset.spTheme='light';document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://trustpulse-ai.vercel.app"),
@@ -114,7 +114,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-screen overflow-x-hidden bg-white dark:bg-[#09090b] text-slate-900 dark:text-slate-50 antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-200">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}

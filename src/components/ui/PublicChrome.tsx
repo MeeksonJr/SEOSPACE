@@ -11,6 +11,13 @@ const THEME_STORAGE_KEY = "trustpulse_theme_mode";
 function applyTheme(dark: boolean) {
   if (typeof document !== "undefined") {
     document.documentElement.dataset.spTheme = dark ? "dark" : "light";
+    if (dark) {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+    }
   }
 }
 
@@ -111,23 +118,23 @@ export function ThemeToggleButton({
           aria-checked={isDark}
           aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
           onClick={onToggle}
-          className="relative hidden sm:inline-flex h-8 w-[4.4rem] shrink-0 items-center rounded-full border border-line bg-card cursor-pointer sp-eyebrow !text-[0.58rem] text-ink"
+          className="relative hidden sm:inline-flex h-8 w-[4.6rem] shrink-0 items-center rounded-full border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 cursor-pointer text-[0.62rem] font-bold font-mono uppercase tracking-wider text-slate-700 dark:text-slate-300 shadow-inner"
         >
           <span
-            className={`absolute top-[2px] h-[24px] w-[32px] rounded-full bg-ink transition-transform duration-300 ${
-              isDark ? "translate-x-[34px]" : "translate-x-[2px]"
+            className={`absolute top-[2px] h-[26px] w-[34px] rounded-full bg-white dark:bg-zinc-950 shadow-sm border border-slate-200/80 dark:border-zinc-700 transition-transform duration-200 ${
+              isDark ? "translate-x-[36px]" : "translate-x-[2px]"
             }`}
           />
           <span
             className={`relative z-10 w-1/2 text-center transition-colors ${
-              isDark ? "text-mute" : "text-paper"
+              isDark ? "text-slate-400 dark:text-slate-500" : "text-emerald-700 font-extrabold"
             }`}
           >
             Day
           </span>
           <span
             className={`relative z-10 w-1/2 text-center transition-colors ${
-              isDark ? "text-paper" : "text-mute"
+              isDark ? "text-emerald-400 font-extrabold" : "text-slate-400"
             }`}
           >
             Night
