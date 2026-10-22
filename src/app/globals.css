@@ -1,235 +1,195 @@
 @import "tailwindcss";
 
+/* ============================================================
+   STUDIO PAPER: Seospace public design system (see DESIGN.md)
+   Theme is driven by <html data-sp-theme="light|dark">
+   ============================================================ */
+
+:root,
+html[data-sp-theme="light"] {
+  --sp-paper: #efece4;
+  --sp-card: #faf8f3;
+  --sp-stage: #e4e0d5;
+  --sp-ink: #141413;
+  --sp-mute: #6a665d;
+  --sp-line: #d3cec1;
+  --sp-accent: #ff4d14;
+  --sp-cobalt: #2a4bff;
+  --sp-butter: #f5d547;
+  --sp-night: #101011;
+  --sp-dot: rgba(20, 20, 19, 0.11);
+}
+
+html[data-sp-theme="dark"] {
+  --sp-paper: #0f0f10;
+  --sp-card: #18181a;
+  --sp-stage: #1b1b1d;
+  --sp-ink: #f3f0e8;
+  --sp-mute: #9d988d;
+  --sp-line: #2c2c2f;
+  --sp-accent: #ff5b24;
+  --sp-cobalt: #4c68ff;
+  --sp-butter: #f5d547;
+  --sp-night: #070708;
+  --sp-dot: rgba(243, 240, 232, 0.09);
+}
+
+@theme inline {
+  --font-display: var(--f-display), "Arial Narrow", sans-serif;
+  --font-sans: var(--f-body), system-ui, sans-serif;
+  --font-mono: var(--f-mono), ui-monospace, monospace;
+
+  --color-paper: var(--sp-paper);
+  --color-card: var(--sp-card);
+  --color-stage: var(--sp-stage);
+  --color-ink: var(--sp-ink);
+  --color-mute: var(--sp-mute);
+  --color-line: var(--sp-line);
+  --color-accent: var(--sp-accent);
+  --color-cobalt: var(--sp-cobalt);
+  --color-butter: var(--sp-butter);
+  --color-night: var(--sp-night);
+}
+
 @layer base {
-  :root {
-    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-serif: "Instrument Serif", Georgia, Cambria, "Times New Roman", serif;
-
-    /* Seospace "Aurora Ink" palette: deep ink + indigo/violet/cyan aurora + emerald proof accent */
-    --sp-indigo: 99 102 241;
-    --sp-violet: 168 85 247;
-    --sp-cyan: 34 211 238;
-    --sp-emerald: 16 185 129;
-    --sp-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
   body {
-    font-family: var(--font-sans);
+    font-family: var(--f-body), system-ui, sans-serif;
     background-color: #f8fafc;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
-
   html {
     scroll-behavior: smooth;
   }
+  .sp-page ::selection {
+    background: var(--sp-accent);
+    color: #141413;
+  }
 }
 
-.font-editorial {
-  font-family: var(--font-serif);
+/* ---------- Typography ---------- */
+.sp-display {
+  font-family: var(--f-display), "Arial Narrow", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  font-variation-settings: "wdth" 90;
+}
+.sp-eyebrow {
+  font-family: var(--f-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-/* Subtle Seospace architectural grid background */
-.bg-seospace-grid {
-  background-size: 64px 64px;
-  background-image: 
-    linear-gradient(to right, rgba(226, 232, 240, 0.55) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(226, 232, 240, 0.55) 1px, transparent 1px);
-}
-
-.bg-seospace-dark-grid {
-  background-size: 64px 64px;
-  background-image: 
-    linear-gradient(to right, rgba(30, 41, 59, 0.55) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 41, 59, 0.55) 1px, transparent 1px);
-}
-
-/* ============================================================
-   AURORA INK DESIGN SYSTEM (public pages)
-   ============================================================ */
-
-/* Ambient aurora overlay, fixed above page backgrounds, never blocks clicks */
-.sp-aurora {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-.sp-aurora::before,
-.sp-aurora::after,
-.sp-aurora > i {
-  content: "";
-  position: absolute;
+/* ---------- Buttons: flat, pill, no gradients ---------- */
+.sp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   border-radius: 9999px;
-  filter: blur(90px);
-  will-change: transform;
+  padding: 0.8rem 1.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s, color 0.2s, border-color 0.2s;
 }
-.sp-aurora::before {
-  width: 46vw; height: 46vw; min-width: 340px; min-height: 340px;
-  top: -14vw; left: -10vw;
-  background: radial-gradient(circle, rgb(var(--sp-indigo) / 0.55), transparent 65%);
-  animation: sp-drift-a 22s ease-in-out infinite alternate;
-}
-.sp-aurora::after {
-  width: 40vw; height: 40vw; min-width: 300px; min-height: 300px;
-  top: 10vh; right: -12vw;
-  background: radial-gradient(circle, rgb(var(--sp-violet) / 0.5), transparent 65%);
-  animation: sp-drift-b 26s ease-in-out infinite alternate;
-}
-.sp-aurora > i {
-  width: 34vw; height: 34vw; min-width: 260px; min-height: 260px;
-  bottom: -12vw; left: 28vw;
-  background: radial-gradient(circle, rgb(var(--sp-cyan) / 0.4), transparent 65%);
-  animation: sp-drift-c 30s ease-in-out infinite alternate;
-}
-html[data-sp-theme="light"] .sp-aurora { opacity: 0.16; }
-html[data-sp-theme="dark"] .sp-aurora { opacity: 0.2; mix-blend-mode: screen; }
+.sp-btn:hover { transform: translateY(-2px); }
+.sp-btn:active { transform: translateY(0); }
+.sp-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+.sp-btn-primary { background: var(--sp-ink); color: var(--sp-paper); }
+.sp-btn-primary:hover { background: var(--sp-accent); color: #141413; }
+.sp-btn-accent { background: var(--sp-accent); color: #141413; }
+.sp-btn-accent:hover { background: var(--sp-ink); color: var(--sp-paper); }
+.sp-btn-ghost { background: transparent; color: var(--sp-ink); border-color: var(--sp-ink); }
+.sp-btn-ghost:hover { background: var(--sp-ink); color: var(--sp-paper); }
 
-@keyframes sp-drift-a { to { transform: translate3d(8vw, 6vh, 0) scale(1.15); } }
-@keyframes sp-drift-b { to { transform: translate3d(-9vw, 10vh, 0) scale(1.1); } }
-@keyframes sp-drift-c { to { transform: translate3d(6vw, -8vh, 0) scale(1.2); } }
-
-/* Scroll progress bar */
-.sp-progress {
-  position: fixed;
-  top: 0; left: 0;
-  height: 3px;
+/* ---------- Surfaces & texture ---------- */
+.sp-dots {
+  background-image: radial-gradient(var(--sp-dot) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+.sp-stage {
+  background-color: var(--sp-stage);
+  background-image: radial-gradient(var(--sp-dot) 1px, transparent 1px);
+  background-size: 14px 14px;
+  border-radius: 28px;
+}
+.sp-rule { border-top: 1px solid var(--sp-line); }
+.sp-input {
   width: 100%;
-  z-index: 70;
-  transform-origin: 0 50%;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, rgb(var(--sp-indigo)), rgb(var(--sp-violet)), rgb(var(--sp-cyan)));
-  box-shadow: 0 0 12px rgb(var(--sp-violet) / 0.7);
-  pointer-events: none;
+  background: transparent;
+  color: var(--sp-ink);
+  outline: none;
 }
+.sp-input::placeholder { color: var(--sp-mute); opacity: 0.8; }
+.sp-card-shadow { box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 18px 32px -20px rgba(20, 20, 19, 0.35); }
+html[data-sp-theme="dark"] .sp-card-shadow { box-shadow: 0 0 0 1px var(--sp-line), 0 22px 40px -22px rgba(0, 0, 0, 0.8); }
 
-/* Scroll reveal (class added by JS only, so content is never hidden without JS) */
-.sp-reveal {
+/* ---------- Tilt + diagonal layout helpers ---------- */
+.sp-tilt-l { transform: rotate(-3deg); }
+.sp-tilt-r { transform: rotate(3deg); }
+.sp-tilt-l2 { transform: rotate(-6deg); }
+.sp-tilt-r2 { transform: rotate(5deg); }
+
+.sp-diag-top { clip-path: polygon(0 var(--sp-cut, 5vw), 100% 0, 100% 100%, 0 100%); padding-top: calc(var(--sp-cut, 5vw) + 3rem); }
+.sp-diag-bot { clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--sp-cut, 5vw)), 0 100%); padding-bottom: calc(var(--sp-cut, 5vw) + 3rem); }
+.sp-diag-both { clip-path: polygon(0 var(--sp-cut, 5vw), 100% 0, 100% calc(100% - var(--sp-cut, 5vw)), 0 100%); padding-top: calc(var(--sp-cut, 5vw) + 3rem); padding-bottom: calc(var(--sp-cut, 5vw) + 3rem); }
+.sp-pull { margin-top: calc(var(--sp-cut, 5vw) * -1); }
+@media (max-width: 640px) { :root { --sp-cut: 9vw; } }
+
+/* ---------- Motion ---------- */
+[data-reveal] {
   opacity: 0;
-  transform: translate3d(0, 28px, 0) scale(0.985);
-  transition:
-    opacity 0.8s var(--sp-ease) var(--sp-delay, 0ms),
-    transform 0.8s var(--sp-ease) var(--sp-delay, 0ms);
-  will-change: opacity, transform;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--sp-d, 0) * 90ms);
 }
-.sp-reveal.sp-in {
-  opacity: 1;
-  transform: none;
-}
+[data-reveal="left"] { transform: translate3d(-34px, 0, 0); }
+[data-reveal="right"] { transform: translate3d(34px, 0, 0); }
+[data-reveal].sp-in { opacity: 1; transform: none; }
+[data-delay="1"] { --sp-d: 1; } [data-delay="2"] { --sp-d: 2; } [data-delay="3"] { --sp-d: 3; }
+[data-delay="4"] { --sp-d: 4; } [data-delay="5"] { --sp-d: 5; }
+html:not(.sp-js) [data-reveal] { opacity: 1; transform: none; }
 
-/* Hero entrance */
-@keyframes sp-fade-up {
-  from { opacity: 0; transform: translate3d(0, 22px, 0); }
-  to { opacity: 1; transform: none; }
-}
-.sp-hero-in > * {
-  opacity: 0;
-  animation: sp-fade-up 0.9s var(--sp-ease) forwards;
-}
-.sp-hero-in > *:nth-child(1) { animation-delay: 0.05s; }
-.sp-hero-in > *:nth-child(2) { animation-delay: 0.18s; }
-.sp-hero-in > *:nth-child(3) { animation-delay: 0.3s; }
-.sp-hero-in > *:nth-child(4) { animation-delay: 0.42s; }
-.sp-hero-in > *:nth-child(5) { animation-delay: 0.54s; }
+@keyframes sp-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -9px; } }
+.sp-bob { animation: sp-bob 6s ease-in-out infinite; }
+.sp-bob-2 { animation: sp-bob 7.5s ease-in-out -2s infinite; }
 
-/* Animated gradient headline text */
-.sp-gradient-text {
-  background-image: linear-gradient(110deg, #6366f1 0%, #a855f7 35%, #22d3ee 70%, #6366f1 100%);
-  background-size: 220% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: sp-gradient-pan 8s linear infinite;
-}
-@keyframes sp-gradient-pan { to { background-position: 220% center; } }
-
-/* Premium card hover on public pages */
-body.sp-public :is(.rounded-2xl, .rounded-3xl).border {
-  transition:
-    transform 0.35s var(--sp-ease),
-    box-shadow 0.35s var(--sp-ease),
-    border-color 0.35s ease;
-}
-@media (hover: hover) {
-  body.sp-public :is(.rounded-2xl, .rounded-3xl).border:hover {
-    transform: translateY(-3px);
-    border-color: rgb(var(--sp-indigo) / 0.55);
-    box-shadow: 0 18px 40px -18px rgb(var(--sp-indigo) / 0.45);
-  }
-  /* Never lift giant containers or form shells */
-  body.sp-public :is(form, pre, table, details, .sp-no-lift, .sp-no-lift *):is(.rounded-2xl, .rounded-3xl).border:hover,
-  body.sp-public .sp-no-lift:hover {
-    transform: none;
-    box-shadow: none;
-  }
-}
-
-/* Shine sweep on primary call-to-action buttons */
-body.sp-public :is(button, a)[class*="bg-blue-600"],
-body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"] {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-body.sp-public :is(button, a)[class*="bg-blue-600"]::after,
-body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
-  transform: translateX(-120%);
-}
-@media (hover: hover) {
-  body.sp-public :is(button, a)[class*="bg-blue-600"]:hover::after,
-  body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"]:hover::after {
-    transform: translateX(120%);
-    transition: transform 0.8s var(--sp-ease);
-  }
-}
-
-/* Marquee */
-.sp-marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.sp-marquee-track { display: flex; width: max-content; gap: 2.5rem; animation: sp-marquee 38s linear infinite; }
+.sp-marquee { overflow: hidden; }
+.sp-marquee-track { display: flex; width: max-content; animation: sp-marquee 34s linear infinite; }
 .sp-marquee:hover .sp-marquee-track { animation-play-state: paused; }
 @keyframes sp-marquee { to { transform: translateX(-50%); } }
 
-/* Floating gentle motion */
-@keyframes sp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.sp-float { animation: sp-float 6s ease-in-out infinite; }
-
-/* Back to top */
-.sp-top {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 45;
-  opacity: 0;
-  transform: translateY(12px) scale(0.9);
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s var(--sp-ease);
+.sp-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 100%; z-index: 80;
+  transform-origin: 0 50%; transform: scaleX(0);
+  background: var(--sp-accent); pointer-events: none;
 }
-.sp-top.sp-show { opacity: 1; transform: none; pointer-events: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .sp-reveal { opacity: 1; transform: none; transition: none; }
-  .sp-hero-in > * { opacity: 1; animation: none; }
-  .sp-aurora::before, .sp-aurora::after, .sp-aurora > i,
-  .sp-gradient-text, .sp-marquee-track, .sp-float { animation: none; }
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .sp-bob, .sp-bob-2, .sp-marquee-track { animation: none; }
 }
 
-/* Print optimization for White-Label Agency PDF Export */
+/* ---------- Legacy helpers still used by dashboard/report ---------- */
+.bg-seospace-grid {
+  background-size: 64px 64px;
+  background-image: linear-gradient(to right, rgba(226, 232, 240, 0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(226, 232, 240, 0.55) 1px, transparent 1px);
+}
+.bg-seospace-dark-grid {
+  background-size: 64px 64px;
+  background-image: linear-gradient(to right, rgba(30, 41, 59, 0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(30, 41, 59, 0.55) 1px, transparent 1px);
+}
+.font-editorial { font-family: var(--f-display), sans-serif; }
+
 @media print {
-  .no-print,
-  .sp-aurora,
-  .sp-progress,
-  .sp-top {
-    display: none !important;
-  }
-  body {
-    background: #ffffff !important;
-  }
+  .no-print, .sp-progress { display: none !important; }
+  body { background: #ffffff !important; }
 }

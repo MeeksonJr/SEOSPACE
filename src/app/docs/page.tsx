@@ -3,25 +3,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Check,
-  Code2,
-  Copy,
-  Loader2,
-  Play,
-  Sparkles,
-  Terminal,
-  Webhook,
-} from "lucide-react";
-import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
-import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
-import {
   PublicFooter,
-  ThemeToggleButton,
+  PublicNavbar,
   usePublicTheme,
 } from "@/components/ui/PublicChrome";
 
-const ENDPOINTS = [
+interface EndpointDef {
+  id: string;
+  method: string;
+  path: string;
+  title: string;
+  description: string;
+  defaultBody: string;
+}
+
+const ENDPOINTS: EndpointDef[] = [
   {
     id: "audit",
     method: "POST",
@@ -76,16 +72,34 @@ const ENDPOINTS = [
   },
 ];
 
+const WEBHOOKS = [
+  {
+    event: "audit.completed",
+    desc: "Fires whenever a URL scan completes with full 5-pillar scores, Core Web Vitals, and DNS security intelligence.",
+    sample: '{"event": "audit.completed", "url": "https://voice-one.com/services/", "overallScore": 88}',
+  },
+  {
+    event: "lead.captured",
+    desc: "Fires when a prospective client submits their email and domain through the White-Label Embeddable Widget.",
+    sample: '{"event": "lead.captured", "name": "Alex Morgan", "email": "alex@agency.com", "auditScore": 84}',
+  },
+  {
+    event: "article.generated",
+    desc: "Fires when Seospace Neural Engine v4.2 finishes drafting and mathematically scoring a 95+ SEO article.",
+    sample: '{"event": "article.generated", "articleId": "art-9482", "wordCount": 1840, "grade": 98}',
+  },
+];
+
 export default function ApiDocsPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
-  const [selectedEndpoint, setSelectedEndpoint] = useState(ENDPOINTS[0]);
-  const [requestBody, setRequestBody] = useState(ENDPOINTS[0].defaultBody);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<EndpointDef>(ENDPOINTS[0]);
+  const [requestBody, setRequestBody] = useState<string>(ENDPOINTS[0].defaultBody);
   const [responseJson, setResponseJson] = useState<string>(
-    `{\n  "status": "Ready to execute live request",\n  "engine": "Seospace Neural Engine v4.2",\n  "tip": "Click 'Run Live API Request' above to test against the production backend"\n}`
+    `{\n  "status": "Ready to execute live request",\n  "engine": "Seospace Neural Engine v4.2",\n  "tip": "Click 'Execute Live Request' below to test against the production backend"\n}`
   );
   const [running, setRunning] = useState(false);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedCurl, setCopiedCurl] = useState(false);
 
   async function handleExecuteRequest() {
     setRunning(true);
@@ -118,228 +132,160 @@ export default function ApiDocsPage() {
   -d '${requestBody.replace(/\n\s*/g, " ")}'`;
 
   function handleCopyCurl() {
-    navigator.clipboard.writeText(curlSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof navigator !== "undefined") {
+      navigator.clipboard.writeText(curlSnippet);
+      setCopiedCurl(true);
+      setTimeout(() => setCopiedCurl(false), 2000);
+    }
   }
 
   return (
-    <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${
-        isDark ? "bg-[#050814] text-white" : "bg-[#F4F6F9] text-slate-900"
-      }`}
-    >
-      {/* Navbar */}
-      <header
-        className={`border-b sticky top-0 z-30 transition-colors ${
-          isDark
-            ? "bg-[#050814]/90 border-slate-800/80 backdrop-blur-md"
-            : "bg-white/90 border-slate-200 backdrop-blur-md"
-        }`}
-      >
-        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-3 min-h-[4rem] flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/" className="shrink-0">
-              <SeospaceLogo darkText={!isDark} />
-            </Link>
-            <span
-              className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                isDark
-                  ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
-                  : "bg-blue-50 text-blue-700 border-blue-200"
-              }`}
-            >
-              <Terminal className="w-3.5 h-3.5" /> Developer REST API &amp;
-              Webhook Reference (v4.2)
-            </span>
-          </div>
+    <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans transition-colors duration-300">
+      <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-          <div className="flex items-center gap-2 text-xs font-semibold shrink-0">
-            <OpenSiteNavigatorButton
-              variant={isDark ? "dark" : "light"}
-              label="All Pages"
-            />
-            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} />
-            <Link
-              href="/compare"
-              className={`hidden lg:inline-flex px-3 py-2 rounded-xl transition ${
-                isDark
-                  ? "text-slate-300 hover:text-white hover:bg-slate-900"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Competitor Battlecard
-            </Link>
-            <Link
-              href="/tools"
-              className={`hidden lg:inline-flex px-3 py-2 rounded-xl transition ${
-                isDark
-                  ? "text-slate-300 hover:text-white hover:bg-slate-900"
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-              }`}
-            >
-              Free SEO &amp; DNS Tools
-            </Link>
-            <Link
-              href="/dashboard"
-              className={`px-3 sm:px-4 py-2 rounded-xl inline-flex items-center gap-1.5 transition ${
-                isDark
-                  ? "bg-blue-600 hover:bg-blue-500 text-white"
-                  : "bg-slate-950 hover:bg-slate-800 text-white"
-              }`}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />{" "}
-              <span className="hidden sm:inline">Workspace</span> Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 pt-8 pb-20 space-y-8 flex-1">
-        {/* Hero Banner */}
-        <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Headless SEO, CRO &amp; DNS
-            Intelligence API • Interactive Sandbox
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Seospace Neural Engine v4.2 — REST API &amp; Webhooks
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-            Integrate automated URL auditing, saved-first metadata caching,
-            Cloudflare DoH DNS/SPF/DMARC checks, and AI article generation into
-            your agency CRM, Zapier, Make, or CI/CD pipeline.
-          </p>
-        </div>
-
-        {/* Interactive Endpoint Selector + Live Console */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Endpoint List & Request Editor */}
-          <div className="lg:col-span-5 space-y-4">
-            <div
-              className={`rounded-3xl border p-6 space-y-3 ${
-                isDark
-                  ? "bg-[#0B1022] border-slate-800"
-                  : "bg-white border-slate-200"
-              }`}
-            >
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                SELECT PRODUCTION ENDPOINT
+      <main className="flex-1 px-4 sm:px-8 py-8 sm:py-12 max-w-[88rem] mx-auto w-full space-y-10">
+        {/* ====================================================================
+            STAGE HEADER
+            ==================================================================== */}
+        <div className="sp-stage border border-line p-6 sm:p-10 rounded-3xl sp-card-shadow space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <div className="sp-eyebrow text-accent mb-2">
+                Developer REST API &amp; Webhooks • v4.2 Public Reference
               </div>
-              {ENDPOINTS.map((ep) => {
-                const active = selectedEndpoint.id === ep.id;
-                return (
-                  <button
-                    key={ep.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedEndpoint(ep);
-                      setRequestBody(ep.defaultBody);
-                    }}
-                    className={`w-full text-left p-4 rounded-2xl border transition cursor-pointer ${
-                      active
-                        ? isDark
-                          ? "bg-blue-600/20 border-blue-500"
-                          : "bg-blue-50/80 border-blue-500"
-                        : isDark
-                        ? "bg-slate-950/80 border-slate-800 hover:bg-slate-900"
-                        : "bg-slate-50/70 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-blue-600 text-white text-[10px] font-mono font-bold">
-                        {ep.method}
-                      </span>
-                      <span
-                        className={`font-mono text-xs font-bold ${
-                          isDark ? "text-white" : "text-slate-900"
-                        }`}
-                      >
-                        {ep.path}
-                      </span>
-                    </div>
-                    <div
-                      className={`text-xs font-bold mt-1.5 ${
-                        isDark ? "text-slate-200" : "text-slate-800"
-                      }`}
-                    >
-                      {ep.title}
-                    </div>
-                    <p
-                      className={`text-[11px] mt-0.5 leading-relaxed ${
-                        isDark ? "text-slate-400" : "text-slate-500"
-                      }`}
-                    >
-                      {ep.description}
-                    </p>
-                  </button>
-                );
-              })}
+              <h1 className="sp-display text-[clamp(2.4rem,6vw,4.5rem)] text-ink leading-tight">
+                Automate audits<span className="text-accent">.</span> <br />
+                <span className="text-mute font-normal">Directly in your code &amp; pipeline.</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-mute mt-3 max-w-2xl leading-relaxed">
+                Connect Seospace’s 35-point diagnostic scanner, saved-first PostgreSQL caching, Cloudflare 1.1.1.1 DoH DNS validation, and autonomous AI article generator to your agency CRM, Zapier, Make, or CI/CD workflow.
+              </p>
             </div>
 
-            {/* Webhook Event Reference */}
-            <div
-              className={`rounded-3xl border p-6 space-y-3 ${
-                isDark
-                  ? "bg-[#0B1022] border-slate-800"
-                  : "bg-white border-slate-200"
-              }`}
-            >
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-500">
-                <Webhook className="w-4 h-4" /> Outbound Webhook Events
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <Link href="/dashboard" className="sp-btn sp-btn-primary">
+                Open Workspace Demo <span aria-hidden>↗</span>
+              </Link>
+              <Link href="/tools" className="sp-btn sp-btn-ghost">
+                Free Generators
+              </Link>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-line flex flex-wrap items-center gap-6 text-xs text-mute font-mono">
+            <div>
+              Base URL: <span className="text-ink font-bold">https://seospace-kappa.vercel.app</span>
+            </div>
+            <div>
+              Auth: <span className="text-ink font-bold">Bearer &lt;API_KEY&gt;</span>
+            </div>
+            <div>
+              Format: <span className="text-ink font-bold">application/json</span>
+            </div>
+            <div>
+              Status: <span className="text-accent font-bold">99.98% Uptime SLA</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ====================================================================
+            INTERACTIVE CONSOLE (SPLIT LAYOUT)
+            ==================================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left: Endpoint Selector & Webhooks */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-card border border-line rounded-3xl p-6 sp-card-shadow space-y-4">
+              <div className="sp-eyebrow text-mute">Available Production Endpoints</div>
+              <div className="space-y-3">
+                {ENDPOINTS.map((ep) => {
+                  const active = selectedEndpoint.id === ep.id;
+                  return (
+                    <button
+                      key={ep.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedEndpoint(ep);
+                        setRequestBody(ep.defaultBody);
+                      }}
+                      className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer ${
+                        active
+                          ? "border-accent bg-accent/10 sp-card-shadow"
+                          : "border-line bg-stage hover:border-ink/40"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                              active ? "bg-accent text-white" : "bg-ink text-paper"
+                            }`}
+                          >
+                            {ep.method}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-ink">
+                            {ep.path}
+                          </span>
+                        </div>
+                        {active && (
+                          <span className="text-[10px] font-mono font-bold text-accent uppercase">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-bold text-ink mt-2">
+                        {ep.title}
+                      </div>
+                      <p className="text-[11px] text-mute mt-1 leading-relaxed">
+                        {ep.description}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
-              <div className="space-y-2 text-xs">
-                {[
-                  {
-                    event: "audit.completed",
-                    desc: "Fires whenever a URL scan completes with full 5-pillar scores and DNS intelligence.",
-                  },
-                  {
-                    event: "lead.captured",
-                    desc: "Fires when a prospect submits their email via the White-Label Embeddable Audit Widget.",
-                  },
-                  {
-                    event: "article.generated",
-                    desc: "Fires when Seospace Neural Engine v4.2 finishes generating a 95+/100 SEO article.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.event}
-                    className={`p-3 rounded-xl border ${
-                      isDark
-                        ? "bg-slate-950 border-slate-800"
-                        : "bg-slate-50 border-slate-200"
-                    }`}
-                  >
-                    <div
-                      className={`font-mono font-bold ${
-                        isDark ? "text-blue-300" : "text-slate-900"
-                      }`}
-                    >
-                      {item.event}
+            </div>
+
+            {/* Outbound Webhook Subscriptions */}
+            <div className="bg-card border border-line rounded-3xl p-6 sp-card-shadow space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="sp-eyebrow text-accent">Outbound Webhook Events</span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cobalt text-white">
+                  HMAC Signed
+                </span>
+              </div>
+              <p className="text-xs text-mute leading-relaxed">
+                Configure HTTP POST endpoints to receive real-time JSON payloads as audits complete or leads arrive.
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {WEBHOOKS.map((wh) => (
+                  <div key={wh.event} className="p-3.5 rounded-2xl border border-line bg-stage space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-ink">
+                        {wh.event}
+                      </span>
+                      <span className="text-[10px] font-mono text-mute">
+                        POST payload
+                      </span>
                     </div>
-                    <div
-                      className={`mt-0.5 ${
-                        isDark ? "text-slate-400" : "text-slate-500"
-                      }`}
-                    >
-                      {item.desc}
-                    </div>
+                    <p className="text-[11px] text-mute leading-relaxed">
+                      {wh.desc}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Right: Live Request & Response Playground */}
+          {/* Right: Interactive Sandbox (Dark Night Theme) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-lg bg-blue-600 text-xs font-mono font-bold">
+            <div className="bg-night text-[#f3f0e8] rounded-3xl p-6 sm:p-8 border border-[#2a2a2c] sp-card-shadow space-y-6">
+              {/* Sandbox Top Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#2a2a2c]">
+                <div className="flex items-center gap-2 font-mono">
+                  <span className="px-2.5 py-1 rounded-lg bg-accent text-white text-xs font-bold">
                     {selectedEndpoint.method}
                   </span>
-                  <span className="font-mono text-sm font-bold text-blue-300">
+                  <span className="text-sm font-bold text-[#f3f0e8]">
                     {selectedEndpoint.path}
                   </span>
                 </div>
@@ -348,78 +294,90 @@ export default function ApiDocsPage() {
                   type="button"
                   onClick={handleExecuteRequest}
                   disabled={running}
-                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs inline-flex items-center gap-1.5 cursor-pointer transition"
+                  className="sp-btn sp-btn-accent !py-2.5 !px-5 text-xs font-bold inline-flex items-center gap-2 cursor-pointer transition disabled:opacity-50"
                 >
                   {running ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Executing Live Request...</span>
+                      <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      <span>Executing...</span>
                     </>
                   ) : (
                     <>
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Run Live API Request</span>
+                      <span>Execute Live Request</span>
+                      <span aria-hidden>→</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* JSON Body Input */}
-              <div>
-                <div className="text-[11px] font-mono uppercase text-slate-400 mb-1.5">
-                  Request JSON Payload (Editable)
+              {/* Request Payload Editor */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#a5a5a0]">
+                  <span>Request JSON Body (Editable)</span>
+                  <span>JSON format</span>
                 </div>
                 <textarea
                   rows={5}
                   value={requestBody}
                   onChange={(e) => setRequestBody(e.target.value)}
-                  className="w-full p-4 rounded-2xl bg-slate-900 border border-slate-800 font-mono text-xs text-blue-200 focus:outline-none focus:border-blue-500"
+                  className="w-full p-4 rounded-2xl bg-[#18181b] border border-[#2a2a2c] font-mono text-xs text-[#f5d547] focus:outline-none focus:border-accent transition leading-relaxed resize-y"
                 />
               </div>
 
-              {/* cURL Snippet */}
-              <div>
-                <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1.5">
-                  <span>cURL Command</span>
+              {/* cURL Command Snippet */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#a5a5a0]">
+                  <span>Equivalent cURL Snippet</span>
                   <button
                     type="button"
                     onClick={handleCopyCurl}
-                    className="text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 cursor-pointer"
+                    className="hover:text-white inline-flex items-center gap-1 cursor-pointer transition text-accent font-bold"
                   >
-                    {copied ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span>{copied ? "Copied!" : "Copy cURL"}</span>
+                    <span>{copiedCurl ? "✓ Copied" : "Copy cURL"}</span>
                   </button>
                 </div>
-                <pre className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap">
+                <pre className="p-4 rounded-2xl bg-[#18181b] border border-[#2a2a2c] font-mono text-[11px] text-[#a5a5a0] overflow-x-auto whitespace-pre-wrap leading-relaxed">
                   {curlSnippet}
                 </pre>
               </div>
 
-              {/* Live Response Output */}
-              <div>
-                <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-400 mb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <Code2 className="w-3.5 h-3.5 text-emerald-400" /> Live JSON
-                    Response
+              {/* Response Panel */}
+              <div className="space-y-2 pt-2 border-t border-[#2a2a2c]">
+                <div className="flex items-center justify-between text-[11px] font-mono uppercase text-[#a5a5a0]">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>Response Output</span>
                   </span>
                   {latencyMs !== null && (
                     <span className="text-emerald-400 font-bold">
-                      200 OK • {latencyMs}ms
+                      200 OK • {latencyMs}ms latency
                     </span>
                   )}
                 </div>
-                <pre className="p-4 rounded-2xl bg-slate-900 border border-slate-800 font-mono text-xs text-emerald-300 max-h-96 overflow-y-auto whitespace-pre-wrap">
+                <pre className="p-4 rounded-2xl bg-[#18181b] border border-[#2a2a2c] font-mono text-xs text-emerald-300 max-h-[380px] overflow-y-auto whitespace-pre-wrap leading-relaxed">
                   {responseJson}
                 </pre>
               </div>
             </div>
+
+            {/* Quick Integration Guides */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-card border border-line rounded-2xl p-5 sp-card-shadow space-y-2">
+                <div className="sp-eyebrow text-cobalt">JavaScript / TypeScript</div>
+                <p className="text-xs text-mute leading-relaxed">
+                  Install via npm or use native fetch in Next.js, Node 20+, or Edge runtimes with zero external dependencies.
+                </p>
+              </div>
+              <div className="bg-card border border-line rounded-2xl p-5 sp-card-shadow space-y-2">
+                <div className="sp-eyebrow text-accent">Python / FastAPI</div>
+                <p className="text-xs text-mute leading-relaxed">
+                  Call our endpoints asynchronously via httpx or requests with built-in Pydantic model validation.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>

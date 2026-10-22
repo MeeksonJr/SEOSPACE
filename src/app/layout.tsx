@@ -1,20 +1,31 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  Instrument_Sans,
+  JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { SiteNavigatorDrawer } from "@/components/ui/SiteNavigatorDrawer";
 
-const inter = Inter({
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--f-display",
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
+const body = Instrument_Sans({
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--f-body",
   display: "swap",
 });
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--f-mono",
+  display: "swap",
+});
+
+const themeBootScript = `try{var t=localStorage.getItem('seospace_theme_mode');document.documentElement.dataset.spTheme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.spTheme='light'}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://seospace-kappa.vercel.app"),
@@ -93,8 +104,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
-      <body className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
+      <body className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 antialiased selection:bg-[#FF4D14] selection:text-[#141413]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
