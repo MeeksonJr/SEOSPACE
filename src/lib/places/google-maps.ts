@@ -234,9 +234,21 @@ async function resolveGoogleMapsUrl(inputUrl: string): Promise<{
   return { resolvedUrl: current, pageHtml };
 }
 
+function formatUsPhone(raw: string): string {
+  if (!raw) return "";
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  return raw;
+}
+
 /**
  * Reverse geocodes coordinates via OpenStreetMap Nominatim ($0 cost, 100% free)
- * to extract the real business name, street address, city, state, and zip code.
+ * to extract the real business name, street address, city, state, zip code, phone, and website.
  */
 async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<{
   name?: string;
@@ -245,9 +257,11 @@ async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<{
   state: string;
   stateCode?: string;
   zip: string;
+  phone?: string;
+  website?: string;
 } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&namedetails=1&addressdetails=1`;
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&namedetails=1&addressdetails=1&extratags=1`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "TrustPulseAI-ReputationEngine/1.0 (https://trustpulse-ai.vercel.app)",
@@ -258,6 +272,7 @@ async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<{
     const data = await res.json();
     if (data && data.address) {
       const a = data.address;
+      const extra = data.extratags || {};
       const road = a.road || a.pedestrian || a.street || "";
       const houseNumber = a.house_number ? `${a.house_number} ` : "";
       const street = road ? `${houseNumber}${road}`.trim() : "";
@@ -273,6 +288,10 @@ async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<{
 
       const detectedName = data.namedetails?.name || data.name || a.amenity || a.shop || a.building;
 
+      const rawPhone = extra.phone || extra["contact:phone"] || "";
+      const phone = rawPhone ? formatUsPhone(rawPhone) : undefined;
+      const website = extra.website || extra["contact:website"] || undefined;
+
       const formattedParts = [street, city, state, zip].filter(Boolean);
       return {
         name: detectedName,
@@ -281,6 +300,8 @@ async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<{
         state,
         stateCode,
         zip,
+        phone,
+        website,
       };
     }
   } catch {
@@ -300,11 +321,13 @@ async function searchNominatimPlace(query: string): Promise<{
   state: string;
   stateCode?: string;
   zip: string;
+  phone?: string;
+  website?: string;
   lat?: number;
   lng?: number;
 } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&namedetails=1&limit=1`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&namedetails=1&extratags=1&limit=1`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "TrustPulseAI-ReputationEngine/1.0 (https://trustpulse-ai.vercel.app)",
@@ -316,6 +339,7 @@ async function searchNominatimPlace(query: string): Promise<{
     if (Array.isArray(list) && list.length > 0) {
       const item = list[0];
       const a = item.address || {};
+      const extra = item.extratags || {};
       const road = a.road || a.pedestrian || a.street || "";
       const houseNumber = a.house_number ? `${a.house_number} ` : "";
       const street = road ? `${houseNumber}${road}`.trim() : "";
@@ -331,6 +355,10 @@ async function searchNominatimPlace(query: string): Promise<{
 
       const detectedName = item.namedetails?.name || item.name || a.amenity || a.shop || a.building;
 
+      const rawPhone = extra.phone || extra["contact:phone"] || "";
+      const phone = rawPhone ? formatUsPhone(rawPhone) : undefined;
+      const website = extra.website || extra["contact:website"] || undefined;
+
       const formattedParts = [street, city, state, zip].filter(Boolean);
       return {
         name: detectedName,
@@ -339,6 +367,8 @@ async function searchNominatimPlace(query: string): Promise<{
         state,
         stateCode,
         zip,
+        phone,
+        website,
         lat: item.lat ? parseFloat(item.lat) : undefined,
         lng: item.lon ? parseFloat(item.lon) : undefined,
       };
@@ -379,6 +409,8 @@ export async function lookupGoogleBusiness(
   let detectedCid = "";
   let detectedPlaceId = "";
   let detectedStateCode = "";
+  let detectedPhone = "";
+  let detectedWebsite = "";
   let lat: number | null = null;
   let lng: number | null = null;
 
@@ -389,6 +421,16 @@ export async function lookupGoogleBusiness(
       // 1. CID & Place ID
       if (parsed.searchParams.get("cid")) detectedCid = parsed.searchParams.get("cid")!;
       if (parsed.searchParams.get("ftid")) detectedPlaceId = parsed.searchParams.get("ftid")!;
+
+      // Check for Hex CID in URL path/params: e.g. !1s0x89ba99d290d669f5:0xc1a201cc1eb80eba
+      const hexMatch = resolvedUrl.match(/!1s0x[0-9a-f]+:(0x[0-9a-f]+)/i);
+      if (hexMatch && !detectedCid) {
+        try {
+          detectedCid = BigInt(hexMatch[1]).toString();
+        } catch {
+          //
+        }
+      }
 
       // 2. Query param ?q= or ?query= or ?daddr=
       const q = parsed.searchParams.get("q") || parsed.searchParams.get("query") || parsed.searchParams.get("daddr");
@@ -422,10 +464,11 @@ export async function lookupGoogleBusiness(
       }
 
       // 4. Extract Coordinates from URL
-      const coordMatch =
-        resolvedUrl.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/) ||
-        resolvedUrl.match(/!3d(-?\d+(?:\.\d+)?)[^!]*!4d(-?\d+(?:\.\d+)?)/) ||
-        resolvedUrl.match(/[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      // CRITICAL: Prioritize !3d...!4d... (exact business pin) over @lat,lng (map viewport camera center)
+      const pinMatch = resolvedUrl.match(/!3d(-?\d+(?:\.\d+)?)[^!]*!4d(-?\d+(?:\.\d+)?)/);
+      const llMatch = resolvedUrl.match(/[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      const viewMatch = resolvedUrl.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      const coordMatch = pinMatch || llMatch || viewMatch;
       if (coordMatch) {
         lat = parseFloat(coordMatch[1]);
         lng = parseFloat(coordMatch[2]);
@@ -442,6 +485,8 @@ export async function lookupGoogleBusiness(
       detectedCity = nom.city;
       detectedState = nom.state;
       if (nom.stateCode) detectedStateCode = nom.stateCode;
+      if (nom.phone) detectedPhone = nom.phone;
+      if (nom.website) detectedWebsite = nom.website;
       if (nom.lat && nom.lng) {
         lat = nom.lat;
         lng = nom.lng;
@@ -463,7 +508,7 @@ export async function lookupGoogleBusiness(
     }
   }
 
-  // If coordinates exist, reverse-geocode to find the real address, state, and business name
+  // If coordinates exist, reverse-geocode to find the real address, state, business name, phone, and website
   if (lat && lng) {
     const geo = await reverseGeocodeCoordinates(lat, lng);
     if (geo) {
@@ -476,6 +521,8 @@ export async function lookupGoogleBusiness(
       if (geo.city && !detectedCity) detectedCity = geo.city;
       if (geo.state && !detectedState) detectedState = geo.state;
       if (geo.stateCode) detectedStateCode = geo.stateCode;
+      if (geo.phone && !detectedPhone) detectedPhone = geo.phone;
+      if (geo.website && !detectedWebsite) detectedWebsite = geo.website;
     }
   }
 
@@ -487,6 +534,8 @@ export async function lookupGoogleBusiness(
       if (!detectedCity) detectedCity = nom2.city;
       if (!detectedState) detectedState = nom2.state;
       if (nom2.stateCode) detectedStateCode = nom2.stateCode;
+      if (nom2.phone && !detectedPhone) detectedPhone = nom2.phone;
+      if (nom2.website && !detectedWebsite) detectedWebsite = nom2.website;
     }
   }
 
@@ -554,6 +603,7 @@ export async function lookupGoogleBusiness(
   }
   const areaCode = (resolvedStateCode && STATE_AREA_CODES[resolvedStateCode]) ? STATE_AREA_CODES[resolvedStateCode] : "415";
   const generatedPhone = `(${areaCode}) ${Math.floor(Math.random() * 899 + 100)}-${Math.floor(Math.random() * 8999 + 1000)}`;
+  const finalPhone = detectedPhone || generatedPhone;
 
   const slug = slugify(detectedName);
 
@@ -658,7 +708,8 @@ export async function lookupGoogleBusiness(
     category: matchedSector.category,
     brandColor: matchedSector.brandColor,
     address: detectedAddress,
-    phone: generatedPhone,
+    phone: finalPhone,
+    website: detectedWebsite || undefined,
     googleReviewUrl,
     rating: Number(randomRating),
     totalReviews: randomCount,

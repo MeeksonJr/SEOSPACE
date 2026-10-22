@@ -685,18 +685,52 @@ export default function AgencyHubPage() {
                               <Phone className="w-3 h-3 text-slate-400" />
                               <span>{detectedResult.phone}</span>
                             </span>
+                            {detectedResult.website && (
+                              <span className="flex items-center gap-1">
+                                <Globe className="w-3 h-3 text-slate-400" />
+                                <a
+                                  href={detectedResult.website}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-emerald-700 hover:underline"
+                                >
+                                  {detectedResult.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                                </a>
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
 
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-mono font-black text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg block">
-                          ★ {detectedResult.rating}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono block mt-1">
-                          {detectedResult.totalReviews} Google Reviews
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingDetected(true)}
+                          title="Click to edit star rating & review count"
+                          className="text-right group cursor-pointer"
+                        >
+                          <span className="text-xs font-mono font-black text-amber-500 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg block group-hover:border-amber-400 transition-colors">
+                            ★ {detectedResult.rating}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono block mt-1 group-hover:text-emerald-700 transition-colors">
+                            {detectedResult.totalReviews} Google Reviews ✎
+                          </span>
+                        </button>
                       </div>
+                    </div>
+
+                    {/* Quick Helper Banner */}
+                    <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between flex-wrap gap-2">
+                      <span>
+                        📍 Verified address, phone &amp; direct review link auto-detected from place pin.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingDetected(!isEditingDetected)}
+                        className="text-emerald-700 hover:underline font-semibold cursor-pointer shrink-0"
+                      >
+                        {isEditingDetected ? "Hide Editor ▲" : "Adjust Rating & Reviews (✎) ▼"}
+                      </button>
                     </div>
 
                     {/* INLINE EDIT ACCORDION */}
@@ -751,6 +785,34 @@ export default function AgencyHubPage() {
 
                           <div>
                             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Google Star Rating (1.0 - 5.0)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="1"
+                              max="5"
+                              value={detectedResult.rating}
+                              onChange={(e) => handleUpdateDetectedField("rating", parseFloat(e.target.value) || 5)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Total Reviews Count
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={detectedResult.totalReviews}
+                              onChange={(e) => handleUpdateDetectedField("totalReviews", parseInt(e.target.value, 10) || 0)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                               Local Phone Number
                             </label>
                             <input
@@ -762,6 +824,19 @@ export default function AgencyHubPage() {
                           </div>
 
                           <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Official Website URL
+                            </label>
+                            <input
+                              type="text"
+                              value={detectedResult.website || ""}
+                              placeholder="e.g. https://www.mjstavern.com"
+                              onChange={(e) => handleUpdateDetectedField("website", e.target.value)}
+                              className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 font-medium"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
                             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                               Funnel Slug Preview
                             </label>
