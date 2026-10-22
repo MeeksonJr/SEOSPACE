@@ -176,3 +176,18 @@ export interface CapturedLead {
   createdAt: string;
   status: "New" | "Contacted" | "Qualified" | "Closed";
 }
+
+export interface SavedArticle {
+  id: string;
+  title: string;
+  focusKeyword: string;
+  keywords: string[];
+  metaDescription: string;
+  content: string;
+  updatedAt: string;
+  linkedDomain?: string;
+  linkedAuditId?: string;
+  seoScore?: number;
+  status?: string;
+}
+

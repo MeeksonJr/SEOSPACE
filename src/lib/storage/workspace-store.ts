@@ -1,8 +1,14 @@
 "use client";
 
-import { AuditReport, CapturedLead, WhiteLabelConfig } from "@/types/audit";
+import {
+  AuditReport,
+  CapturedLead,
+  SavedArticle,
+  WhiteLabelConfig,
+} from "@/types/audit";
 import {
   DEFAULT_WHITELABEL_CONFIG,
+  INITIAL_ARTICLES,
   SAMPLE_AUDITS,
   SAMPLE_CAPTURED_LEADS,
 } from "@/lib/sample-audits";
@@ -52,20 +58,7 @@ export interface ArticleGradeBreakdown {
   checks: ArticleCheckResult[];
 }
 
-export interface SavedArticle {
-  id: string;
-  title: string;
-  focusKeyword: string;
-  keywords: string[];
-  metaDescription: string;
-  content: string;
-  updatedAt: string;
-  linkedDomain?: string;
-  linkedAuditId?: string;
-  seoScore?: number;
-  status?: string;
-}
-
+export type { SavedArticle };
 export type ArticleDraft = SavedArticle;
 
 export function gradeArticleReal(
@@ -282,78 +275,7 @@ export const DEFAULT_DEMO_USER: WorkspaceUser = {
   joined: "Oct 2026",
 };
 
-export const INITIAL_ARTICLES: SavedArticle[] = [
-  {
-    id: "art-voiceone-guide",
-    title:
-      "Virtual Receptionist Answering Service: 24/7 Live Call Guide",
-    focusKeyword: "Virtual Receptionist Answering Service",
-    keywords: [
-      "Virtual Receptionist Answering Service",
-      "24/7 Live Answering",
-      "Appointment Scheduling",
-    ],
-    metaDescription:
-      "Discover how a 24/7 Virtual Receptionist Answering Service captures every client call, books appointments automatically, and boosts small business revenue.",
-    updatedAt: "Just now",
-    linkedDomain: "voice-one.com",
-    linkedAuditId: "voice-one-com",
-    content: `Why Every Growing Business Needs a 24/7 Virtual Receptionist Answering Service
-
-Every missed phone call represents a high-intent customer calling your competitor next. Over 67% of callers hang up when routed to a generic voicemail box. Implementing a dedicated Virtual Receptionist Answering Service ensures that every prospect is greeted by a live, trained professional 24 hours a day, 365 days a year.
-
-How Live Call Answering & Appointment Scheduling Works
-
-Modern businesses don't need expensive in-house front-desk overhead to deliver five-star caller experiences. A Virtual Receptionist Answering Service integrates directly with your existing phone number and calendar software:
-
-• Instant 24/7 Live Call Pickup: Eliminate hold times and voicemail drop-offs during peak hours, nights, weekends, and holidays.
-• Custom Call Scripting & Lead Qualification: Receptionists follow your exact qualification criteria so urgent leads are transferred immediately.
-• Real-Time Calendar & Appointment Booking: Prospects are booked directly into your CRM or scheduling calendar while on the call.
-• Bilingual Receptionists & SMS Follow-Ups: Serve diverse customer bases and send instant confirmation texts after every call.
-
-Fixing Common Website Conversion & SEO Bottlenecks
-
-When prospects search for a Virtual Receptionist Answering Service online, your landing page must load fast, work seamlessly on mobile devices without viewport zoom locks, and display transparent pricing and trust signals above the fold. Pairing high-intent landing page copy with a clean <title> tag under 60 characters increases organic search click-through rates by 22.4%.
-
-Key Takeaways for Service Businesses
-
-• Audit your call volume to identify peak missed-call windows.
-• Replace voicemail routing with a live Virtual Receptionist Answering Service.
-• Track cost-per-booked-appointment across organic search and local listings.`,
-  },
-  {
-    id: "art-1",
-    title:
-      "Linkable alternative: Go-To-Market Strategy for AI Project Tools",
-    focusKeyword: "Linkable alternative",
-    keywords: ["Linkable alternative", "Technology", "Development"],
-    metaDescription:
-      "Discover the complete Linkable alternative Go-To-Market strategy for SMBs and agencies using AI-assisted project management workflows.",
-    updatedAt: "25 mins ago",
-    linkedDomain: "linear.app",
-    linkedAuditId: "linear-app",
-    content: `Executive Summary: Choosing a Modern Linkable alternative
-
-Small businesses don't need another complicated "work OS." They need a calm, AI-assisted workspace that saves hours, reduces follow-ups, and makes projects visibly move. Adopting a purpose-built Linkable alternative positions your team with automation where it matters and clarity everywhere else. Below you'll find target audience analysis, positioning, and a channel mix with timelines, messages, and KPIs.
-
-Target Audience Analysis & Buyer Segments
-
-1. Segments (by firm size & work style)
-• Micro teams (1–10 people): Agencies, boutiques, freelancers who collaborate; legacy tools feel "too heavy" compared to a streamlined Linkable alternative.
-• Growing small businesses (11–50): Owners + ops managers juggling delivery, hiring, and sales; need visibility and fewer status meetings.
-• Non-technical SMBs: Construction/home services, marketing/creative shops, legal/accounting, clinics—want simple setup and templated workflows.
-
-2. Primary Personas & Value Propositions
-• Owner Olivia (5–25 ppl): Wears sales + ops hats. Pain: status chaos, chasing updates, late projects. Value: 1-page clarity, fewer meetings, faster cash flow.
-• Ops Manager Omar (15–50 ppl): Coordinates people & vendors. Pain: scattered tools, manual reporting. Value: automated reports, risk alerts, smooth handoffs.
-• Agency PM Aisha (3–20 ppl): Client delivery + profitability. Pain: scope creep, approvals, follow-ups. Value: AI summaries, client-ready status, reusable templates.
-
-Go-To-Market Channel Execution
-
-• Publish comparison guides targeting high-intent buyers searching for a Linkable alternative.
-• Embed interactive ROI calculators and free website diagnostic widgets to capture inbound leads.`,
-  },
-];
+export { INITIAL_ARTICLES };
 
 export function normalizeClientUrl(input: string): string {
   return (input || "")

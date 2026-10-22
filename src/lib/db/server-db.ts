@@ -5,14 +5,15 @@ import {
   AuditReport,
   CapturedLead,
   DomainComparisonRecord,
+  SavedArticle,
   WhiteLabelConfig,
 } from "@/types/audit";
 import {
   DEFAULT_WHITELABEL_CONFIG,
+  INITIAL_ARTICLES,
   SAMPLE_AUDITS,
   SAMPLE_CAPTURED_LEADS,
 } from "@/lib/sample-audits";
-import { INITIAL_ARTICLES, SavedArticle } from "@/lib/storage/workspace-store";
 import { getServerSupabaseAdmin } from "@/lib/supabase/client";
 
 const LOCAL_DATA_DIR = path.join(process.cwd(), ".data");

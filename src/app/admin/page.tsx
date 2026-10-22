@@ -33,6 +33,11 @@ interface SystemHealth {
   geminiLatencyMs: number;
   stripeConfigured: boolean;
   stripeAccountId: string;
+  supabaseConnected?: boolean;
+  supabaseLatencyMs?: number;
+  databaseEngine?: string;
+  dnsDohActive?: boolean;
+  waybackArchiveActive?: boolean;
   timestamp: string;
 }
 
@@ -281,12 +286,17 @@ export default function AdminPortalPage() {
             <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs">
-                <div className="font-bold text-slate-900">
-                  Supabase PostgreSQL &amp; RapidAPI
+                <div className="font-bold text-slate-900 flex items-center gap-2">
+                  <span>{health?.databaseEngine || "Supabase PostgreSQL"}</span>
+                  {health?.supabaseLatencyMs ? (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-200/70 text-emerald-800 font-mono">
+                      {health.supabaseLatencyMs}ms
+                    </span>
+                  ) : null}
                 </div>
                 <p className="text-slate-600 mt-0.5">
                   {totalAudits} audits, {totalArticles} articles, and{" "}
-                  {totalLeads} leads persisted in live Supabase PostgreSQL.
+                  {totalLeads} leads persisted with real-time RLS tenant isolation.
                 </p>
               </div>
             </div>
