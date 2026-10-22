@@ -36,14 +36,16 @@ export default function AgencyHubPage() {
   const totalClients = workspaces.length;
   const estimatedAgencyMRR = totalClients * 149;
 
-  const handleCreateClient = (e: React.FormEvent) => {
+  const handleCreateClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newClientName || !newClientSlug) return;
 
+    const cleanSlug = newClientSlug.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-");
+
     const newWs: Workspace = {
-      id: `ws-${newClientSlug}-${Date.now().toString(36)}`,
-      name: newClientName,
-      slug: newClientSlug.toLowerCase().replace(/\s+/g, "-"),
+      id: `ws-${cleanSlug}-${Date.now().toString(36)}`,
+      name: newClientName.trim(),
+      slug: cleanSlug,
       category: newClientCategory,
       brandColor: newClientColor,
       googleReviewUrl: newClientGoogleUrl,
@@ -57,11 +59,23 @@ export default function AgencyHubPage() {
       },
     };
 
+    // 1. Local update
     TrustPulseStore.saveWorkspace(newWs);
     setWorkspaces([...TrustPulseStore.getWorkspaces()]);
     setShowAddModal(false);
     setNewClientName("");
     setNewClientSlug("");
+
+    // 2. Server API sync
+    try {
+      await fetch("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newWs),
+      });
+    } catch (err) {
+      console.error("Failed to sync workspace to server:", err);
+    }
   };
 
   const handlePrintClientReport = (ws: Workspace) => {

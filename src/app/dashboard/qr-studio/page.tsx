@@ -27,8 +27,15 @@ export default function QRStudioPage() {
   const [color, setColor] = useState(ws.brandColor || "#059669");
   const [includeStars, setIncludeStars] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [origin, setOrigin] = useState("https://seospace-kappa.vercel.app");
 
-  const funnelUrl = `https://trustpulse-ai.vercel.app/r/${ws.slug}`;
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const funnelUrl = `${origin}/r/${ws.slug}`;
 
   // Generate SVG QR Code representation using pure SVG vectors (no external heavy library required)
   const qrSvgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(

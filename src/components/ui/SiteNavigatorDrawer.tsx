@@ -152,8 +152,20 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    heading: "Documentation, Security & Legal",
+    heading: "Documentation, Security & Tools",
     items: [
+      {
+        href: "/compare",
+        label: "Competitor Comparison Battlecard",
+        desc: "TrustPulse AI vs. Birdeye ($399/mo) vs. Podium ($449/mo)",
+        icon: Swords,
+      },
+      {
+        href: "/tools",
+        label: "Free Public Reputation Utilities",
+        desc: "QR stand maker, review sentiment tester & widget playground",
+        icon: Wrench,
+      },
       {
         href: "/docs",
         label: "REST API & Embed Documentation",

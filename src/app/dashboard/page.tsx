@@ -18,6 +18,8 @@ import {
   Building2,
   Sliders,
   Code2,
+  Plus,
+  X,
 } from "lucide-react";
 import { TrustPulseStore } from "@/lib/storage/trustpulse-store";
 import { Workspace, ReviewItem, PrivateFeedback } from "@/types/trustpulse";
@@ -27,8 +29,56 @@ export default function DashboardPage() {
   const [selectedWsId, setSelectedWsId] = useState<string>(workspaces[0]?.id || "ws-apex-dental");
 
   const currentWorkspace = workspaces.find((w) => w.id === selectedWsId) || workspaces[0];
-  const reviews = TrustPulseStore.getReviews(currentWorkspace?.id);
+  const [reviewsList, setReviewsList] = useState<ReviewItem[]>(
+    TrustPulseStore.getReviews(currentWorkspace?.id)
+  );
   const feedback = TrustPulseStore.getPrivateFeedback(currentWorkspace?.id);
+
+  // Add Review Modal State
+  const [showAddReviewModal, setShowAddReviewModal] = useState(false);
+  const [newAuthorName, setNewAuthorName] = useState("");
+  const [newAuthorRole, setNewAuthorRole] = useState("Verified Client");
+  const [newRating, setNewRating] = useState(5);
+  const [newReviewText, setNewReviewText] = useState("");
+  const [newPlatform, setNewPlatform] = useState<"google" | "trustpilot" | "direct">("google");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  React.useEffect(() => {
+    setReviewsList(TrustPulseStore.getReviews(currentWorkspace?.id));
+  }, [selectedWsId, currentWorkspace?.id]);
+
+  const handleAddReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAuthorName || !newReviewText) return;
+
+    setSubmittingReview(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId: currentWorkspace?.id,
+          authorName: newAuthorName.trim(),
+          authorRole: newAuthorRole.trim(),
+          rating: newRating,
+          reviewText: newReviewText.trim(),
+          platform: newPlatform,
+          isFeatured: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.review) {
+        setReviewsList((prev) => [data.review, ...prev]);
+        setShowAddReviewModal(false);
+        setNewAuthorName("");
+        setNewReviewText("");
+      }
+    } catch (err) {
+      console.error("Failed to add review:", err);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   // AI Reply Modal State
   const [activeReviewForAI, setActiveReviewForAI] = useState<ReviewItem | null>(null);
@@ -282,26 +332,36 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           {/* REVIEWS STREAM */}
           <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="font-bold text-base text-slate-900">
-                  Aggregated Customer Reviews ({reviews.length})
+                  Aggregated Customer Reviews ({reviewsList.length})
                 </h2>
                 <p className="text-xs text-slate-600 mt-0.5">
                   Streamed live to your embeddable widgets &amp; Wall of Love
                 </p>
               </div>
-              <Link
-                href="/dashboard/ai-replies"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Responder</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddReviewModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 font-semibold text-xs transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Review</span>
+                </button>
+                <Link
+                  href="/dashboard/ai-replies"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>AI Responder</span>
+                </Link>
+              </div>
             </div>
 
             <div className="divide-y divide-slate-100">
-              {reviews.map((rev) => (
+              {reviewsList.map((rev) => (
                 <div key={rev.id} className="p-5 space-y-3 hover:bg-slate-50/60 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -417,6 +477,127 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ADD VERIFIED REVIEW MODAL */}
+      {showAddReviewModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">
+                  Add Verified Review
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddReviewModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddReview} className="space-y-4 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Customer Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newAuthorName}
+                    onChange={(e) => setNewAuthorName(e.target.value)}
+                    placeholder="e.g. Dr. Aris Thorne"
+                    className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Role / Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={newAuthorRole}
+                    onChange={(e) => setNewAuthorRole(e.target.value)}
+                    placeholder="e.g. Verified Patient"
+                    className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Rating (Stars)
+                  </label>
+                  <select
+                    value={newRating}
+                    onChange={(e) => setNewRating(Number(e.target.value))}
+                    className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 font-semibold"
+                  >
+                    <option value={5}>★★★★★ (5 Stars)</option>
+                    <option value={4}>★★★★☆ (4 Stars)</option>
+                    <option value={3}>★★★☆☆ (3 Stars)</option>
+                    <option value={2}>★★☆☆☆ (2 Stars)</option>
+                    <option value={1}>★☆☆☆☆ (1 Star)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Platform Source
+                  </label>
+                  <select
+                    value={newPlatform}
+                    onChange={(e) =>
+                      setNewPlatform(e.target.value as "google" | "trustpilot" | "direct")
+                    }
+                    className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 font-semibold"
+                  >
+                    <option value="google">Google Maps</option>
+                    <option value="trustpilot">Trustpilot</option>
+                    <option value="direct">Direct In-Person</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Customer Review Praise *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={newReviewText}
+                  onChange={(e) => setNewReviewText(e.target.value)}
+                  placeholder="Paste or write the customer review..."
+                  className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-white p-3 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddReviewModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                >
+                  {submittingReview ? "Saving Review..." : "Add to Live Feeds"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* AI REPLY MODAL */}
       {activeReviewForAI && (

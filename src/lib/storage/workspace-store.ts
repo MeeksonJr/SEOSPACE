@@ -266,9 +266,9 @@ export function gradeArticleReal(
 }
 
 export const DEFAULT_DEMO_USER: WorkspaceUser = {
-  id: "usr-owner",
-  name: "Zaim Maulana",
-  email: "zaim@seospace.io",
+  id: "usr-partner",
+  name: "TrustPulse Partner",
+  email: "partner@trustpulse.ai",
   plan: "agency",
   creditsUsed: 4,
   creditsLimit: 999,

@@ -22,6 +22,13 @@ import {
 export default function FreeReputationToolsPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
   const [activeTab, setActiveTab] = useState<"qr" | "sentiment" | "widget">("qr");
+  const [origin, setOrigin] = useState("https://seospace-kappa.vercel.app");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   // Tool 1: Free QR Stand Generator State
   const [bizName, setBizName] = useState("Apex Dental Studio");
@@ -71,7 +78,7 @@ export default function FreeReputationToolsPage() {
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="max-w-5xl mx-auto space-y-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
@@ -276,13 +283,13 @@ export default function FreeReputationToolsPage() {
 
               <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-slate-100 font-mono text-xs overflow-x-auto flex items-center justify-between gap-4">
                 <code>
-                  &lt;script src=&quot;https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
+                  &lt;script src=&quot;{origin}/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
                 </code>
                 <button
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      '<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>'
+                      `<script src="${origin}/api/widget/script?id=widget-apex-toasts" defer></script>`
                     );
                     setCopiedEmbed(true);
                     setTimeout(() => setCopiedEmbed(false), 2000);

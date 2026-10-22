@@ -90,6 +90,13 @@ export default function DocsPage() {
   const [responseOutput, setResponseOutput] = useState<string>("// Click 'Execute Request' to test this endpoint live in your browser");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("https://seospace-kappa.vercel.app");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const handleSelectEndpoint = (ep: EndpointDef) => {
     setActiveEndpoint(ep);
@@ -123,7 +130,7 @@ export default function DocsPage() {
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(
-      `<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>`
+      `<script src="${origin}/api/widget/script?id=widget-apex-toasts" defer></script>`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -168,7 +175,7 @@ export default function DocsPage() {
               Drop this script into the &lt;head&gt; or &lt;body&gt; of Shopify, WordPress, Webflow, or Squarespace. Automatically initializes and renders floating toasts without any npm build step.
             </p>
             <div className="p-3.5 bg-slate-900 text-emerald-400 font-mono text-xs rounded-xl overflow-x-auto border border-slate-800">
-              &lt;script src=&quot;https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
+              &lt;script src=&quot;{origin}/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
             </div>
           </div>
 

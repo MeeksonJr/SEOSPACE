@@ -30,11 +30,27 @@ export default function WidgetStudioPage() {
   const [loopInterval, setLoopInterval] = useState<number>(6);
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
+  const [origin, setOrigin] = useState("https://seospace-kappa.vercel.app");
+  const [testToastActive, setTestToastActive] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const sampleReviews = TrustPulseStore.getReviews(ws?.id).filter((r) => r.rating >= minRating);
 
-  const scriptSnippet = `<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>`;
-  const iframeSnippet = `<iframe src="https://trustpulse-ai.vercel.app/embed/widget-apex-wall" width="100%" height="600" frameborder="0" loading="lazy"></iframe>`;
+  const widgetId = `widget-${ws?.slug || "apex-dental"}-${
+    widgetType === "toast_notification"
+      ? "toasts"
+      : widgetType === "floating_pill"
+      ? "badge"
+      : "wall"
+  }`;
+
+  const scriptSnippet = `<script src="${origin}/api/widget/script?id=${widgetId}" defer></script>`;
+  const iframeSnippet = `<iframe src="${origin}/embed/${widgetId}" width="100%" height="600" frameborder="0" loading="lazy"></iframe>`;
 
   const copyScript = () => {
     navigator.clipboard.writeText(scriptSnippet);
@@ -46,6 +62,11 @@ export default function WidgetStudioPage() {
     navigator.clipboard.writeText(iframeSnippet);
     setCopiedIframe(true);
     setTimeout(() => setCopiedIframe(false), 2000);
+  };
+
+  const triggerLiveTestToast = () => {
+    setTestToastActive(true);
+    setTimeout(() => setTestToastActive(false), 5000);
   };
 
   return (
@@ -223,6 +244,15 @@ export default function WidgetStudioPage() {
 
           {/* Embed Snippets Code Box */}
           <div className="pt-4 border-t border-slate-200 space-y-4">
+            <button
+              type="button"
+              onClick={triggerLiveTestToast}
+              className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <span>⚡ Test Live Toast on this Screen</span>
+            </button>
+
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-slate-800">
@@ -231,7 +261,7 @@ export default function WidgetStudioPage() {
                 <button
                   type="button"
                   onClick={copyScript}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
                 >
                   {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedScript ? "Copied!" : "Copy"}</span>
@@ -250,7 +280,7 @@ export default function WidgetStudioPage() {
                 <button
                   type="button"
                   onClick={copyIframe}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
                 >
                   {copiedIframe ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedIframe ? "Copied!" : "Copy"}</span>
@@ -396,6 +426,53 @@ export default function WidgetStudioPage() {
           </div>
         </div>
       </div>
+
+      {/* Floating Live Test Toast Overlay (Triggers when "Test Live Toast" is clicked) */}
+      {testToastActive && (
+        <div
+          className={`fixed z-50 transition-all duration-500 animate-slide-up ${
+            position === "bottom_right" ? "bottom-6 right-6" : "bottom-6 left-6"
+          }`}
+        >
+          <div className="bg-slate-950/95 backdrop-blur-md text-white border border-white/15 rounded-2xl p-4 shadow-2xl max-w-sm flex gap-3.5 items-start ring-1 ring-emerald-500/30">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow"
+              style={{ backgroundColor: ws.brandColor || "#10b981" }}
+            >
+              {sampleReviews[0]?.authorName?.charAt(0) || "S"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold text-xs truncate">
+                  {sampleReviews[0]?.authorName || "Verified Patient"}
+                </span>
+                <div className="flex text-amber-400">
+                  {Array.from({ length: sampleReviews[0]?.rating || 5 }).map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
+                &ldquo;{sampleReviews[0]?.reviewText || "Outstanding experience with our team!"}&rdquo;
+              </p>
+              <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Verified Social Proof
+                </span>
+                <span className="text-slate-500">Live Test</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTestToastActive(false)}
+              className="text-slate-400 hover:text-white text-xs cursor-pointer ml-1"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

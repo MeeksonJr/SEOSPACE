@@ -344,6 +344,8 @@ const FOOT_COLS: Array<{
   {
     title: "Company & Legal",
     links: [
+      { href: "/compare", label: "Competitor Battlecard" },
+      { href: "/tools", label: "Free Reputation Utilities" },
       { href: "/security", label: "Security & SOC2 Readiness" },
       { href: "/legal/privacy", label: "Privacy Policy & GDPR" },
       { href: "/legal/terms", label: "Terms of Service" },
