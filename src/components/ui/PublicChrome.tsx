@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
+import { MotionEffects } from "@/components/ui/Motion";
 import {
   OpenSiteNavigatorButton,
   triggerSiteNavigator,
@@ -275,6 +276,8 @@ export function PublicFooter({
   onToggleTheme?: () => void;
 }) {
   return (
+    <>
+    <MotionEffects isDark={isDark} />
     <footer
       className={`border-t transition-colors duration-300 mt-auto ${
         isDark
@@ -651,5 +654,6 @@ export function PublicFooter({
         </div>
       </div>
     </footer>
+    </>
   );
 }

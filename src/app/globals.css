@@ -4,6 +4,13 @@
   :root {
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-serif: "Instrument Serif", Georgia, Cambria, "Times New Roman", serif;
+
+    /* Seospace "Aurora Ink" palette: deep ink + indigo/violet/cyan aurora + emerald proof accent */
+    --sp-indigo: 99 102 241;
+    --sp-violet: 168 85 247;
+    --sp-cyan: 34 211 238;
+    --sp-emerald: 16 185 129;
+    --sp-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   body {
@@ -11,6 +18,10 @@
     background-color: #f8fafc;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -33,9 +44,189 @@
     linear-gradient(to bottom, rgba(30, 41, 59, 0.55) 1px, transparent 1px);
 }
 
+/* ============================================================
+   AURORA INK DESIGN SYSTEM (public pages)
+   ============================================================ */
+
+/* Ambient aurora overlay, fixed above page backgrounds, never blocks clicks */
+.sp-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sp-aurora::before,
+.sp-aurora::after,
+.sp-aurora > i {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+}
+.sp-aurora::before {
+  width: 46vw; height: 46vw; min-width: 340px; min-height: 340px;
+  top: -14vw; left: -10vw;
+  background: radial-gradient(circle, rgb(var(--sp-indigo) / 0.55), transparent 65%);
+  animation: sp-drift-a 22s ease-in-out infinite alternate;
+}
+.sp-aurora::after {
+  width: 40vw; height: 40vw; min-width: 300px; min-height: 300px;
+  top: 10vh; right: -12vw;
+  background: radial-gradient(circle, rgb(var(--sp-violet) / 0.5), transparent 65%);
+  animation: sp-drift-b 26s ease-in-out infinite alternate;
+}
+.sp-aurora > i {
+  width: 34vw; height: 34vw; min-width: 260px; min-height: 260px;
+  bottom: -12vw; left: 28vw;
+  background: radial-gradient(circle, rgb(var(--sp-cyan) / 0.4), transparent 65%);
+  animation: sp-drift-c 30s ease-in-out infinite alternate;
+}
+html[data-sp-theme="light"] .sp-aurora { opacity: 0.16; }
+html[data-sp-theme="dark"] .sp-aurora { opacity: 0.2; mix-blend-mode: screen; }
+
+@keyframes sp-drift-a { to { transform: translate3d(8vw, 6vh, 0) scale(1.15); } }
+@keyframes sp-drift-b { to { transform: translate3d(-9vw, 10vh, 0) scale(1.1); } }
+@keyframes sp-drift-c { to { transform: translate3d(6vw, -8vh, 0) scale(1.2); } }
+
+/* Scroll progress bar */
+.sp-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 70;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, rgb(var(--sp-indigo)), rgb(var(--sp-violet)), rgb(var(--sp-cyan)));
+  box-shadow: 0 0 12px rgb(var(--sp-violet) / 0.7);
+  pointer-events: none;
+}
+
+/* Scroll reveal (class added by JS only, so content is never hidden without JS) */
+.sp-reveal {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.985);
+  transition:
+    opacity 0.8s var(--sp-ease) var(--sp-delay, 0ms),
+    transform 0.8s var(--sp-ease) var(--sp-delay, 0ms);
+  will-change: opacity, transform;
+}
+.sp-reveal.sp-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero entrance */
+@keyframes sp-fade-up {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: none; }
+}
+.sp-hero-in > * {
+  opacity: 0;
+  animation: sp-fade-up 0.9s var(--sp-ease) forwards;
+}
+.sp-hero-in > *:nth-child(1) { animation-delay: 0.05s; }
+.sp-hero-in > *:nth-child(2) { animation-delay: 0.18s; }
+.sp-hero-in > *:nth-child(3) { animation-delay: 0.3s; }
+.sp-hero-in > *:nth-child(4) { animation-delay: 0.42s; }
+.sp-hero-in > *:nth-child(5) { animation-delay: 0.54s; }
+
+/* Animated gradient headline text */
+.sp-gradient-text {
+  background-image: linear-gradient(110deg, #6366f1 0%, #a855f7 35%, #22d3ee 70%, #6366f1 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: sp-gradient-pan 8s linear infinite;
+}
+@keyframes sp-gradient-pan { to { background-position: 220% center; } }
+
+/* Premium card hover on public pages */
+body.sp-public :is(.rounded-2xl, .rounded-3xl).border {
+  transition:
+    transform 0.35s var(--sp-ease),
+    box-shadow 0.35s var(--sp-ease),
+    border-color 0.35s ease;
+}
+@media (hover: hover) {
+  body.sp-public :is(.rounded-2xl, .rounded-3xl).border:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--sp-indigo) / 0.55);
+    box-shadow: 0 18px 40px -18px rgb(var(--sp-indigo) / 0.45);
+  }
+  /* Never lift giant containers or form shells */
+  body.sp-public :is(form, pre, table, details, .sp-no-lift, .sp-no-lift *):is(.rounded-2xl, .rounded-3xl).border:hover,
+  body.sp-public .sp-no-lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Shine sweep on primary call-to-action buttons */
+body.sp-public :is(button, a)[class*="bg-blue-600"],
+body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"] {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+body.sp-public :is(button, a)[class*="bg-blue-600"]::after,
+body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+@media (hover: hover) {
+  body.sp-public :is(button, a)[class*="bg-blue-600"]:hover::after,
+  body.sp-public :is(button, a)[class*="bg-slate-950"][class*="text-white"]:hover::after {
+    transform: translateX(120%);
+    transition: transform 0.8s var(--sp-ease);
+  }
+}
+
+/* Marquee */
+.sp-marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.sp-marquee-track { display: flex; width: max-content; gap: 2.5rem; animation: sp-marquee 38s linear infinite; }
+.sp-marquee:hover .sp-marquee-track { animation-play-state: paused; }
+@keyframes sp-marquee { to { transform: translateX(-50%); } }
+
+/* Floating gentle motion */
+@keyframes sp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.sp-float { animation: sp-float 6s ease-in-out infinite; }
+
+/* Back to top */
+.sp-top {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 45;
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s var(--sp-ease);
+}
+.sp-top.sp-show { opacity: 1; transform: none; pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .sp-reveal { opacity: 1; transform: none; transition: none; }
+  .sp-hero-in > * { opacity: 1; animation: none; }
+  .sp-aurora::before, .sp-aurora::after, .sp-aurora > i,
+  .sp-gradient-text, .sp-marquee-track, .sp-float { animation: none; }
+}
+
 /* Print optimization for White-Label Agency PDF Export */
 @media print {
-  .no-print {
+  .no-print,
+  .sp-aurora,
+  .sp-progress,
+  .sp-top {
     display: none !important;
   }
   body {

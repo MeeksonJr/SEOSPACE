@@ -41,6 +41,7 @@ import {
   triggerSiteNavigator,
 } from "@/components/ui/SiteNavigatorDrawer";
 import { PublicFooter, usePublicTheme } from "@/components/ui/PublicChrome";
+import { TrustStrip } from "@/components/ui/Motion";
 import { PRICING_PLANS } from "@/lib/stripe/plans";
 import {
   findSavedAuditByUrl,
@@ -861,7 +862,7 @@ export default function LandingPage() {
         </header>
 
         {/* HERO CONTENT */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 relative z-10">
+        <section className="sp-hero-in max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 relative z-10">
           {/* 3-Column 5-Star Social Proof Row */}
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mb-8">
             {[
@@ -906,7 +907,7 @@ export default function LandingPage() {
               }`}
             >
               Your Always On AI <br />
-              SEO Growth Engine
+              <span className="sp-gradient-text">SEO Growth Engine</span>
             </h1>
             <p
               className={`mt-5 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed ${
@@ -1320,6 +1321,8 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+
+      <TrustStrip isDark={heroDark} />
 
       {/* SECTION 2: Everything You Need to Create Great Content & Audits */}
       <section
