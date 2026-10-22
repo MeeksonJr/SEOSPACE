@@ -17,6 +17,11 @@ import {
   ExternalLink,
   MessageSquareWarning,
   PlusCircle,
+  Send,
+  X,
+  FileText,
+  Inbox,
+  CheckCircle,
 } from "lucide-react";
 import { TrustPulseStore } from "@/lib/storage/trustpulse-store";
 import { PrivateFeedback, FeedbackStatus } from "@/types/trustpulse";
@@ -35,6 +40,23 @@ export default function ShieldInboxPage() {
   const [notesText, setNotesText] = useState("");
   const [savedSuccessId, setSavedSuccessId] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
+
+  // Email Test Modal State
+  const [testEmailModalOpen, setTestEmailModalOpen] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState("");
+  const [testEmailType, setTestEmailType] = useState<
+    "shield_alert" | "customer_apology" | "weekly_digest"
+  >("shield_alert");
+  const [selectedFeedbackForEmail, setSelectedFeedbackForEmail] = useState<PrivateFeedback | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailResult, setEmailResult] = useState<{
+    success: boolean;
+    messageId?: string;
+    simulated?: boolean;
+    configUsed?: string;
+    note?: string;
+    error?: string;
+  } | null>(null);
 
   // Sync feedback from API
   const fetchFreshFeedback = async (workspaceId: string) => {
@@ -113,12 +135,13 @@ export default function ShieldInboxPage() {
 
   const handleSimulateGrievance = async () => {
     setSimulating(true);
-    const mockNames = ["David Miller", "Elena Rostova", "Marcus Vance", "Chloe Bennett"];
+    const mockNames = ["David Miller", "Elena Rostova", "Marcus Vance", "Chloe Bennett", "Arthur Pendelton"];
     const mockGrievances = [
       "Front desk receptionist seemed rushed and didn't validate my parking ticket.",
       "Waiting room TV was playing loud news, and my appointment was delayed 15 minutes.",
       "Hygiene cleaning felt somewhat rushed compared to my previous appointment with Dr. Thorne.",
       "Pharmacy prescription was sent to the wrong branch, causing a 30-minute delay.",
+      "The anesthetic injection pinched more than usual and I was left in chair for 20 minutes without check-in.",
     ];
     const randomName = mockNames[Math.floor(Math.random() * mockNames.length)];
     const randomGrievance = mockGrievances[Math.floor(Math.random() * mockGrievances.length)];
@@ -133,7 +156,7 @@ export default function ShieldInboxPage() {
           rating: randomRating,
           customerName: randomName,
           customerEmail: `${randomName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
-          customerPhone: "(555) 234-5678",
+          customerPhone: "(512) 555-0144",
           grievanceText: randomGrievance,
         }),
       });
@@ -146,6 +169,45 @@ export default function ShieldInboxPage() {
       console.error(err);
     } finally {
       setSimulating(false);
+    }
+  };
+
+  const handleSendTestEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testEmailAddress || !testEmailAddress.includes("@")) return;
+
+    setSendingEmail(true);
+    setEmailResult(null);
+
+    try {
+      const res = await fetch("/api/email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: testEmailAddress,
+          templateType: testEmailType,
+          customData: {
+            businessName: ws.name,
+            brandColor: ws.brandColor,
+            rating: selectedFeedbackForEmail ? selectedFeedbackForEmail.rating : 2,
+            customerName: selectedFeedbackForEmail ? selectedFeedbackForEmail.customerName : "Marcus Vance (Test)",
+            customerPhone: selectedFeedbackForEmail ? selectedFeedbackForEmail.customerPhone : "(512) 555-0199",
+            grievanceText: selectedFeedbackForEmail
+              ? selectedFeedbackForEmail.grievanceText
+              : "Wait time was 25 minutes past appointment time and staff was rushed.",
+          },
+        }),
+      });
+
+      const data = await res.json();
+      setEmailResult(data);
+    } catch (err: unknown) {
+      setEmailResult({
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to connect to email API",
+      });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -174,6 +236,20 @@ export default function ShieldInboxPage() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Test Email Dispatch Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedFeedbackForEmail(null);
+              setEmailResult(null);
+              setTestEmailModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm"
+          >
+            <Send className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Send Test Alert Email</span>
+          </button>
+
           <button
             type="button"
             onClick={handleSimulateGrievance}
@@ -198,7 +274,7 @@ export default function ShieldInboxPage() {
             onChange={(e) => {
               setSelectedWsId(e.target.value);
             }}
-            className="text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none text-slate-800"
+            className="text-xs font-bold bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
@@ -211,219 +287,270 @@ export default function ShieldInboxPage() {
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
-        {/* Protection Impact Banner */}
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-950 via-slate-900 to-slate-950 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400 bg-rose-500/20 px-2.5 py-0.5 rounded-full">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Public Rating Protection Active
+        {/* Metric Cards Banner */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Intercepted Ratings
+              </p>
+              <p className="text-2xl font-black text-slate-900 mt-1">
+                {feedbackList.length}
+              </p>
+              <p className="text-[11px] text-rose-600 font-semibold mt-0.5">
+                Prevented from reaching Google
+              </p>
             </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              {feedbackList.length} Negative Public Reviews Successfully Shielded
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-              When dissatisfied customers rated 1 to 3 stars via{" "}
-              <Link
-                href={`/r/${ws.slug}`}
-                target="_blank"
-                className="underline text-rose-300 hover:text-white"
-              >
-                /r/{ws.slug}
-              </Link>
-              , TrustPulse diverted them to your private inbox. This protected {ws.name}&apos;s public 4.9+ Google rating.
-            </p>
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={`/r/${ws.slug}`}
-              target="_blank"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-all"
-            >
-              <span>Test Live Funnel</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-            <button
-              type="button"
-              onClick={handleSimulateGrievance}
-              disabled={simulating}
-              className="sm:hidden inline-flex items-center gap-1.5 text-xs font-bold text-white bg-rose-600 px-3.5 py-2.5 rounded-xl transition-all"
-            >
-              <span>Simulate Grievance</span>
-            </button>
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Needs Immediate Action
+              </p>
+              <p className="text-2xl font-black text-rose-600 mt-1">
+                {feedbackList.filter((f) => f.status === "new").length}
+              </p>
+              <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                Waiting for follow-up call
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Resolution Rate
+              </p>
+              <p className="text-2xl font-black text-emerald-600 mt-1">
+                {feedbackList.length > 0
+                  ? Math.round(
+                      (feedbackList.filter((f) => f.status === "resolved").length /
+                        feedbackList.length) *
+                        100
+                    )
+                  : 100}
+                %
+              </p>
+              <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">
+                Turned into happy advocates
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+                Public Rating Protected
+              </span>
+              <span className="text-xs bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+                Active Shield
+              </span>
+            </div>
+            <div className="mt-2">
+              <div className="text-3xl font-black text-white">4.94 ★</div>
+              <p className="text-xs text-slate-300 mt-1">
+                Without Shield, rating would drop to{" "}
+                <span className="text-rose-400 font-bold">4.41 ★</span>
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-3.5 rounded-2xl border border-slate-200">
-          <div className="flex items-center gap-1 text-xs font-semibold">
+        {/* Filter Bar & Quick Info */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold">
             {(["all", "new", "contacted", "resolved"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setFilter(tab)}
-                className={`px-3.5 py-1.5 rounded-xl capitalize transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg capitalize transition-all cursor-pointer ${
                   filter === tab
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                {tab}
-                {tab === "new" && (
-                  <span className="ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                    {feedbackList.filter((f) => f.status === "new").length}
-                  </span>
-                )}
+                {tab === "all" ? "All Interceptions" : tab}
+                <span className="ml-1.5 text-[10px] font-mono py-0.2 px-1.5 rounded-full bg-slate-200 text-slate-700">
+                  {tab === "all"
+                    ? feedbackList.length
+                    : feedbackList.filter((f) => f.status === tab).length}
+                </span>
               </button>
             ))}
           </div>
 
-          <span className="text-xs text-slate-500 font-medium">
-            Showing {filtered.length} of {feedbackList.length} records
-          </span>
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>
+              Google SMTP Dispatcher:{" "}
+              <strong className="text-slate-900">
+                Automatic Alert on 1-3★ Submission
+              </strong>
+            </span>
+          </div>
         </div>
 
-        {/* Feedback Records List */}
+        {/* Grievance Feed */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8 space-y-3">
-            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-600">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-slate-800 text-base">
-              No Feedback Under &quot;{filter}&quot; Filter
+            <h3 className="text-base font-bold text-slate-900">
+              No grievance records found in this view
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              All grievances under this filter are cleared. Click &quot;Simulate Incoming Grievance&quot; to test.
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              All intercepted ratings have been handled, or no reviews match this filter. Use
+              &ldquo;Simulate Incoming Grievance&rdquo; above to test how incoming ratings are processed.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {filtered.map((item) => {
-              const isEditingNotes = editingNotesId === item.id;
+              const isEditing = editingNotesId === item.id;
               const isSaved = savedSuccessId === item.id;
 
               return (
                 <div
                   key={item.id}
-                  className={`bg-white rounded-3xl border p-6 shadow-sm transition-all ${
+                  className={`bg-white rounded-2xl border transition-all p-5 shadow-sm hover:shadow-md ${
                     item.status === "new"
-                      ? "border-rose-300 ring-2 ring-rose-100"
+                      ? "border-rose-300 bg-rose-50/20"
                       : item.status === "contacted"
                       ? "border-amber-200"
-                      : "border-slate-200 opacity-90"
+                      : "border-slate-200"
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-100">
-                    {/* Customer info & rating */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="font-extrabold text-base text-slate-900">
-                          {item.customerName}
-                        </span>
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
-                          <span>{item.rating}★ Rated</span>
-                        </div>
-                        <span
-                          className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${
-                            item.status === "new"
-                              ? "bg-rose-100 text-rose-700"
-                              : item.status === "contacted"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-emerald-100 text-emerald-700"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    {/* Customer & Rating Column */}
+                    <div className="flex items-start gap-3.5">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
+                          item.rating <= 2
+                            ? "bg-rose-100 text-rose-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {item.rating}★
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <Mail className="w-3.5 h-3.5 text-slate-400" />
-                          <a href={`mailto:${item.customerEmail}`} className="hover:underline text-slate-700">
-                            {item.customerEmail}
-                          </a>
-                        </span>
-                        {item.customerPhone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3.5 h-3.5 text-slate-400" />
-                            <a href={`tel:${item.customerPhone}`} className="hover:underline text-slate-700">
-                              {item.customerPhone}
-                            </a>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-slate-900 text-sm">{item.customerName}</h4>
+                          <span
+                            className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${
+                              item.status === "new"
+                                ? "bg-rose-100 text-rose-700"
+                                : item.status === "contacted"
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {item.status}
                           </span>
-                        )}
-                        <span className="flex items-center gap-1 text-slate-400">
-                          <Clock className="w-3.5 h-3.5" />
-                          {new Date(item.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(item.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+
+                        {/* Contact details */}
+                        <div className="flex items-center gap-4 text-xs text-slate-500 mt-1.5 flex-wrap">
+                          <a
+                            href={`mailto:${item.customerEmail}`}
+                            className="inline-flex items-center gap-1 hover:text-emerald-700 transition-colors"
+                          >
+                            <Mail className="w-3 h-3" />
+                            <span>{item.customerEmail}</span>
+                          </a>
+                          {item.customerPhone && (
+                            <a
+                              href={`tel:${item.customerPhone}`}
+                              className="inline-flex items-center gap-1 hover:text-emerald-700 transition-colors"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>{item.customerPhone}</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Status Action Buttons */}
-                    <div className="flex items-center gap-1.5">
+                    {/* Action buttons & Status selector */}
+                    <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+                      {/* Send Test Email specifically with this grievance */}
                       <button
                         type="button"
-                        onClick={() => handleStatusChange(item.id, "new")}
-                        className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
-                          item.status === "new"
-                            ? "bg-rose-600 text-white border-rose-600"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                        }`}
+                        onClick={() => {
+                          setSelectedFeedbackForEmail(item);
+                          setTestEmailType("shield_alert");
+                          setEmailResult(null);
+                          setTestEmailModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors"
+                        title="Send this exact grievance alert to your inbox"
                       >
-                        New
+                        <Send className="w-3 h-3 text-emerald-600" />
+                        <span>Email Alert to Me</span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(item.id, "contacted")}
-                        className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
-                          item.status === "contacted"
-                            ? "bg-amber-500 text-white border-amber-500"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                        }`}
+
+                      <select
+                        value={item.status}
+                        onChange={(e) =>
+                          handleStatusChange(item.id, e.target.value as FeedbackStatus)
+                        }
+                        className="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                       >
-                        Contacted
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(item.id, "resolved")}
-                        className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
-                          item.status === "resolved"
-                            ? "bg-emerald-600 text-white border-emerald-600"
-                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                        }`}
-                      >
-                        Resolved ✓
-                      </button>
+                        <option value="new">Mark New (Unread)</option>
+                        <option value="contacted">Mark Contacted</option>
+                        <option value="resolved">Mark Resolved</option>
+                      </select>
+
+                      {item.customerPhone && (
+                        <a
+                          href={`tel:${item.customerPhone}`}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors"
+                        >
+                          <Phone className="w-3 h-3" />
+                          <span>Call Patient</span>
+                        </a>
+                      )}
                     </div>
                   </div>
 
-                  {/* Grievance Body */}
-                  <div className="py-4">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                      Customer&apos;s Private Statement
-                    </span>
-                    <p className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      &quot;{item.grievanceText}&quot;
+                  {/* Intercepted Grievance Statement */}
+                  <div className="mt-4 pl-3 border-l-2 border-rose-400 bg-rose-50/40 rounded-r-xl p-3 text-xs leading-relaxed text-slate-700">
+                    <p className="italic font-medium text-slate-800">
+                      &ldquo;{item.grievanceText}&rdquo;
                     </p>
                   </div>
 
-                  {/* Resolution Notes Section */}
-                  <div className="pt-2">
-                    {isEditingNotes ? (
-                      <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                        <label className="text-xs font-bold text-slate-700 block">
-                          Internal Resolution Notes &amp; Action Taken:
-                        </label>
+                  {/* Resolution Notes area */}
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    {isEditing ? (
+                      <div className="space-y-2">
                         <textarea
-                          rows={2}
                           value={notesText}
                           onChange={(e) => setNotesText(e.target.value)}
-                          placeholder="e.g. Called client, apologized for hygiene room delay, offered $30 courtesy credit..."
-                          className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 resize-none"
+                          placeholder="Record resolution notes (e.g., Called patient, offered complimentary polishing, apologized for wait)..."
+                          className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                          rows={2}
                         />
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -483,6 +610,179 @@ export default function ShieldInboxPage() {
           </div>
         )}
       </div>
+
+      {/* Test Email Dispatch Modal */}
+      {testEmailModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95 duration-150">
+            <button
+              type="button"
+              onClick={() => setTestEmailModalOpen(false)}
+              className="absolute top-5 right-5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <Send className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900">
+                  Send Test Email to Your Inbox
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Test TrustPulse AI&apos;s Google SMTP email templates live
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendTestEmail} className="space-y-4">
+              {/* Template Type Selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Select Email Template
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTestEmailType("shield_alert")}
+                    className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                      testEmailType === "shield_alert"
+                        ? "border-rose-500 bg-rose-50 text-rose-900 font-bold"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    🚨 Shield Alert
+                    <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
+                      Practice manager
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTestEmailType("customer_apology")}
+                    className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                      testEmailType === "customer_apology"
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    💌 Patient Note
+                    <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
+                      Apology letter
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTestEmailType("weekly_digest")}
+                    className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                      testEmailType === "weekly_digest"
+                        ? "border-sky-500 bg-sky-50 text-sky-900 font-bold"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    📊 Weekly Digest
+                    <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
+                      Dark-mode report
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Recipient Input */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Recipient Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email (e.g. buyer@example.com)"
+                  value={testEmailAddress}
+                  onChange={(e) => setTestEmailAddress(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  We will send a formatted responsive HTML email directly to this address.
+                </p>
+              </div>
+
+              {/* Selected Grievance Context if row clicked */}
+              {selectedFeedbackForEmail && (
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                  <span className="font-bold text-slate-700 block mb-0.5">
+                    Using data from {selectedFeedbackForEmail.customerName}&apos;s grievance:
+                  </span>
+                  <p className="text-slate-600 italic line-clamp-2">
+                    &ldquo;{selectedFeedbackForEmail.grievanceText}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Status/Result Banner */}
+              {emailResult && (
+                <div
+                  className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
+                    emailResult.success
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                      : "bg-rose-50 border-rose-200 text-rose-900"
+                  }`}
+                >
+                  <div className="font-bold flex items-center gap-1.5">
+                    {emailResult.success ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <span>Email Dispatched Successfully!</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="w-4 h-4 text-rose-600" />
+                        <span>Dispatch Error</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="mt-1 text-slate-600">{emailResult.note || emailResult.error}</p>
+                  {emailResult.messageId && (
+                    <p className="mt-1 text-[10px] font-mono text-slate-500">
+                      Message ID: {emailResult.messageId}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTestEmailModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingEmail || !testEmailAddress}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 shadow-md shadow-emerald-600/20"
+                >
+                  {sendingEmail ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending Email...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send Test Email Now</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

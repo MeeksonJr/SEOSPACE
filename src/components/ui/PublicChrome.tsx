@@ -219,6 +219,12 @@ export function PublicNavbar({
             Pricing
           </Link>
           <Link
+            href="/audit"
+            className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
+          >
+            Audit Scanner
+          </Link>
+          <Link
             href="/docs"
             className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
           >
@@ -281,6 +287,7 @@ export function PublicNavbar({
               { href: "/#widgets", label: "Embeddable Social Proof Widgets" },
               { href: "/#ai-replies", label: "PulseMind™ AI Review Responder" },
               { href: "/#roi", label: "Agency Retainer Calculator" },
+              { href: "/audit", label: "Reputation & Revenue Leak Scanner" },
               { href: "/#pricing", label: "Pricing & Plans" },
               { href: "/r/apex-dental", label: "Test Live QR Funnel ↗" },
               { href: "/dashboard", label: "Client Workspace Dashboard ↗" },
@@ -316,6 +323,7 @@ const FOOT_COLS: Array<{
   {
     title: "Product",
     links: [
+      { href: "/audit", label: "Reputation Leak Scanner" },
       { href: "/dashboard", label: "Reputation Dashboard" },
       { href: "/dashboard/widgets", label: "Widget Studio (Toasts & Wall)" },
       { href: "/dashboard/shield", label: "Shielded Feedback Inbox" },

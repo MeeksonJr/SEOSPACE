@@ -27,6 +27,7 @@ import {
   TrendingUp,
   Flame,
   Zap,
+  Activity,
 } from "lucide-react";
 import {
   DiagonalRibbon,
@@ -126,6 +127,13 @@ export default function HomePage() {
                 >
                   <span>Launch Live Demo Workspace</span>
                   <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/audit"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-50/90 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-semibold text-sm sm:text-base px-6 py-3.5 transition-all shadow-xs"
+                >
+                  <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Free Revenue Leak Scanner</span>
                 </Link>
                 <Link
                   href="/r/apex-dental"

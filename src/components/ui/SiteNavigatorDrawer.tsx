@@ -91,6 +91,12 @@ const NAV_SECTIONS = [
         icon: Home,
       },
       {
+        href: "/audit",
+        label: "Reputation & Revenue Leak Scanner",
+        desc: "Diagnostic: star deficit, competitor drop-off & leaked revenue",
+        icon: Activity,
+      },
+      {
         href: "/dashboard",
         label: "Reputation Overview Dashboard",
         desc: "Live average rating (4.94★), total reviews & quick actions",
