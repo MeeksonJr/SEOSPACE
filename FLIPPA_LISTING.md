@@ -80,6 +80,27 @@
 10. `10-competitor-battlecard.png` — Comparison matrix vs. Birdeye and Podium.
 11. `11-free-public-utilities.png` — Public QR maker, sentiment tester, and script playground.
 12. `12-interactive-api-docs.png` — Developer API console with executable requests.
+13. `13-reputation-revenue-leak-scanner.png` — Interactive client audit tool calculating 5★ deficit & leaked revenue.
+14. `14-live-client-buyer-testing-dock.png` — Realistic dental clinic demo site with floating Buyer Testing Dock.
+15. `15-google-smtp-test-email-suite.png` — Google SMTP integration with live modal dispatching responsive HTML alerts.
+
+---
+
+## 4.5. Live Interactive Buyer Testing Walkthrough
+
+Prospective buyers can test the entire commercial workflow live right now on production (`https://seospace-kappa.vercel.app`):
+
+1. **Option 2: Live Client Website & Buyer Testing Dock (`/demo/apex-dental-site`)**:
+   - Visit the realistic luxury dental clinic site.
+   - Use the floating **Buyer Testing Dock** to trigger live review toasts, simulate a patient encounter, or dispatch a test alert to your own inbox.
+2. **Option 3: Reputation Health & Revenue Leak Scanner (`/audit`)**:
+   - Choose any industry preset (Dental, MedSpa, Law Firm, Auto Repair, HVAC, Fine Dining).
+   - Adjust star rating and review counts to see the exact arithmetic **5-Star Deficit Formula** and calculated annual revenue leaked to local competitors.
+   - Click "Email Me This Report" or "Print / Save PDF".
+3. **Option 4: Google SMTP Practice Alert Dispatch (`/dashboard/shield`)**:
+   - Click **"Send Test Alert Email"** in the top action bar.
+   - Enter your personal email address and choose between the **Practice Shield Alert**, **Patient Apology Note**, or **Weekly Intelligence Digest**.
+   - Verified automated dispatch: Submitting a 1–3★ grievance at `/r/apex-dental` automatically triggers the alert and apology letter.
 
 ---
 
