@@ -1,282 +1,197 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
-  addCapturedLead,
-  getWhiteLabelConfig,
-  saveAuditReport,
-} from "@/lib/storage/workspace-store";
-import {
-  PublicFooter,
   PublicNavbar,
+  PublicFooter,
   usePublicTheme,
 } from "@/components/ui/PublicChrome";
+import {
+  Code2,
+  Copy,
+  Check,
+  Star,
+  ExternalLink,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { TrustPulseStore } from "@/lib/storage/trustpulse-store";
+import { GoogleBadge, TrustpilotBadge } from "@/components/ui/PlatformBadges";
 
-function WidgetFormContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function PublicWidgetPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
-  const defaultWl = getWhiteLabelConfig();
+  const workspaces = TrustPulseStore.getWorkspaces();
+  const [selectedWsId, setSelectedWsId] = useState<string>("ws-apex-dental");
+  const ws = workspaces.find((w) => w.id === selectedWsId) || workspaces[0];
 
-  const agencyName =
-    searchParams.get("agency") || defaultWl.agencyName || "Apex Digital Growth";
-  const primaryColor =
-    searchParams.get("color") || defaultWl.primaryColor || "#FF4D14";
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const reviews = TrustPulseStore.getReviews(ws.id);
+  const [copiedScript, setCopiedScript] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
 
-  const iframeSnippet = `<iframe\n  src="https://seospace-kappa.vercel.app/widget?agency=${encodeURIComponent(
-    agencyName
-  )}&color=${encodeURIComponent(primaryColor)}"\n  width="100%"\n  height="540"\n  frameborder="0"\n  style="border-radius: 20px; overflow: hidden;"\n></iframe>`;
+  const scriptTag = `<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>`;
+  const iframeTag = `<iframe src="https://trustpulse-ai.vercel.app/embed/widget-apex-wall" width="100%" height="600" frameborder="0" loading="lazy"></iframe>`;
 
-  function handleCopyIframe() {
-    if (typeof navigator !== "undefined") {
-      navigator.clipboard.writeText(iframeSnippet);
-      setCopiedIframe(true);
-      setTimeout(() => setCopiedIframe(false), 2000);
-    }
-  }
+  const copyScript = () => {
+    navigator.clipboard.writeText(scriptTag);
+    setCopiedScript(true);
+    setTimeout(() => setCopiedScript(false), 2000);
+  };
 
-  async function handleWidgetSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!websiteUrl.trim()) return;
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: websiteUrl }),
-      });
-      const data = await res.json();
-
-      const score = data?.report?.overallScore || 78;
-      addCapturedLead({
-        name: name.trim() || "Website Visitor",
-        email: email.trim() || "prospect@company.com",
-        websiteUrl: websiteUrl.trim(),
-        auditScore: score,
-      });
-
-      if (data?.report) {
-        saveAuditReport(data.report);
-        router.push(`/report/${data.report.id}`);
-      } else {
-        router.push("/report/stripe-com");
-      }
-    } catch {
-      router.push("/report/stripe-com");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const copyIframe = () => {
+    navigator.clipboard.writeText(iframeTag);
+    setCopiedIframe(true);
+    setTimeout(() => setCopiedIframe(false), 2000);
+  };
 
   return (
-    <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans transition-colors duration-300">
+    <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-8 py-8 sm:py-12 max-w-[88rem] mx-auto w-full space-y-10">
-        {/* ====================================================================
-            STAGE HEADER
-            ==================================================================== */}
-        <div className="sp-stage border border-line p-6 sm:p-10 rounded-3xl sp-card-shadow space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div>
-              <div className="sp-eyebrow text-accent mb-2">
-                White-Label Embeddable Widget • Inbound Lead Generation
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
+              <Code2 className="w-3.5 h-3.5" />
+              Embeddable Widget Suite
+            </div>
+            <h1 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
+              Embed Authentic Social Proof on Any Site
+            </h1>
+            <p className="text-base sm:text-lg text-[var(--sp-mute)] mt-2 max-w-2xl leading-relaxed">
+              Showcase verified Google &amp; Trustpilot testimonials with floating toast notifications or a responsive Wall of Love grid with a single &lt;script&gt; tag.
+            </p>
+          </div>
+
+          {/* Quick Embed Snippets */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm">A. 1-Line Async Script</h3>
+                <button
+                  type="button"
+                  onClick={copyScript}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer"
+                >
+                  {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedScript ? "Copied!" : "Copy Script"}</span>
+                </button>
               </div>
-              <h1 className="sp-display text-[clamp(2.4rem,6vw,4.5rem)] text-ink leading-tight">
-                Turn visitors into<span className="text-accent">.</span> <br />
-                <span className="text-mute font-normal">Retainer audit clients automatically.</span>
-              </h1>
-              <p className="text-xs sm:text-sm text-mute mt-3 max-w-2xl leading-relaxed">
-                Embed this interactive 60-second website audit widget directly on your agency homepage, blog, or landing page. Capture inbound prospect emails and deliver high-impact diagnostic reports under your brand.
+              <div className="p-3 bg-slate-900 text-emerald-400 font-mono text-xs rounded-xl overflow-x-auto border border-slate-800 break-all">
+                {scriptTag}
+              </div>
+              <p className="text-[11px] text-[var(--sp-mute)]">
+                Recommended for Webflow, Shopify, Squarespace, and custom HTML. Self-contained under 15KB.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <Link href="/dashboard?tab=widget" className="sp-btn sp-btn-primary">
-                Configure in Workspace <span aria-hidden>↗</span>
-              </Link>
-              <Link href="/dashboard?tab=leads" className="sp-btn sp-btn-ghost">
-                View Captured Leads
-              </Link>
+            <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm">B. Responsive iFrame Wall</h3>
+                <button
+                  type="button"
+                  onClick={copyIframe}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer"
+                >
+                  {copiedIframe ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedIframe ? "Copied!" : "Copy iFrame"}</span>
+                </button>
+              </div>
+              <div className="p-3 bg-slate-900 text-slate-200 font-mono text-xs rounded-xl overflow-x-auto border border-slate-800 break-all">
+                {iframeTag}
+              </div>
+              <p className="text-[11px] text-[var(--sp-mute)]">
+                Best for WordPress Elementor, Divi, or Wix blocks that require an isolated iframe embed.
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* ====================================================================
-            SPLIT SHOWCASE: LIVE PREVIEW & EXPLANATION
-            ==================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left: The Live Interactive Widget Card */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="sp-eyebrow text-mute">Live Embed Preview Container</div>
-            <div className="bg-card border border-line rounded-3xl p-6 sm:p-10 sp-card-shadow relative overflow-hidden space-y-6">
-              {/* Agency Brand Bar */}
-              <div className="flex items-center justify-between pb-4 border-b border-line">
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full"
-                    style={{ backgroundColor: primaryColor }}
-                  />
-                  <span className="font-bold text-xs uppercase tracking-wider text-ink">
-                    {agencyName}
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-mute px-2.5 py-0.5 rounded-full border border-line bg-stage">
-                  Free 60s Audit
-                </span>
-              </div>
-
+          {/* Live Preview Wall */}
+          <div className="bg-[var(--sp-card)] rounded-3xl border border-[var(--sp-line)] p-6 sm:p-10 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--sp-line)]">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                  Get Your Free Website Audit
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <span>Live Wall of Love: {ws.name}</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Verified
+                  </span>
                 </h2>
-                <p className="text-xs sm:text-sm text-mute mt-2 leading-relaxed">
-                  Enter your domain below to receive an instant 35-point diagnostic report across SEO, CRO conversion blockers, and AI Search citations prepared by <strong>{agencyName}</strong>.
+                <p className="text-xs text-[var(--sp-mute)] mt-0.5">
+                  Real-time client reviews formatted for high conversion
                 </p>
               </div>
 
-              <form onSubmit={handleWidgetSubmit} className="space-y-4 pt-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-mute mb-1.5">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Alex Morgan"
-                      className="w-full px-4 py-3 rounded-2xl bg-stage border border-line text-xs text-ink focus:outline-none focus:border-ink transition font-sans"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-mute mb-1.5">
-                      Work Email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="alex@company.com"
-                      className="w-full px-4 py-3 rounded-2xl bg-stage border border-line text-xs text-ink focus:outline-none focus:border-ink transition font-sans"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-mono uppercase text-mute mb-1.5">
-                    Website URL to Audit
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
-                    placeholder="https://example.com"
-                    className="w-full px-4 py-3.5 rounded-2xl bg-stage border border-line text-xs font-mono text-ink focus:outline-none focus:border-ink transition"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ backgroundColor: primaryColor }}
-                  className="w-full py-4 px-6 rounded-2xl text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition hover:opacity-95 shadow-md disabled:opacity-50"
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedWsId}
+                  onChange={(e) => setSelectedWsId(e.target.value)}
+                  className="text-xs font-semibold bg-[var(--sp-stage)] border border-[var(--sp-line)] rounded-xl px-3 py-2 text-[var(--sp-ink)] focus:outline-none"
                 >
-                  {loading ? (
-                    <>
-                      <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      <span>Running 35-Point Diagnostic Audit...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Generate My Free Audit Report</span>
-                      <span aria-hidden>→</span>
-                    </>
-                  )}
-                </button>
-              </form>
-
-              <div className="pt-4 border-t border-line flex items-center justify-between text-[11px] text-mute">
-                <span className="flex items-center gap-1.5 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Instant Live Results • Zero Spam
-                </span>
-                <span className="font-mono">Powered by Seospace</span>
+                  {workspaces.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+                <Link
+                  href={`/embed/${ws.id === "ws-apex-dental" ? "widget-apex-wall" : "widget-bayview-badge"}`}
+                  target="_blank"
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                >
+                  <span>Standalone View</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
               </div>
             </div>
-          </div>
 
-          {/* Right: How It Works & Embed Code Snippet */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Embed Code Card */}
-            <div className="bg-card border border-line rounded-3xl p-6 sm:p-8 sp-card-shadow space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="sp-eyebrow text-accent">1-Click Embed Snippet</span>
-                <button
-                  type="button"
-                  onClick={handleCopyIframe}
-                  className="sp-btn sp-btn-ghost !py-1.5 !px-3 text-xs font-mono cursor-pointer"
+            {/* Reviews Masonry */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reviews.map((r) => (
+                <div
+                  key={r.id}
+                  className="p-5 rounded-2xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/40 hover:bg-[var(--sp-stage)]/80 transition-all flex flex-col justify-between space-y-4"
                 >
-                  {copiedIframe ? "✓ Snippet Copied" : "Copy <iframe> Code"}
-                </button>
-              </div>
-              <p className="text-xs text-mute leading-relaxed">
-                Paste this snippet into Webflow, WordPress, Framer, Squarespace, or any custom HTML site.
-              </p>
-              <pre className="p-4 rounded-2xl bg-night text-[#a5a5a0] border border-[#2a2a2c] font-mono text-xs overflow-x-auto leading-relaxed">
-                {iframeSnippet}
-              </pre>
-            </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex text-amber-400 gap-0.5">
+                        {Array.from({ length: r.rating }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                      {r.platform === "google" && <GoogleBadge />}
+                      {r.platform === "trustpilot" && <TrustpilotBadge />}
+                      {r.platform !== "google" && r.platform !== "trustpilot" && (
+                        <span className="text-[10px] uppercase font-bold text-[var(--sp-mute)]">
+                          {r.platform}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm text-[var(--sp-ink)] leading-relaxed italic">
+                      &ldquo;{r.reviewText}&rdquo;
+                    </p>
+                  </div>
 
-            {/* 3-Step Agency Inbound Pipeline */}
-            <div className="bg-card border border-line rounded-3xl p-6 sm:p-8 sp-card-shadow space-y-5">
-              <span className="sp-eyebrow text-mute">The Agency Flywheel</span>
-              <div className="space-y-4">
-                {[
-                  {
-                    step: "01",
-                    title: "Embed on your agency site",
-                    desc: "Add the widget to your header, case studies, or as a standalone /free-audit landing page with your agency colors.",
-                  },
-                  {
-                    step: "02",
-                    title: "Prospect submits domain",
-                    desc: "Visitor enters their URL and email to see their site's health. The audit runs instantly in the background.",
-                  },
-                  {
-                    step: "03",
-                    title: "Lead saved to your CRM",
-                    desc: "Contact details, target URL, and initial audit score are saved to your Seospace workspace and sent to your webhook.",
-                  },
-                  {
-                    step: "04",
-                    title: "Pitch the solution",
-                    desc: "Follow up with a ready-made PDF proposal highlighting the exact issues found and your monthly retainer offer.",
-                  },
-                ].map((item) => (
-                  <div key={item.step} className="flex items-start gap-4 p-3 rounded-2xl border border-line bg-stage">
-                    <span className="font-mono text-xs font-bold text-accent shrink-0 pt-0.5">
-                      {item.step}
-                    </span>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-ink">{item.title}</div>
-                      <p className="text-[11px] text-mute leading-relaxed">{item.desc}</p>
+                  <div className="flex items-center gap-3 pt-3 border-t border-[var(--sp-line)]">
+                    <img
+                      src={
+                        r.authorAvatar ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                      }
+                      alt={r.authorName}
+                      className="w-8 h-8 rounded-full object-cover border border-[var(--sp-line)]"
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-[var(--sp-ink)]">
+                        {r.authorName}
+                      </div>
+                      <div className="text-[10px] text-[var(--sp-mute)]">
+                        {r.authorRole || "Verified Client"} {r.authorLocation ? `• ${r.authorLocation}` : ""}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -284,19 +199,5 @@ function WidgetFormContent() {
 
       <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>
-  );
-}
-
-export default function WidgetPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-mono text-mute">
-          Loading Audit Widget...
-        </div>
-      }
-    >
-      <WidgetFormContent />
-    </Suspense>
   );
 }

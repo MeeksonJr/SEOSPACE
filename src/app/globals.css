@@ -175,6 +175,17 @@ html:not(.sp-js) [data-reveal] { opacity: 1; transform: none; }
 .sp-marquee:hover .sp-marquee-track { animation-play-state: paused; }
 @keyframes sp-marquee { to { transform: translateX(-50%); } }
 
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
 .sp-progress {
   position: fixed; top: 0; left: 0; height: 3px; width: 100%; z-index: 80;
   transform-origin: 0 50%; transform: scaleX(0);

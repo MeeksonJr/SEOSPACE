@@ -6,19 +6,15 @@ import {
   FeedbackStatus,
 } from "@/types/trustpulse";
 
-// In-Memory global store with fallback persistence
-declare global {
-  // eslint-disable-next-line no-var
-  var __tp_store:
-    | {
-        workspaces: Workspace[];
-        reviews: ReviewItem[];
-        feedback: PrivateFeedback[];
-        widgets: WidgetConfig[];
-      }
-    | undefined;
+interface TrustPulseDbSchema {
+  workspaces: Workspace[];
+  reviews: ReviewItem[];
+  feedback: PrivateFeedback[];
+  widgets: WidgetConfig[];
+  updatedAt: string;
 }
 
+// Initial seed data with authentic avatars, real-world copy & realistic metrics
 const INITIAL_WORKSPACES: Workspace[] = [
   {
     id: "ws-apex-dental",
@@ -61,7 +57,7 @@ const INITIAL_WORKSPACES: Workspace[] = [
     id: "ws-nimbus-saas",
     name: "Nimbus Analytics Platform",
     slug: "nimbus-saas",
-    category: "B2B SaaS",
+    category: "B2B SaaS & Tech",
     brandColor: "#7c3aed", // Violet
     googleReviewUrl: "https://g2.com/products/nimbus-analytics",
     trustpilotUrl: "https://trustpilot.com/review/nimbusanalytics.com",
@@ -83,6 +79,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-1",
     workspaceId: "ws-apex-dental",
     authorName: "Sarah Jenkins",
+    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
     authorRole: "Invisalign Patient",
     authorLocation: "Austin, TX",
     rating: 5,
@@ -104,6 +101,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-2",
     workspaceId: "ws-apex-dental",
     authorName: "Marcus Vance",
+    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
     authorRole: "Cosmetic Veneers",
     authorLocation: "Westlake, TX",
     rating: 5,
@@ -119,6 +117,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-3",
     workspaceId: "ws-apex-dental",
     authorName: "Elena Rostova",
+    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     authorRole: "Teeth Whitening",
     authorLocation: "Round Rock, TX",
     rating: 5,
@@ -134,6 +133,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-4",
     workspaceId: "ws-bayview-auto",
     authorName: "David Sterling",
+    authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
     authorRole: "Porsche 911 Owner",
     authorLocation: "San Francisco, CA",
     rating: 5,
@@ -149,6 +149,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-5",
     workspaceId: "ws-bayview-auto",
     authorName: "Carlos Mendez",
+    authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
     authorRole: "BMW M3 Owner",
     authorLocation: "Oakland, CA",
     rating: 5,
@@ -164,6 +165,7 @@ const INITIAL_REVIEWS: ReviewItem[] = [
     id: "rev-6",
     workspaceId: "ws-nimbus-saas",
     authorName: "Amanda Chen",
+    authorAvatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
     authorRole: "VP Growth @ FinTechHQ",
     authorLocation: "New York, NY",
     rating: 5,
@@ -269,16 +271,88 @@ const INITIAL_WIDGETS: WidgetConfig[] = [
   },
 ];
 
-function getStore() {
-  if (!globalThis.__tp_store) {
-    globalThis.__tp_store = {
-      workspaces: [...INITIAL_WORKSPACES],
-      reviews: [...INITIAL_REVIEWS],
-      feedback: [...INITIAL_FEEDBACK],
-      widgets: [...INITIAL_WIDGETS],
-    };
+const CLIENT_STORAGE_KEY = "trustpulse_local_db_v1";
+
+function trySavePersisted(data: TrustPulseDbSchema) {
+  // 1. Client-side localStorage
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // Ignore quota errors
+    }
   }
-  return globalThis.__tp_store;
+
+  // 2. Server-side disk write if node environment
+  if (typeof window === "undefined") {
+    try {
+      // Dynamic require avoids webpack bundling fs into client bundles
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require("fs");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require("path");
+      const dir = path.join(process.cwd(), ".data");
+      const file = path.join(dir, "trustpulse-db.json");
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf-8");
+    } catch {
+      // Ignore in read-only edge environment
+    }
+  }
+}
+
+function loadInitialData(): TrustPulseDbSchema {
+  // Client check
+  if (typeof window !== "undefined") {
+    try {
+      const saved = window.localStorage.getItem(CLIENT_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  // Server check
+  if (typeof window === "undefined") {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require("fs");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require("path");
+      const file = path.join(process.cwd(), ".data", "trustpulse-db.json");
+      if (fs.existsSync(file)) {
+        const raw = fs.readFileSync(file, "utf-8");
+        return JSON.parse(raw);
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
+  const initial: TrustPulseDbSchema = {
+    workspaces: [...INITIAL_WORKSPACES],
+    reviews: [...INITIAL_REVIEWS],
+    feedback: [...INITIAL_FEEDBACK],
+    widgets: [...INITIAL_WIDGETS],
+    updatedAt: new Date().toISOString(),
+  };
+
+  trySavePersisted(initial);
+  return initial;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __tp_store_v3: TrustPulseDbSchema | undefined;
+}
+
+function getStore(): TrustPulseDbSchema {
+  if (!globalThis.__tp_store_v3) {
+    globalThis.__tp_store_v3 = loadInitialData();
+  }
+  return globalThis.__tp_store_v3;
 }
 
 export const TrustPulseStore = {
@@ -302,6 +376,8 @@ export const TrustPulseStore = {
     } else {
       store.workspaces.push(ws);
     }
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return ws;
   },
 
@@ -330,6 +406,8 @@ export const TrustPulseStore = {
       ws.stats.averageRating = Number((sum / (total || 1)).toFixed(2));
     }
 
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return newReview;
   },
 
@@ -338,6 +416,8 @@ export const TrustPulseStore = {
     const rev = store.reviews.find((r) => r.id === id);
     if (!rev) return null;
     Object.assign(rev, updates);
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return rev;
   },
 
@@ -346,6 +426,8 @@ export const TrustPulseStore = {
     const idx = store.reviews.findIndex((r) => r.id === id);
     if (idx >= 0) {
       store.reviews.splice(idx, 1);
+      store.updatedAt = new Date().toISOString();
+      trySavePersisted(store);
       return true;
     }
     return false;
@@ -379,6 +461,8 @@ export const TrustPulseStore = {
       ws.stats.shieldedReviews += 1;
     }
 
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return newFeedback;
   },
 
@@ -388,6 +472,8 @@ export const TrustPulseStore = {
     if (!fb) return null;
     fb.status = status;
     if (notes !== undefined) fb.resolutionNotes = notes;
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return fb;
   },
 
@@ -409,6 +495,8 @@ export const TrustPulseStore = {
     } else {
       store.widgets.push(config);
     }
+    store.updatedAt = new Date().toISOString();
+    trySavePersisted(store);
     return config;
   },
 };

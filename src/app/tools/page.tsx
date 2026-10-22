@@ -2,621 +2,314 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PublicNavbar, PublicFooter, usePublicTheme } from "@/components/ui/PublicChrome";
-import { DnsIntelligence } from "@/types/audit";
+import {
+  PublicNavbar,
+  PublicFooter,
+  usePublicTheme,
+} from "@/components/ui/PublicChrome";
+import {
+  QrCode,
+  Sparkles,
+  Code2,
+  Copy,
+  Check,
+  Star,
+  Printer,
+  ShieldCheck,
+  ExternalLink,
+} from "lucide-react";
 
-export default function FreeSeoToolsPage() {
+export default function FreeReputationToolsPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
-  const [activeTool, setActiveTool] = useState<"llms" | "schema" | "robots" | "dns">("llms");
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"qr" | "sentiment" | "widget">("qr");
 
-  // Tool 1: /llms.txt Generator State
-  const [llmsBrand, setLlmsBrand] = useState("Voice One Answering Service");
-  const [llmsDomain, setLlmsDomain] = useState("https://voice-one.com");
-  const [llmsSummary, setLlmsSummary] = useState(
-    "24/7 live virtual receptionist, bilingual telephone answering, and appointment scheduling for growing businesses."
-  );
-  const [llmsPages, setLlmsPages] = useState(
-    "/services/ | 24/7 Virtual Receptionist & Call Answering\n/pricing/ | Transparent Monthly Answering Plans\n/contact/ | Start Your 7-Day Free Trial"
-  );
+  // Tool 1: Free QR Stand Generator State
+  const [bizName, setBizName] = useState("Apex Dental Studio");
+  const [googleUrl, setGoogleUrl] = useState("https://maps.google.com");
+  const [brandColor, setBrandColor] = useState("#059669");
+  const [copiedQrUrl, setCopiedQrUrl] = useState(false);
 
-  // Tool 2: JSON-LD Schema Studio State
-  const [schemaType, setSchemaType] = useState<"Organization" | "SoftwareApplication" | "FAQPage">("Organization");
-  const [schemaName, setSchemaName] = useState("Seospace AI");
-  const [schemaUrl, setSchemaUrl] = useState("https://seospace-kappa.vercel.app");
-  const [schemaDesc, setSchemaDesc] = useState(
-    "Autonomous Technical SEO, CRO, AI Search (GEO) & Live DNS Intelligence Platform."
+  // Tool 2: Review Sentiment Tester State
+  const [sampleReviewText, setSampleReviewText] = useState(
+    "Dr. Thorne was gentle and the clinic was spotless, but my appointment was delayed by 20 minutes."
   );
-  const [faqQ1, setFaqQ1] = useState("How does Seospace Neural Engine v4.2 grade URLs?");
-  const [faqA1, setFaqA1] = useState(
-    "It extracts live DOM tags, distributed edge metadata, and Cloudflare 1.1.1.1 DNS records to compute an uninflated 5-pillar score."
-  );
-
-  // Tool 3: AI Crawler robots.txt Builder State
-  const [allowGptBot, setAllowGptBot] = useState(true);
-  const [allowClaudeBot, setAllowClaudeBot] = useState(true);
-  const [allowPerplexityBot, setAllowPerplexityBot] = useState(true);
-  const [allowGoogleExtended, setAllowGoogleExtended] = useState(true);
-  const [blockCcBot, setBlockCcBot] = useState(true);
-  const [sitemapUrl, setSitemapUrl] = useState("https://voice-one.com/sitemap.xml");
-
-  // Tool 4: Live Cloudflare DoH DNS & SERP Simulator State
-  const [dnsDomainInput, setDnsDomainInput] = useState("voice-one.com");
-  const [dnsLoading, setDnsLoading] = useState(false);
-  const [dnsLatency, setDnsLatency] = useState<number | null>(72);
-  const [dnsResult, setDnsResult] = useState<DnsIntelligence>({
-    aRecords: ["141.193.213.10", "141.193.213.11"],
-    ipv6Support: false,
-    mxRecords: ["10 smtpgw.voice-one.com."],
-    mailProvider: "Custom Mail Server",
-    hasSpf: true,
-    spfRecord: "v=spf1 mx include:spf.protection.outlook.com ip4:66.35.17.83 ~all",
-    hasDmarc: true,
-    dmarcRecord: "v=DMARC1; p=quarantine;",
-    dmarcPolicy: "quarantine",
-    nameservers: ["lia.ns.cloudflare.com.", "max.ns.cloudflare.com."],
+  const [analyzedSentiment, setAnalyzedSentiment] = useState<{
+    ratingEstimate: number;
+    tone: string;
+    action: string;
+  }>({
+    ratingEstimate: 3,
+    tone: "Mixed / Grievance Detected",
+    action: "Activate Negative Review Shield (Intercept privately)",
   });
-  const [serpTitle, setSerpTitle] = useState(
-    "24/7 Live Virtual Receptionist & Answering Service | Voice One"
-  );
-  const [serpDesc, setSerpDesc] = useState(
-    "Never miss a client call again. Voice One's 24/7 live virtual receptionists answer calls, qualify leads & book appointments onto your calendar."
-  );
 
-  const generatedLlmsTxt = `# ${llmsBrand}
-> ${llmsSummary}
+  // Tool 3: Embed Script Tester State
+  const [copiedEmbed, setCopiedEmbed] = useState(false);
 
-## Core Documentation & High-Value Pages
-${llmsPages
-  .split("\n")
-  .filter(Boolean)
-  .map((line) => {
-    const [path, desc] = line.split("|").map((s) => s?.trim() || "");
-    const fullUrl = path.startsWith("http")
-      ? path
-      : `${llmsDomain.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
-    return `- [${desc || path}](${fullUrl}): Official ${llmsBrand} resource`;
-  })
-  .join("\n")}
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+    googleUrl
+  )}&color=${brandColor.replace("#", "")}`;
 
-## AI Citation Policy
-- Canonical Domain: ${llmsDomain}
-- Preferred Citation Format: "${llmsBrand} (${llmsDomain})"
-- Generated via Seospace Neural Engine v4.2
-`;
-
-  const generatedJsonLd =
-    schemaType === "FAQPage"
-      ? `<script type="application/ld+json">\n${JSON.stringify(
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: faqQ1,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: faqA1,
-                },
-              },
-            ],
-          },
-          null,
-          2
-        )}\n</script>`
-      : `<script type="application/ld+json">\n${JSON.stringify(
-          {
-            "@context": "https://schema.org",
-            "@type": schemaType,
-            name: schemaName,
-            url: schemaUrl,
-            description: schemaDesc,
-            ...(schemaType === "SoftwareApplication"
-              ? {
-                  applicationCategory: "BusinessApplication",
-                  operatingSystem: "Web",
-                  offers: {
-                    "@type": "Offer",
-                    price: "19.00",
-                    priceCurrency: "USD",
-                  },
-                }
-              : {}),
-          },
-          null,
-          2
-        )}\n</script>`;
-
-  const generatedRobotsTxt = `# robots.txt generated by Seospace Neural Engine v4.2
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-
-# OpenAI ChatGPT Search Crawler
-User-agent: GPTBot
-${allowGptBot ? "Allow: /" : "Disallow: /"}
-
-# Anthropic Claude Search Crawler
-User-agent: ClaudeBot
-${allowClaudeBot ? "Allow: /" : "Disallow: /"}
-
-# Perplexity AI Answer Engine
-User-agent: PerplexityBot
-${allowPerplexityBot ? "Allow: /" : "Disallow: /"}
-
-# Google Gemini & AI Overviews
-User-agent: Google-Extended
-${allowGoogleExtended ? "Allow: /" : "Disallow: /"}
-
-# Common Crawl Training Scraper
-User-agent: CCBot
-${blockCcBot ? "Disallow: /" : "Allow: /"}
-
-Sitemap: ${sitemapUrl}
-`;
-
-  function copyOutput(text: string) {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  function downloadFile(filename: string, content: string) {
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function handleRunDnsLookup(e: React.FormEvent) {
-    e.preventDefault();
-    if (!dnsDomainInput.trim()) return;
-    setDnsLoading(true);
-    try {
-      const res = await fetch("/api/dns-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: dnsDomainInput }),
+  const analyzeReview = () => {
+    const text = sampleReviewText.toLowerCase();
+    if (text.includes("delay") || text.includes("wait") || text.includes("bad") || text.includes("rude")) {
+      setAnalyzedSentiment({
+        ratingEstimate: 2,
+        tone: "Risk: Negative Customer Experience",
+        action: "Shield Trigger: Intercept with Private Feedback Form to prevent Google rating damage",
       });
-      const data = await res.json();
-      if (data?.dns) {
-        setDnsResult(data.dns);
-        setDnsLatency(data.latencyMs || 65);
-      }
-    } finally {
-      setDnsLoading(false);
+    } else {
+      setAnalyzedSentiment({
+        ratingEstimate: 5,
+        tone: "Positive Brand Advocate",
+        action: "One-Tap Google Maps Redirect: Prompt customer to post publicly!",
+      });
     }
-  }
+  };
 
   return (
-    <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans transition-colors duration-300">
+    <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-8 py-8 sm:py-12 max-w-[88rem] mx-auto w-full space-y-10">
-        {/* ====================================================================
-            HEADER & TOOL TABS STAGE
-            ==================================================================== */}
-        <div className="sp-stage border border-line p-6 sm:p-10 rounded-3xl sp-card-shadow space-y-6">
-          <div className="max-w-3xl space-y-2">
-            <div className="sp-eyebrow text-accent">Zero-Cost Growth Tools • Seospace Neural Engine v4.2</div>
-            <h1 className="sp-display text-[clamp(2.4rem,6vw,4.5rem)] text-ink leading-tight">
-              Tools<span className="text-accent">+</span> <br />
-              <span className="text-mute font-normal">Technical SEO, /llms.txt &amp; DNS generator suite.</span>
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-5xl mx-auto space-y-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
+              100% Free Public Utilities
+            </div>
+            <h1 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
+              Free Reputation &amp; Social Proof Tools
             </h1>
-            <p className="text-xs sm:text-sm text-mute leading-relaxed max-w-2xl">
-              Generate production-ready <code className="font-mono text-accent">/llms.txt</code> manifests, Schema.org <code className="font-mono text-accent">JSON-LD</code> graphs, AI crawler <code className="font-mono text-accent">robots.txt</code> policies, and query live Cloudflare 1.1.1.1 SPF/DMARC records.
+            <p className="text-base sm:text-lg text-[var(--sp-mute)] mt-2 max-w-2xl leading-relaxed">
+              Generate custom review QR codes, analyze customer sentiment, and preview 1-line embeddable widgets with zero signup required.
             </p>
           </div>
 
-          {/* 4 Tool Switcher Tabs */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {[
-              { id: "llms", label: "01 /llms.txt Manifest" },
-              { id: "schema", label: "02 JSON-LD Schema Studio" },
-              { id: "robots", label: "03 robots.txt AI Policy" },
-              { id: "dns", label: "04 Cloudflare DoH & SERP Simulator" },
-            ].map((t) => {
-              const active = activeTool === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setActiveTool(t.id as "llms" | "schema" | "robots" | "dns")}
-                  className={`sp-btn text-xs font-semibold cursor-pointer transition-all ${
-                    active
-                      ? "sp-btn-primary"
-                      : "sp-btn-ghost bg-card hover:bg-paper"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
+          {/* Tool Switcher Tabs */}
+          <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-[var(--sp-stage)] border border-[var(--sp-line)] text-xs font-bold w-fit">
+            <button
+              type="button"
+              onClick={() => setActiveTab("qr")}
+              className={`px-4 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
+                activeTab === "qr"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+              }`}
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Free QR Stand Maker</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("sentiment")}
+              className={`px-4 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
+                activeTab === "sentiment"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Review Sentiment Analyzer</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("widget")}
+              className={`px-4 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${
+                activeTab === "widget"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span>1-Line Script Playground</span>
+            </button>
           </div>
-        </div>
 
-        {/* ====================================================================
-            TOOL 1: /llms.txt GENERATOR
-            ==================================================================== */}
-        {activeTool === "llms" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-card p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <h2 className="sp-display text-xl sm:text-2xl text-ink font-bold">
-                Configure /llms.txt AI Search Manifest
-              </h2>
-              <div className="space-y-1.5">
-                <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Brand / Company Name</label>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <input
-                    type="text"
-                    value={llmsBrand}
-                    onChange={(e) => setLlmsBrand(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Canonical Domain URL</label>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <input
-                    type="text"
-                    value={llmsDomain}
-                    onChange={(e) => setLlmsDomain(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Concise Entity Value Proposition</label>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <textarea
-                    rows={2}
-                    value={llmsSummary}
-                    onChange={(e) => setLlmsSummary(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Core Pages (Path | Title per line)</label>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <textarea
-                    rows={4}
-                    value={llmsPages}
-                    onChange={(e) => setLlmsPages(e.target.value)}
-                    className="sp-input text-xs font-mono"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-night text-[#f3f0e8] p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-accent">/public/llms.txt</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => copyOutput(generatedLlmsTxt)}
-                    className="sp-btn sp-btn-ghost !text-white !border-white/30 !py-1.5 !px-3 text-xs"
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => downloadFile("llms.txt", generatedLlmsTxt)}
-                    className="sp-btn sp-btn-accent !py-1.5 !px-3 text-xs font-bold"
-                  >
-                    Download llms.txt ↗
-                  </button>
-                </div>
-              </div>
-              <pre className="p-4 rounded-2xl bg-black/50 border border-white/10 text-xs font-mono text-white/90 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                {generatedLlmsTxt}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* ====================================================================
-            TOOL 2: JSON-LD SCHEMA STUDIO
-            ==================================================================== */}
-        {activeTool === "schema" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-card p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <h2 className="sp-display text-xl sm:text-2xl text-ink font-bold">
-                Schema.org JSON-LD Entity Graph Builder
-              </h2>
-              <div className="flex gap-2">
-                {(["Organization", "SoftwareApplication", "FAQPage"] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setSchemaType(type)}
-                    className={`sp-btn !py-1.5 !px-3 text-xs font-bold ${
-                      schemaType === type ? "sp-btn-primary" : "sp-btn-ghost"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-
-              {schemaType === "FAQPage" ? (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">FAQ Question #1</label>
-                    <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                      <input
-                        type="text"
-                        value={faqQ1}
-                        onChange={(e) => setFaqQ1(e.target.value)}
-                        className="sp-input text-xs sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">FAQ Answer #1</label>
-                    <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                      <textarea
-                        rows={3}
-                        value={faqA1}
-                        onChange={(e) => setFaqA1(e.target.value)}
-                        className="sp-input text-xs sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Entity Name</label>
-                    <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                      <input
-                        type="text"
-                        value={schemaName}
-                        onChange={(e) => setSchemaName(e.target.value)}
-                        className="sp-input text-xs sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Official URL</label>
-                    <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                      <input
-                        type="text"
-                        value={schemaUrl}
-                        onChange={(e) => setSchemaUrl(e.target.value)}
-                        className="sp-input text-xs sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">Entity Description</label>
-                    <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                      <textarea
-                        rows={3}
-                        value={schemaDesc}
-                        onChange={(e) => setSchemaDesc(e.target.value)}
-                        className="sp-input text-xs sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-night text-[#f3f0e8] p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-accent">✓ Valid Schema.org JSON-LD</span>
-                <button
-                  type="button"
-                  onClick={() => copyOutput(generatedJsonLd)}
-                  className="sp-btn sp-btn-accent !py-1.5 !px-3 text-xs font-bold"
-                >
-                  {copied ? "Copied!" : "Copy <script>"}
-                </button>
-              </div>
-              <pre className="p-4 rounded-2xl bg-black/50 border border-white/10 text-xs font-mono text-white/90 overflow-x-auto whitespace-pre-wrap">
-                {generatedJsonLd}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* ====================================================================
-            TOOL 3: AI CRAWLER ROBOTS.TXT BUILDER
-            ==================================================================== */}
-        {activeTool === "robots" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-card p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <h2 className="sp-display text-xl sm:text-2xl text-ink font-bold">
-                AI Search Crawler Permissions (robots.txt)
-              </h2>
-              {[
-                { label: "OpenAI GPTBot (ChatGPT Search Citations)", val: allowGptBot, set: setAllowGptBot },
-                { label: "Anthropic ClaudeBot (Claude Web Citations)", val: allowClaudeBot, set: setAllowClaudeBot },
-                { label: "PerplexityBot (Perplexity Answer Engine)", val: allowPerplexityBot, set: setAllowPerplexityBot },
-                { label: "Google-Extended (Google AI Overviews)", val: allowGoogleExtended, set: setAllowGoogleExtended },
-                { label: "Block CCBot (Prevent Training Scraping)", val: blockCcBot, set: setBlockCcBot },
-              ].map((item) => (
-                <label
-                  key={item.label}
-                  className="flex items-center justify-between p-3.5 rounded-2xl border border-line bg-stage cursor-pointer hover:bg-paper transition-colors"
-                >
-                  <span className="text-xs sm:text-sm font-semibold text-ink">{item.label}</span>
-                  <input
-                    type="checkbox"
-                    checked={item.val}
-                    onChange={(e) => item.set(e.target.checked)}
-                    className="accent-[#ff4d14] w-4 h-4 cursor-pointer"
-                  />
-                </label>
-              ))}
-              <div className="space-y-1.5 pt-1">
-                <label className="sp-eyebrow !text-[0.62rem] text-mute block font-bold">XML Sitemap Location</label>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <input
-                    type="text"
-                    value={sitemapUrl}
-                    onChange={(e) => setSitemapUrl(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-night text-[#f3f0e8] p-6 sm:p-8 space-y-4 sp-card-shadow">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-accent">/public/robots.txt</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => copyOutput(generatedRobotsTxt)}
-                    className="sp-btn sp-btn-ghost !text-white !border-white/30 !py-1.5 !px-3 text-xs"
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => downloadFile("robots.txt", generatedRobotsTxt)}
-                    className="sp-btn sp-btn-accent !py-1.5 !px-3 text-xs font-bold"
-                  >
-                    Download robots.txt ↗
-                  </button>
-                </div>
-              </div>
-              <pre className="p-4 rounded-2xl bg-black/50 border border-white/10 text-xs font-mono text-white/90 overflow-x-auto whitespace-pre-wrap">
-                {generatedRobotsTxt}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* ====================================================================
-            TOOL 4: LIVE CLOUDFLARE DoH DNS & SERP SIMULATOR
-            ==================================================================== */}
-        {activeTool === "dns" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-card p-6 sm:p-8 space-y-5 sp-card-shadow">
-              <div>
-                <div className="sp-eyebrow text-accent">Cloudflare 1.1.1.1 DNS-over-HTTPS</div>
-                <h2 className="sp-display text-xl sm:text-2xl text-ink font-bold mt-1">
-                  Live Domain DNS, SPF &amp; DMARC Inspector
-                </h2>
-              </div>
-
-              <form onSubmit={handleRunDnsLookup} className="flex gap-2">
-                <div className="flex-1 rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <input
-                    type="text"
-                    value={dnsDomainInput}
-                    onChange={(e) => setDnsDomainInput(e.target.value)}
-                    placeholder="voice-one.com or stripe.com"
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={dnsLoading}
-                  className="sp-btn sp-btn-accent !py-2 text-xs font-bold shrink-0"
-                >
-                  {dnsLoading ? "Querying..." : "Query 1.1.1.1 ↗"}
-                </button>
-              </form>
-
-              <div className="space-y-3 text-xs font-mono">
-                <div className="p-3.5 rounded-2xl bg-stage border border-line flex items-center justify-between">
-                  <span className="text-mute font-sans">Mail Server</span>
-                  <span className="font-bold text-ink">{dnsResult.mailProvider} ({dnsResult.mxRecords.length} MX)</span>
-                </div>
-                <div className="p-3.5 rounded-2xl bg-stage border border-line space-y-1">
-                  <div className="flex items-center justify-between font-sans">
-                    <span className="text-mute">SPF Record</span>
-                    <span className={`font-bold ${dnsResult.hasSpf ? "text-emerald-600" : "text-rose-600"}`}>
-                      {dnsResult.hasSpf ? "✓ Active" : "✕ Missing"}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-mute break-all">{dnsResult.spfRecord}</div>
-                </div>
-                <div className="p-3.5 rounded-2xl bg-stage border border-line space-y-1">
-                  <div className="flex items-center justify-between font-sans">
-                    <span className="text-mute">DMARC Policy (_dmarc)</span>
-                    <span className={`font-bold ${dnsResult.hasDmarc ? "text-emerald-600" : "text-rose-600"}`}>
-                      {dnsResult.hasDmarc ? `✓ ${dnsResult.dmarcPolicy}` : "✕ Missing"}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-mute break-all">{dnsResult.dmarcRecord}</div>
-                </div>
-                <div className="p-3.5 rounded-2xl bg-stage border border-line flex items-center justify-between font-sans">
-                  <span className="text-mute">A Records ({dnsLatency}ms latency)</span>
-                  <span className="font-mono text-ink font-bold">{dnsResult.aRecords.slice(0, 2).join(", ") || "N/A"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Google SERP Simulator */}
-            <div className="lg:col-span-6 rounded-3xl border border-line bg-card p-6 sm:p-8 space-y-5 sp-card-shadow">
-              <div>
-                <div className="sp-eyebrow text-accent">Google SERP Snippet Simulator</div>
-                <h2 className="sp-display text-xl sm:text-2xl text-ink font-bold mt-1">
-                  Pixel-accurate search result preview
-                </h2>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-mute">Meta Title Tag</span>
-                  <span className={serpTitle.length > 60 ? "text-rose-600 font-bold" : "text-emerald-600 font-bold"}>
-                    {serpTitle.length} / 60 chars
-                  </span>
-                </div>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <input
-                    type="text"
-                    value={serpTitle}
-                    onChange={(e) => setSerpTitle(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-mute">Meta Description</span>
-                  <span className={serpDesc.length > 160 ? "text-rose-600 font-bold" : "text-emerald-600 font-bold"}>
-                    {serpDesc.length} / 158 chars
-                  </span>
-                </div>
-                <div className="rounded-2xl border-2 border-line bg-stage px-3.5 py-2">
-                  <textarea
-                    rows={3}
-                    value={serpDesc}
-                    onChange={(e) => setSerpDesc(e.target.value)}
-                    className="sp-input text-xs sm:text-sm font-medium"
-                  />
-                </div>
-              </div>
-
-              {/* Real SERP Box Preview */}
-              <div className="p-5 rounded-2xl bg-stage border border-line space-y-1.5 font-sans">
-                <div className="text-xs text-mute font-mono">
-                  https://{dnsDomainInput}
-                </div>
-                <div className="text-base sm:text-lg font-semibold text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-snug">
-                  {serpTitle.length > 62 ? `${serpTitle.slice(0, 60)}...` : serpTitle}
-                </div>
-                <p className="text-xs sm:text-sm text-mute leading-relaxed">
-                  {serpDesc.length > 160 ? `${serpDesc.slice(0, 157)}...` : serpDesc}
+          {/* TAB 1: QR CODE STAND MAKER */}
+          {activeTab === "qr" && (
+            <div className="grid lg:grid-cols-12 gap-8 items-start bg-[var(--sp-card)] p-6 sm:p-10 rounded-3xl border border-[var(--sp-line)] shadow-xl animate-fade-in">
+              <div className="lg:col-span-6 space-y-5">
+                <h2 className="text-xl font-bold">Free Counter Stand &amp; Table Tent QR</h2>
+                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
+                  Enter your business details below to generate a printable QR card to place on your front desk or customer tables.
                 </p>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--sp-mute)] mb-1">
+                    Business Name
+                  </label>
+                  <input
+                    type="text"
+                    value={bizName}
+                    onChange={(e) => setBizName(e.target.value)}
+                    className="w-full text-xs border border-[var(--sp-line)] bg-[var(--sp-stage)]/40 rounded-xl px-3 py-2.5 text-[var(--sp-ink)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--sp-mute)] mb-1">
+                    Google Review URL (or maps link)
+                  </label>
+                  <input
+                    type="url"
+                    value={googleUrl}
+                    onChange={(e) => setGoogleUrl(e.target.value)}
+                    className="w-full text-xs border border-[var(--sp-line)] bg-[var(--sp-stage)]/40 rounded-xl px-3 py-2.5 text-[var(--sp-ink)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--sp-mute)] mb-1">
+                    Brand Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={brandColor}
+                      onChange={(e) => setBrandColor(e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0 p-0"
+                    />
+                    <span className="font-mono text-xs text-[var(--sp-mute)]">{brandColor}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Card</span>
+                  </button>
+                  <Link
+                    href="/dashboard/qr-studio"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)] hover:bg-[var(--sp-line)] text-xs font-bold text-[var(--sp-ink)]"
+                  >
+                    <span>Full QR Studio in Dashboard →</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Printable Card Preview */}
+              <div className="lg:col-span-6 flex justify-center">
+                <div className="w-full max-w-xs p-6 rounded-3xl border-2 border-slate-300 bg-white text-slate-900 shadow-xl text-center space-y-4">
+                  <div className="h-2 w-full rounded-full" style={{ backgroundColor: brandColor }} />
+                  <div className="font-black text-base tracking-tight">{bizName}</div>
+                  <div className="flex justify-center text-amber-400 gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400" />
+                    ))}
+                  </div>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <img src={qrImageUrl} alt="QR Code" className="w-36 h-36 mx-auto object-contain" />
+                    <div className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Point Camera &amp; Tap
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold text-slate-800">
+                    How was your experience today?
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Scan to share feedback &amp; help our team maintain 5-star service.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* TAB 2: SENTIMENT ANALYZER */}
+          {activeTab === "sentiment" && (
+            <div className="bg-[var(--sp-card)] p-6 sm:p-10 rounded-3xl border border-[var(--sp-line)] shadow-xl space-y-6 animate-fade-in">
+              <h2 className="text-xl font-bold">Review Sentiment &amp; Shield Router</h2>
+              <p className="text-xs text-[var(--sp-mute)]">
+                Type or paste any customer feedback to see how TrustPulse automatically scores the sentiment and chooses whether to route to Google Maps or the Negative Review Shield.
+              </p>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--sp-mute)] mb-1">
+                  Customer Review Text
+                </label>
+                <textarea
+                  rows={4}
+                  value={sampleReviewText}
+                  onChange={(e) => setSampleReviewText(e.target.value)}
+                  className="w-full text-xs font-sans border border-[var(--sp-line)] bg-[var(--sp-stage)]/40 rounded-xl p-3 text-[var(--sp-ink)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={analyzeReview}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Analyze Sentiment</span>
+              </button>
+
+              <div className="p-5 rounded-2xl bg-[var(--sp-stage)]/60 border border-[var(--sp-line)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-[var(--sp-ink)]">
+                    Calculated Result:
+                  </span>
+                  <span className="text-amber-500 font-mono font-bold text-xs">
+                    Estimated Rating: {"★".repeat(analyzedSentiment.ratingEstimate)} ({analyzedSentiment.ratingEstimate} Stars)
+                  </span>
+                </div>
+                <div className="text-xs text-[var(--sp-ink)]">
+                  <strong>Detected Sentiment:</strong> {analyzedSentiment.tone}
+                </div>
+                <div className="p-3 rounded-xl bg-[var(--sp-card)] border border-[var(--sp-line)] text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+                  {analyzedSentiment.action}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: WIDGET SCRIPT PLAYGROUND */}
+          {activeTab === "widget" && (
+            <div className="bg-[var(--sp-card)] p-6 sm:p-10 rounded-3xl border border-[var(--sp-line)] shadow-xl space-y-6 animate-fade-in">
+              <h2 className="text-xl font-bold">1-Line Embed Script Generator</h2>
+              <p className="text-xs text-[var(--sp-mute)]">
+                Copy this single line of code to embed live social proof toasts onto any client website. Works with WordPress, Shopify, Webflow, and custom HTML.
+              </p>
+
+              <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-slate-100 font-mono text-xs overflow-x-auto flex items-center justify-between gap-4">
+                <code>
+                  &lt;script src=&quot;https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      '<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>'
+                    );
+                    setCopiedEmbed(true);
+                    setTimeout(() => setCopiedEmbed(false), 2000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0 cursor-pointer"
+                >
+                  {copiedEmbed ? "Copied!" : "Copy"}
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-4 text-xs text-[var(--sp-mute)]">
+                <div className="p-4 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/30 space-y-1">
+                  <span className="font-bold text-[var(--sp-ink)] block">Lightweight</span>
+                  <span>Under 15KB uncompressed, zero jQuery or runtime frameworks</span>
+                </div>
+                <div className="p-4 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/30 space-y-1">
+                  <span className="font-bold text-[var(--sp-ink)] block">CORS Wildcard</span>
+                  <span>Access-Control-Allow-Origin: * for seamless embedding</span>
+                </div>
+                <div className="p-4 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/30 space-y-1">
+                  <span className="font-bold text-[var(--sp-ink)] block">Edge CDN</span>
+                  <span>Hosted globally on Vercel Edge with sub-100ms response time</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />

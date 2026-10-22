@@ -27,7 +27,21 @@ import {
   DollarSign,
   QrCode,
   Sliders,
+  HelpCircle,
+  Zap,
+  Globe,
+  Lock,
 } from "lucide-react";
+import {
+  DiagonalRibbon,
+  CustomerReviewMarquee,
+} from "@/components/ui/DiagonalTicker";
+import {
+  GoogleBadge,
+  TrustpilotBadge,
+  ProductHuntBadge,
+  YelpBadge,
+} from "@/components/ui/PlatformBadges";
 
 export default function HomePage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
@@ -40,7 +54,7 @@ export default function HomePage() {
   const [simulatedRating, setSimulatedRating] = useState<number | null>(5);
 
   // Agency ROI Calculator State
-  const [clientCount, setClientCount] = useState<number>(12);
+  const [clientCount, setClientCount] = useState<number>(14);
   const [clientFee, setClientFee] = useState<number>(149);
 
   const calculatedMRR = clientCount * clientFee;
@@ -55,27 +69,28 @@ export default function HomePage() {
 
   return (
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)] transition-colors duration-200">
+      {/* Sticky Glassmorphic Navbar */}
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
       <main className="flex-1">
         {/* =========================================================================
-            1. HERO SECTION: Big Bold Title, Metrics & Live Interactive Demo
+            1. HERO SECTION: High-Design, Visual Trust Badges & Action CTAs
            ========================================================================= */}
-        <section className="relative px-4 sm:px-6 lg:px-8 pt-12 pb-20 sm:pt-20 sm:pb-28 overflow-hidden">
+        <section className="relative px-4 sm:px-6 lg:px-8 pt-10 pb-16 sm:pt-16 sm:pb-24 overflow-hidden">
           <div className="mx-auto max-w-6xl">
             {/* Top pill badge */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--sp-line)] bg-[var(--sp-card)] text-xs font-mono font-medium shadow-sm">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--sp-line)] bg-[var(--sp-card)] text-xs font-mono font-medium shadow-xs">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[var(--sp-mute)]">Autonomous Social Proof &amp; Review Protection</span>
-                <span className="text-emerald-600 font-semibold">v1.0 Ready</span>
+                <span className="text-[var(--sp-mute)]">Autonomous Reputation SaaS</span>
+                <span className="text-emerald-600 font-semibold">• Turnkey Ready</span>
               </div>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Title & Pitch */}
             <div className="text-center max-w-4xl mx-auto space-y-6">
               <h1 className="sp-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-                Protect your 5-star rating.
+                Protect your 5-star reputation.
                 <br />
                 Turn happy clients into{" "}
                 <span className="text-emerald-600 dark:text-emerald-400 underline decoration-emerald-500/30">
@@ -87,7 +102,7 @@ export default function HomePage() {
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-4">
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm sm:text-base px-7 py-3.5 shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -105,35 +120,87 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Trust metric tags */}
-              <div className="pt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs sm:text-sm text-[var(--sp-mute)] font-medium">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Zero-Cost Infrastructure ($0/mo)</span>
+              {/* Verified Platform Badges Cluster */}
+              <div className="pt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 text-xs">
+                <span className="text-[var(--sp-mute)] font-medium mr-1">Direct Sync With:</span>
+                <GoogleBadge />
+                <TrustpilotBadge />
+                <ProductHuntBadge />
+                <YelpBadge />
+              </div>
+            </div>
+
+            {/* =========================================================================
+                VISUAL WORKFLOW ARCHITECTURE: 3-Step Diagram
+               ========================================================================= */}
+            <div className="mt-14 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Step 1 */}
+              <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3 relative group hover:border-emerald-500 transition-colors">
+                <span className="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold font-mono flex items-center justify-center shadow">
+                  01
+                </span>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base">Customer Scans QR</h3>
+                  <QrCode className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span>4.94 Average Client Rating</span>
+                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
+                  Placed on clinic counters, dining tables, or sent via SMS/Email. Opens an instant 5-star rating selector with zero app download.
+                </p>
+                <div className="text-[11px] font-mono text-emerald-600 font-semibold pt-1">
+                  Speed: &lt; 0.4s load time
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Code2 className="w-4 h-4 text-indigo-500" />
-                  <span>1-Line Copy &amp; Paste Script</span>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-6 rounded-3xl border-2 border-emerald-500/80 bg-[var(--sp-card)] shadow-lg space-y-3 relative group">
+                <span className="w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold font-mono flex items-center justify-center shadow">
+                  02
+                </span>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base text-emerald-800 dark:text-emerald-300">
+                    Smart Gatekeeper
+                  </h3>
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div className="text-xs space-y-2">
+                  <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[11px]">
+                    <span className="font-bold text-emerald-700 dark:text-emerald-300">4–5 Stars:</span> 1-Click Copy &amp; redirect to Google Maps!
+                  </div>
+                  <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-[11px]">
+                    <span className="font-bold text-rose-700 dark:text-rose-300">1–3 Stars:</span> Negative Review Shield intercepts complaint privately!
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3 relative group hover:border-emerald-500 transition-colors">
+                <span className="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold font-mono flex items-center justify-center shadow">
+                  03
+                </span>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base">Instant Social Proof</h3>
+                  <Code2 className="w-5 h-5 text-indigo-600" />
+                </div>
+                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
+                  Verified 5-star reviews stream automatically into floating toasts, Wall of Love masonry, and corner badges on any website via 1 script line.
+                </p>
+                <div className="text-[11px] font-mono text-indigo-600 font-semibold pt-1">
+                  1-Line Embed • No npm build
                 </div>
               </div>
             </div>
 
             {/* =========================================================================
-                HERO PREVIEW INTERACTIVE PANEL: Real-time Widget Switcher
+                INTERACTIVE LIVE WIDGET STUDIO SANDBOX
                ========================================================================= */}
-            <div className="mt-14 max-w-4xl mx-auto rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] p-4 sm:p-6 shadow-2xl overflow-hidden relative">
-              {/* Header bar of preview */}
+            <div id="widgets" className="mt-16 max-w-4xl mx-auto rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] p-4 sm:p-6 shadow-2xl overflow-hidden relative">
               <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--sp-line)]">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className="ml-2 text-xs font-mono text-[var(--sp-mute)]">
-                    live_widget_studio.tsx
+                    trustpulse_widget_engine.js
                   </span>
                 </div>
 
@@ -141,9 +208,9 @@ export default function HomePage() {
                 <div className="flex items-center p-1 rounded-xl bg-[var(--sp-stage)] text-xs font-medium">
                   <button
                     onClick={() => setActiveWidgetTab("toast")}
-                    className={`px-3 py-1.5 rounded-lg transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       activeWidgetTab === "toast"
-                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-sm font-semibold"
+                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-xs font-semibold"
                         : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
                     }`}
                   >
@@ -151,9 +218,9 @@ export default function HomePage() {
                   </button>
                   <button
                     onClick={() => setActiveWidgetTab("wall")}
-                    className={`px-3 py-1.5 rounded-lg transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       activeWidgetTab === "wall"
-                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-sm font-semibold"
+                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-xs font-semibold"
                         : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
                     }`}
                   >
@@ -161,28 +228,30 @@ export default function HomePage() {
                   </button>
                   <button
                     onClick={() => setActiveWidgetTab("pill")}
-                    className={`px-3 py-1.5 rounded-lg transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       activeWidgetTab === "pill"
-                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-sm font-semibold"
+                        ? "bg-[var(--sp-card)] text-[var(--sp-ink)] shadow-xs font-semibold"
                         : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
                     }`}
                   >
-                    Rating Badge
+                    Corner Rating Pill
                   </button>
                 </div>
               </div>
 
-              {/* Dynamic Tab Body */}
-              <div className="py-8 px-2 sm:px-6 min-h-[300px] flex items-center justify-center">
+              {/* Dynamic Tab Body with Real Avatars */}
+              <div className="py-8 px-2 sm:px-6 min-h-[290px] flex items-center justify-center">
                 {activeWidgetTab === "toast" && (
                   <div className="w-full max-w-md p-4 rounded-2xl border border-[var(--sp-line)] bg-slate-900 text-white shadow-xl animate-fade-in flex gap-3.5 items-start">
-                    <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      S
-                    </div>
+                    <img
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80"
+                      alt="Sarah Jenkins"
+                      className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 flex-shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold text-sm truncate">
-                          Sarah Jenkins (Cosmetic Dentistry)
+                          Sarah Jenkins (Cosmetic Patient)
                         </span>
                         <div className="flex text-amber-400">
                           {Array.from({ length: 5 }).map((_, i) => (
@@ -205,10 +274,17 @@ export default function HomePage() {
                 )}
 
                 {activeWidgetTab === "wall" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full animate-fade-in">
                     <div className="p-4 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/60 text-xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold">Marcus Vance</span>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
+                            alt="Marcus Vance"
+                            className="w-7 h-7 rounded-full object-cover"
+                          />
+                          <span className="font-bold">Marcus Vance</span>
+                        </div>
                         <span className="text-amber-500 font-bold">★★★★★</span>
                       </div>
                       <p className="text-[var(--sp-mute)] leading-relaxed">
@@ -218,9 +294,17 @@ export default function HomePage() {
                         ✓ Verified Patient • Google
                       </div>
                     </div>
+
                     <div className="p-4 rounded-xl border border-[var(--sp-line)] bg-[var(--sp-stage)]/60 text-xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold">Elena Rostova</span>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                            alt="Elena Rostova"
+                            className="w-7 h-7 rounded-full object-cover"
+                          />
+                          <span className="font-bold">Elena Rostova</span>
+                        </div>
                         <span className="text-amber-500 font-bold">★★★★★</span>
                       </div>
                       <p className="text-[var(--sp-mute)] leading-relaxed">
@@ -254,12 +338,12 @@ export default function HomePage() {
               {/* Bottom Script Embed Bar */}
               <div className="pt-4 border-t border-[var(--sp-line)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <div className="font-mono text-[var(--sp-mute)] truncate max-w-md">
-                  &lt;script src=&quot;https://trustpulse-ai.vercel.app/api/widget/script?id=...&quot; defer&gt;&lt;/script&gt;
+                  &lt;script src=&quot;https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts&quot; defer&gt;&lt;/script&gt;
                 </div>
                 <button
                   type="button"
                   onClick={copyEmbedCode}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--sp-line)] bg-[var(--sp-stage)] hover:bg-[var(--sp-line)] transition-colors font-medium text-[var(--sp-ink)]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--sp-line)] bg-[var(--sp-stage)] hover:bg-[var(--sp-line)] transition-colors font-medium text-[var(--sp-ink)] cursor-pointer"
                 >
                   {copiedScript ? (
                     <>
@@ -279,17 +363,22 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            2. INTERACTIVE NEGATIVE REVIEW SHIELD SIMULATOR
+            2. DIAGONAL RIBBON TICKER (Angled Graphic Element)
+           ========================================================================= */}
+        <DiagonalRibbon />
+
+        {/* =========================================================================
+            3. INTERACTIVE NEGATIVE REVIEW SHIELD SIMULATOR
            ========================================================================= */}
         <section id="shield" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/40">
           <div className="mx-auto max-w-5xl">
-            <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 The Core Value Loop
               </div>
               <h2 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
-                See How The Negative Review Shield Works
+                Interactive Shield Simulator
               </h2>
               <p className="text-base sm:text-lg text-[var(--sp-mute)]">
                 Try selecting 5 stars versus 2 stars below to witness how TrustPulse prevents public 1-star Google damage while amplifying happy customers.
@@ -314,7 +403,7 @@ export default function HomePage() {
                     key={star}
                     type="button"
                     onClick={() => setSimulatedRating(star)}
-                    className="p-1.5 transition-transform hover:scale-125 focus:outline-none"
+                    className="p-1.5 transition-transform hover:scale-125 focus:outline-none cursor-pointer"
                   >
                     <Star
                       className={`w-10 h-10 transition-colors ${
@@ -330,7 +419,7 @@ export default function HomePage() {
               {/* Condition 1: 4 or 5 Stars */}
               {simulatedRating !== null && simulatedRating >= 4 && (
                 <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center animate-fade-in">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-lg shadow">
                     ✓
                   </div>
                   <h4 className="text-base font-bold text-emerald-800 dark:text-emerald-300 mb-1">
@@ -339,17 +428,21 @@ export default function HomePage() {
                   <p className="text-xs sm:text-sm text-emerald-900/80 dark:text-emerald-200/80 mb-4 max-w-md mx-auto">
                     TrustPulse automatically prompts the customer to copy their review and redirects them directly to Google Business Profile or Trustpilot in 1 click!
                   </p>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white font-medium text-xs shadow">
-                    <span>Redirecting to Google Maps...</span>
+                  <Link
+                    href="/r/apex-dental"
+                    target="_blank"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition-all"
+                  >
+                    <span>Test Full Live Funnel</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </div>
+                  </Link>
                 </div>
               )}
 
               {/* Condition 2: 1, 2, or 3 Stars */}
               {simulatedRating !== null && simulatedRating < 4 && (
                 <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center animate-fade-in">
-                  <div className="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto mb-3 shadow">
                     <ShieldCheck className="w-6 h-6" />
                   </div>
                   <h4 className="text-base font-bold text-rose-800 dark:text-rose-300 mb-1">
@@ -358,7 +451,7 @@ export default function HomePage() {
                   <p className="text-xs sm:text-sm text-rose-900/80 dark:text-rose-200/80 mb-4 max-w-md mx-auto">
                     <strong>Zero public stars lost.</strong> Instead of posting to Google Maps, an empathetic private feedback form opens directly to the business owner, allowing instant resolution!
                   </p>
-                  <div className="p-3 rounded-xl bg-[var(--sp-card)] border border-[var(--sp-line)] text-left text-xs space-y-1.5 max-w-sm mx-auto text-[var(--sp-ink)]">
+                  <div className="p-3.5 rounded-xl bg-[var(--sp-card)] border border-[var(--sp-line)] text-left text-xs space-y-1.5 max-w-sm mx-auto text-[var(--sp-ink)]">
                     <div className="font-semibold text-rose-600 dark:text-rose-400">
                       Private Resolution Inbox:
                     </div>
@@ -374,11 +467,16 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            3. AGENCY ROI CALCULATOR
+            4. CONTINUOUS MARQUEE TICKER (Real Customer Feedback Cards)
+           ========================================================================= */}
+        <CustomerReviewMarquee />
+
+        {/* =========================================================================
+            5. AGENCY RETENTION & ROI CALCULATOR
            ========================================================================= */}
         <section id="roi" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)]">
           <div className="mx-auto max-w-5xl">
-            <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
+            <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <DollarSign className="w-3.5 h-3.5" />
                 Agency Resale Blueprint
@@ -440,7 +538,7 @@ export default function HomePage() {
                     className="w-full h-2 bg-[var(--sp-stage)] rounded-lg appearance-none cursor-pointer accent-emerald-600"
                   />
                   <div className="flex justify-between text-[11px] text-[var(--sp-mute)] mt-1 font-mono">
-                    <span>$49/mo (Starter)</span>
+                    <span>$49/mo (Basic)</span>
                     <span>$149/mo (Standard)</span>
                     <span>$299/mo (VIP Local)</span>
                   </div>
@@ -489,75 +587,77 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            4. GEMINI AI REVIEW AUTO-RESPONDER SHOWCASE
+            6. COMPETITOR COMPARISON BATTLECARD (TrustPulse vs Birdeye vs Podium)
            ========================================================================= */}
-        <section id="ai-replies" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/30">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/30">
           <div className="mx-auto max-w-5xl">
-            <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold uppercase tracking-wider">
-                <Bot className="w-3.5 h-3.5" />
-                Google Gemini 2.5 Flash Engine
-              </div>
+            <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-emerald-600 font-bold">
+                Honest Market Comparison
+              </span>
               <h2 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
-                AI Auto-Responder with 3 Strategic Angles
+                Why Buyers &amp; Agencies Choose TrustPulse
               </h2>
               <p className="text-base sm:text-lg text-[var(--sp-mute)]">
-                Never leave reviews unanswered. Generate SEO-optimized, de-escalating, and customer loyalty replies in 1.8 seconds.
+                Compare our turnkey, zero-cost architecture against bloated legacy enterprise solutions.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Card 1 */}
-              <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
-                  SEO
-                </div>
-                <h3 className="font-bold text-base">Local SEO Booster</h3>
-                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
-                  Naturally weaves local service keywords and geographic markers into the reply to boost Google Maps local pack rankings without keyword stuffing.
-                </p>
-                <div className="p-3 rounded-xl bg-[var(--sp-stage)] text-xs text-[var(--sp-ink)] italic">
-                  &ldquo;Thank you Sarah! Dr. Thorne and our cosmetic dental team in Austin are thrilled that your dental implant journey was painless!&rdquo;
-                </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold">
-                  DEF
-                </div>
-                <h3 className="font-bold text-base">De-escalation &amp; Empathy</h3>
-                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
-                  Crafted for lukewarm or sensitive feedback: compassionate, professional, defuses tension, and invites offline direct resolution with management.
-                </p>
-                <div className="p-3 rounded-xl bg-[var(--sp-stage)] text-xs text-[var(--sp-ink)] italic">
-                  &ldquo;We hold ourselves to rigorous standards and apologize for the delay. Please reach out to our clinic director directly so we can make this right.&rdquo;
-                </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold">
-                  LOY
-                </div>
-                <h3 className="font-bold text-base">Loyalty &amp; Referral</h3>
-                <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
-                  Deepens relationship with 5-star brand advocates, offering courtesy upgrades on their next visit and encouraging word-of-mouth recommendations.
-                </p>
-                <div className="p-3 rounded-xl bg-[var(--sp-stage)] text-xs text-[var(--sp-ink)] italic">
-                  &ldquo;Clients like you make our practice special! Mention this review during your next visit for a VIP courtesy upgrade.&rdquo;
-                </div>
+            <div className="bg-[var(--sp-card)] rounded-3xl border border-[var(--sp-line)] overflow-hidden shadow-lg">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-[var(--sp-line)] bg-[var(--sp-stage)] text-[var(--sp-mute)]">
+                      <th className="py-4 px-6 font-semibold">Capability</th>
+                      <th className="py-4 px-6 font-bold text-emerald-700 dark:text-emerald-400">TrustPulse AI</th>
+                      <th className="py-4 px-6 font-medium">Birdeye</th>
+                      <th className="py-4 px-6 font-medium">Podium</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--sp-line)]">
+                    <tr>
+                      <td className="py-4 px-6 font-semibold">Monthly Software Cost</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">$0.00 / month</td>
+                      <td className="py-4 px-6 text-slate-500">$399 / location</td>
+                      <td className="py-4 px-6 text-slate-500">$449 / location</td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-semibold">Negative Review Shield</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">✓ Included (1-3★ Gatekeeper)</td>
+                      <td className="py-4 px-6 text-slate-500">Limited / Extra add-on</td>
+                      <td className="py-4 px-6 text-slate-500">No (Public only)</td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-semibold">1-Line Script Embeds</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">✓ Universal (&lt; 15KB)</td>
+                      <td className="py-4 px-6 text-slate-500">Heavy iframe</td>
+                      <td className="py-4 px-6 text-slate-500">Proprietary widget</td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-semibold">AI Auto-Responder</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">✓ Gemini 2.5 Flash (3 Angles)</td>
+                      <td className="py-4 px-6 text-slate-500">Basic template text</td>
+                      <td className="py-4 px-6 text-slate-500">Manual templates</td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-semibold">Codebase Ownership</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">✓ 100% Turnkey Transfer</td>
+                      <td className="py-4 px-6 text-slate-500">SaaS subscription lock-in</td>
+                      <td className="py-4 px-6 text-slate-500">SaaS subscription lock-in</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </section>
 
         {/* =========================================================================
-            5. PRICING SECTION CONNECTED TO STRIPE
+            7. PRICING SECTION CONNECTED TO STRIPE
            ========================================================================= */}
         <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)]">
           <div className="mx-auto max-w-5xl">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
               <span className="text-xs font-mono uppercase tracking-widest text-emerald-600 font-bold">
                 Simple, High-Margin Pricing
               </span>
@@ -602,7 +702,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/dashboard"
-                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold border border-[var(--sp-line)] hover:bg-[var(--sp-stage)] transition-colors"
+                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold border border-[var(--sp-line)] hover:bg-[var(--sp-stage)] transition-colors cursor-pointer"
                 >
                   Choose Starter
                 </Link>
@@ -647,7 +747,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/dashboard"
-                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all"
+                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all cursor-pointer"
                 >
                   Get Growth Pro
                 </Link>
@@ -685,7 +785,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/dashboard/agency"
-                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold border border-[var(--sp-line)] hover:bg-[var(--sp-stage)] transition-colors"
+                  className="mt-8 block w-full py-3 rounded-full text-center text-xs font-bold border border-[var(--sp-line)] hover:bg-[var(--sp-stage)] transition-colors cursor-pointer"
                 >
                   Explore Agency Hub
                 </Link>
@@ -693,8 +793,59 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* =========================================================================
+            8. FREQUENTLY ASKED QUESTIONS
+           ========================================================================= */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/40">
+          <div className="mx-auto max-w-4xl space-y-12">
+            <div className="text-center space-y-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-emerald-600 font-bold">
+                Answers to Common Questions
+              </span>
+              <h2 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
+                Frequently Asked Questions
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  q: "How does the Negative Review Shield work without violating FTC policies?",
+                  a: "TrustPulse acts as an honest customer feedback survey. When customers scan your QR stand, they are asked for their experience. Happy customers are politely invited to share their review publicly on Google. Dissatisfied customers are given an immediate direct communication line to business management so their grievance is solved privately before they feel the need to post publicly.",
+                },
+                {
+                  q: "Can digital marketing agencies resell TrustPulse under their own brand?",
+                  a: "Yes! The Agency Plan ($129/mo) includes full white-label commercial resale rights. You can add your own agency logo, manage dozens of local business clients, and generate monthly branded PDF performance reports to justify your retainers.",
+                },
+                {
+                  q: "How does the 1-line script embed work on client websites?",
+                  a: "Our widget script is pure vanilla JavaScript (< 15KB) hosted on Vercel's global CDN with wildcard CORS headers. Simply paste <script src='...' defer></script> into any HTML, WordPress, Shopify, or Webflow site and the toasts/wall will render automatically.",
+                },
+                {
+                  q: "Is it really $0/month to host and operate?",
+                  a: "Yes. TrustPulse is engineered to run completely inside the permanent free tiers of Vercel (Edge serverless), Supabase (PostgreSQL), and Google Gemini (15 RPM free tier). There are zero required paid SaaS subscriptions.",
+                },
+              ].map((faq, i) => (
+                <div
+                  key={i}
+                  className="p-6 rounded-2xl border border-[var(--sp-line)] bg-[var(--sp-card)] space-y-2 shadow-xs"
+                >
+                  <h3 className="font-bold text-base text-[var(--sp-ink)] flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span>{faq.q}</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[var(--sp-mute)] leading-relaxed pl-6">
+                    {faq.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
+      {/* Footer */}
       <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />
     </div>
   );
