@@ -356,29 +356,29 @@ export function PublicFooter({
   return (
     <>
       <MotionEffects />
-      <footer className="mt-auto bg-night text-[#f3f0e8] relative overflow-hidden">
+      <footer className="mt-auto bg-slate-950 text-slate-100 relative overflow-hidden border-t border-slate-800">
         <div className="mx-auto max-w-[88rem] px-5 sm:px-8 pt-16 sm:pt-24">
           <div className="grid lg:grid-cols-12 gap-10 items-end">
-            <h2 className="sp-display text-[clamp(2.4rem,7vw,6.5rem)] lg:col-span-8">
+            <h2 className="sp-display text-[clamp(2.4rem,7vw,6.5rem)] lg:col-span-8 text-white">
               Protect your stars.
               <br />
               Amplify your <span className="text-emerald-400">social proof.</span>
             </h2>
             <div className="lg:col-span-4 space-y-5">
-              <p className="text-[#f3f0e8]/70 text-[0.95rem] leading-relaxed max-w-sm">
+              <p className="text-slate-300 text-[0.95rem] leading-relaxed max-w-sm">
                 Shield local businesses from unfair 1-star public reviews while streaming verified 5-star customer praise into high-converting website widgets.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 transition-colors shadow-lg"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 transition-colors shadow-lg shadow-emerald-500/20"
                 >
                   Open Live Demo Workspace <span aria-hidden className="ml-1">↗</span>
                 </Link>
                 <Link
                   href="/r/apex-dental"
                   target="_blank"
-                  className="inline-flex items-center justify-center rounded-full border border-white/20 hover:bg-white/10 text-white font-medium px-5 py-3 transition-colors"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-700 hover:bg-slate-900 text-white font-medium px-5 py-3 transition-colors"
                 >
                   Test QR Shield Funnel
                 </Link>
@@ -386,16 +386,16 @@ export function PublicFooter({
             </div>
           </div>
 
-          <div className="mt-16 sm:mt-20 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 border-t border-white/10 pt-10">
+          <div className="mt-16 sm:mt-20 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 border-t border-slate-800/80 pt-10">
             <div className="col-span-2 lg:col-span-1 space-y-4">
               <TrustPulseLogo darkText={false} />
-              <p className="text-xs leading-relaxed text-white/50 max-w-[16rem]">
+              <p className="text-xs leading-relaxed text-slate-400 max-w-[16rem]">
                 Autonomous Social Proof, Multi-Source Review Aggregator &amp; Negative Review Shield for Local Businesses &amp; Agencies.
               </p>
             </div>
             {FOOT_COLS.map((col) => (
               <div key={col.title}>
-                <div className="sp-eyebrow text-white/40 mb-4">{col.title}</div>
+                <div className="sp-eyebrow text-slate-400 mb-4">{col.title}</div>
                 <ul className="space-y-2.5 text-[0.85rem]">
                   {col.links.map((l) => (
                     <li key={l.label}>
@@ -404,14 +404,14 @@ export function PublicFooter({
                           href={l.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-white/80 hover:text-emerald-400 transition-colors font-mono text-[0.78rem]"
+                          className="text-slate-300 hover:text-emerald-400 transition-colors font-mono text-[0.78rem]"
                         >
                           {l.label} ↗
                         </a>
                       ) : (
                         <Link
                           href={l.href}
-                          className="text-white/80 hover:text-emerald-400 transition-colors"
+                          className="text-slate-300 hover:text-emerald-400 transition-colors"
                         >
                           {l.label}
                         </Link>
@@ -423,7 +423,7 @@ export function PublicFooter({
             ))}
           </div>
 
-          <div className="mt-14 py-6 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/50">
+          <div className="mt-14 py-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-400">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               All systems operational · © {new Date().getFullYear()} TrustPulse AI Inc. Built for zero-cost operation.

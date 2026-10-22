@@ -46,7 +46,7 @@ export function DiagonalRibbon() {
   return (
     <div className="relative py-6 overflow-hidden select-none pointer-events-none">
       {/* Rotated slanted background tape */}
-      <div className="w-[120vw] -ml-[10vw] bg-emerald-600 text-slate-950 font-mono font-extrabold text-xs uppercase tracking-widest py-3 -rotate-1 shadow-lg border-y-2 border-emerald-400 flex items-center">
+      <div className="w-[120vw] -ml-[10vw] bg-emerald-600 text-white font-mono font-bold text-xs uppercase tracking-widest py-3 -rotate-1 shadow-lg border-y-2 border-emerald-400/80 flex items-center">
         <div className="flex whitespace-nowrap animate-marquee">
           <span className="mx-4">{ribbonText}</span>
           <span className="mx-4">{ribbonText}</span>

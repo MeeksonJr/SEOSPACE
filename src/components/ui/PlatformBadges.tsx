@@ -2,7 +2,7 @@ import React from "react";
 
 export function GoogleBadge({ className = "h-4" }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-slate-200 shadow-xs text-xs font-semibold text-slate-800 ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 shadow-xs text-xs font-semibold text-slate-800 dark:text-slate-100 ${className}`}>
       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
         <path
           fill="#4285F4"

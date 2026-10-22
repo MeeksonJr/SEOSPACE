@@ -7,31 +7,31 @@
 
 :root,
 html[data-sp-theme="light"] {
-  --sp-paper: #efece4;
-  --sp-card: #faf8f3;
-  --sp-stage: #e4e0d5;
-  --sp-ink: #141413;
-  --sp-mute: #6a665d;
-  --sp-line: #d3cec1;
-  --sp-accent: #ff4d14;
-  --sp-cobalt: #2a4bff;
-  --sp-butter: #f5d547;
-  --sp-night: #101011;
-  --sp-dot: rgba(20, 20, 19, 0.11);
+  --sp-paper: #ffffff;
+  --sp-card: #ffffff;
+  --sp-stage: #f8fafc;
+  --sp-ink: #0f172a;
+  --sp-mute: #475569;
+  --sp-line: #e2e8f0;
+  --sp-accent: #10b981;
+  --sp-cobalt: #2563eb;
+  --sp-butter: #f59e0b;
+  --sp-night: #0f172a;
+  --sp-dot: rgba(15, 23, 42, 0.05);
 }
 
 html[data-sp-theme="dark"] {
-  --sp-paper: #0f0f10;
-  --sp-card: #18181a;
-  --sp-stage: #1b1b1d;
-  --sp-ink: #f3f0e8;
-  --sp-mute: #9d988d;
-  --sp-line: #2c2c2f;
-  --sp-accent: #ff5b24;
-  --sp-cobalt: #4c68ff;
-  --sp-butter: #f5d547;
-  --sp-night: #070708;
-  --sp-dot: rgba(243, 240, 232, 0.09);
+  --sp-paper: #09090b;
+  --sp-card: #121316;
+  --sp-stage: #181a20;
+  --sp-ink: #f8fafc;
+  --sp-mute: #94a3b8;
+  --sp-line: #27272a;
+  --sp-accent: #10b981;
+  --sp-cobalt: #3b82f6;
+  --sp-butter: #fbbf24;
+  --sp-night: #050506;
+  --sp-dot: rgba(248, 250, 252, 0.06);
 }
 
 @theme inline {
@@ -112,11 +112,11 @@ html[data-sp-theme="dark"] {
 .sp-btn:active { transform: translateY(0); }
 .sp-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
 .sp-btn-primary { background: var(--sp-ink); color: var(--sp-paper); }
-.sp-btn-primary:hover { background: var(--sp-accent); color: #141413; }
-.sp-btn-accent { background: var(--sp-accent); color: #141413; }
-.sp-btn-accent:hover { background: var(--sp-ink); color: var(--sp-paper); }
-.sp-btn-ghost { background: transparent; color: var(--sp-ink); border-color: var(--sp-ink); }
-.sp-btn-ghost:hover { background: var(--sp-ink); color: var(--sp-paper); }
+.sp-btn-primary:hover { background: var(--sp-accent); color: #ffffff; }
+.sp-btn-accent { background: var(--sp-accent); color: #ffffff; }
+.sp-btn-accent:hover { background: #059669; color: #ffffff; }
+.sp-btn-ghost { background: transparent; color: var(--sp-ink); border-color: var(--sp-line); }
+.sp-btn-ghost:hover { background: var(--sp-stage); border-color: var(--sp-ink); }
 
 /* ---------- Surfaces & texture ---------- */
 .sp-dots {
@@ -137,8 +137,8 @@ html[data-sp-theme="dark"] {
   outline: none;
 }
 .sp-input::placeholder { color: var(--sp-mute); opacity: 0.8; }
-.sp-card-shadow { box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 18px 32px -20px rgba(20, 20, 19, 0.35); }
-html[data-sp-theme="dark"] .sp-card-shadow { box-shadow: 0 0 0 1px var(--sp-line), 0 22px 40px -22px rgba(0, 0, 0, 0.8); }
+.sp-card-shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05), 0 14px 28px -8px rgba(0,0,0,0.06); }
+html[data-sp-theme="dark"] .sp-card-shadow { box-shadow: 0 0 0 1px var(--sp-line), 0 20px 35px -15px rgba(0, 0, 0, 0.7); }
 
 /* ---------- Tilt + diagonal layout helpers ---------- */
 .sp-tilt-l { transform: rotate(-3deg); }
