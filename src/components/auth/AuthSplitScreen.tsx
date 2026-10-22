@@ -17,6 +17,7 @@ import {
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import { usePublicTheme, ThemeToggleButton } from "@/components/ui/PublicChrome";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import {
   getAdminUsers,
@@ -31,6 +32,7 @@ export function AuthSplitScreen({
   initialMode = "login",
 }: AuthSplitScreenProps) {
   const router = useRouter();
+  const { isDark, toggleTheme } = usePublicTheme(false);
   const [mode, setMode] = useState<"login" | "signup" | "magic">(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,7 +65,7 @@ export function AuthSplitScreen({
       badge: "Real-Time AI Content Studio",
       title: "Write & Optimize Articles with Live 0–100 Scoring",
       subtitle:
-        "Seospace Neural Engine v4.2 rewrites headlines, meta descriptions, and content structure while you type.",
+        "Seospace Neural Engine v4.2 verifies headlines, meta descriptions, and keyword densities while you edit.",
     },
     {
       badge: "Agency White-Label Suite",
@@ -200,35 +202,43 @@ export function AuthSplitScreen({
   }
 
   return (
-    <div className="min-h-screen bg-slate-100/80 flex items-center justify-center p-4 sm:p-6 lg:p-10">
-      <div className="w-full max-w-6xl bg-white rounded-[32px] border border-slate-200/90 shadow-2xl shadow-slate-300/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[700px]">
+    <div className="sp-page min-h-screen bg-paper text-ink flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans">
+      <div className="w-full max-w-6xl bg-card rounded-[32px] border border-line sp-card-shadow overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[720px]">
         {/* LEFT COLUMN: Clean Onboarding & Login Form */}
-        <div className="lg:col-span-6 p-5 sm:p-10 lg:p-12 flex flex-col justify-between">
+        <div className="lg:col-span-6 p-6 sm:p-10 lg:p-12 flex flex-col justify-between">
           <div>
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <Link href="/">
-                <SeospaceLogo size="md" />
+                <SeospaceLogo auto size="md" />
               </Link>
               <div className="flex items-center gap-2">
-                <OpenSiteNavigatorButton label="All Pages" />
+                <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
+                <OpenSiteNavigatorButton variant="dark" label="All Pages" />
                 <Link
                   href="/"
-                  className="text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                  className="text-xs font-semibold text-mute hover:text-ink transition"
                 >
                   ← Home
                 </Link>
               </div>
             </div>
 
-            <div className="mt-10">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
+            <div className="mt-8">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
+                {mode === "login"
+                  ? "Account Access"
+                  : mode === "signup"
+                  ? "Free 14-Day Agency Trial"
+                  : "Passwordless Sign-In"}
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-ink mt-1">
                 {mode === "login"
                   ? "Welcome back to Seospace"
                   : mode === "signup"
                   ? "Create your growth workspace"
                   : "Sign in with Magic Link"}
               </h1>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-xs sm:text-sm text-mute leading-relaxed">
                 {mode === "login"
                   ? "Sign in to access your AI SEO audits, content studio, and white-label reports."
                   : "Start with 3 free deep audits/month or unlock unlimited agency white-labeling."}
@@ -236,7 +246,7 @@ export function AuthSplitScreen({
             </div>
 
             {/* Mode Switcher Tabs */}
-            <div className="mt-6 grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200/70 text-xs font-semibold">
+            <div className="mt-6 grid grid-cols-3 gap-1 p-1 rounded-2xl bg-stage border border-line text-xs font-bold">
               <button
                 type="button"
                 onClick={() => {
@@ -244,10 +254,10 @@ export function AuthSplitScreen({
                   setMagicLinkSent(false);
                   setAuthError("");
                 }}
-                className={`py-2 rounded-lg transition cursor-pointer ${
+                className={`py-2 rounded-xl transition cursor-pointer ${
                   mode === "login"
-                    ? "bg-white text-slate-950 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-night text-[#f3f0e8] shadow-xs"
+                    : "text-mute hover:text-ink"
                 }`}
               >
                 Sign In
@@ -259,10 +269,10 @@ export function AuthSplitScreen({
                   setMagicLinkSent(false);
                   setAuthError("");
                 }}
-                className={`py-2 rounded-lg transition cursor-pointer ${
+                className={`py-2 rounded-xl transition cursor-pointer ${
                   mode === "signup"
-                    ? "bg-white text-slate-950 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-night text-[#f3f0e8] shadow-xs"
+                    : "text-mute hover:text-ink"
                 }`}
               >
                 Create Account
@@ -273,10 +283,10 @@ export function AuthSplitScreen({
                   setMode("magic");
                   setAuthError("");
                 }}
-                className={`py-2 rounded-lg transition cursor-pointer ${
+                className={`py-2 rounded-xl transition cursor-pointer ${
                   mode === "magic"
-                    ? "bg-white text-slate-950 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-night text-[#f3f0e8] shadow-xs"
+                    : "text-mute hover:text-ink"
                 }`}
               >
                 Magic Link
@@ -284,13 +294,13 @@ export function AuthSplitScreen({
             </div>
 
             {/* 1-Click Google OAuth Button */}
-            <div className="mt-6">
+            <div className="mt-5">
               <button
                 type="button"
                 onClick={handleInstantDemo}
-                className="w-full py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm flex items-center justify-center gap-3 shadow-2xs transition cursor-pointer"
+                className="w-full py-3 px-4 rounded-2xl border border-line bg-stage hover:bg-card text-ink font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 transition cursor-pointer"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
@@ -313,34 +323,33 @@ export function AuthSplitScreen({
             </div>
 
             <div className="my-5 flex items-center gap-3">
-              <div className="h-px bg-slate-200 flex-1" />
-              <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
-                or continue with email
+              <div className="h-px bg-line flex-1" />
+              <span className="text-[11px] uppercase tracking-wider text-mute font-mono font-semibold">
+                or with email
               </span>
-              <div className="h-px bg-slate-200 flex-1" />
+              <div className="h-px bg-line flex-1" />
             </div>
 
             {authError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+              <div className="mb-4 p-3.5 rounded-2xl bg-card border border-rose-300 text-xs font-semibold text-rose-600">
                 {authError}
               </div>
             )}
 
             {mode === "magic" && magicLinkSent ? (
-              <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+              <div className="p-5 rounded-2xl bg-stage border border-line space-y-3">
+                <div className="flex items-center gap-2 text-ink font-bold text-sm font-display">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>Magic Sign-In Link Dispatched!</span>
                 </div>
-                <p className="text-xs text-emerald-700 leading-relaxed">
+                <p className="text-xs text-mute leading-relaxed">
                   We sent an encrypted one-time sign-in link to{" "}
-                  <strong>{email}</strong>. Click below to verify and enter your
-                  workspace immediately.
+                  <strong className="text-ink">{email}</strong>. Click below to verify and enter your workspace immediately.
                 </p>
                 <button
                   type="button"
                   onClick={handleVerifyMagicLink}
-                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition"
+                  className="sp-btn sp-btn-accent w-full text-xs"
                 >
                   ✓ Verify Magic Link &amp; Enter Workspace →
                 </button>
@@ -350,36 +359,36 @@ export function AuthSplitScreen({
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "signup" && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-ink mb-1.5 font-mono">
                       Full Name or Agency Name
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <User className="w-4 h-4 text-mute absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Zaim Maulana / Apex Agency"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-line bg-stage text-ink text-sm focus:outline-none focus:border-accent"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-ink mb-1.5 font-mono">
                     Work Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-mute absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@agency.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-line bg-stage text-ink text-sm focus:outline-none focus:border-accent"
                     />
                   </div>
                 </div>
@@ -387,19 +396,19 @@ export function AuthSplitScreen({
                 {mode !== "magic" && (
                   <div>
                     <div className="flex items-center justify-between text-xs mb-1.5">
-                      <label className="font-semibold text-slate-700">
+                      <label className="font-semibold text-ink font-mono">
                         Password (min. 6 characters)
                       </label>
                       <button
                         type="button"
                         onClick={() => setMode("magic")}
-                        className="text-blue-600 hover:underline font-medium cursor-pointer"
+                        className="text-accent hover:underline font-medium cursor-pointer"
                       >
                         Forgot password?
                       </button>
                     </div>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-4 h-4 text-mute absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="password"
                         required
@@ -407,7 +416,7 @@ export function AuthSplitScreen({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••••••"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-600"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-line bg-stage text-ink text-sm focus:outline-none focus:border-accent"
                       />
                     </div>
                   </div>
@@ -416,7 +425,7 @@ export function AuthSplitScreen({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
+                  className="sp-btn sp-btn-primary w-full py-3 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>
                     {loading
@@ -434,17 +443,17 @@ export function AuthSplitScreen({
           </div>
 
           {/* 1-Click Instant Demo Sandbox for Flippa Buyers */}
-          <div className="mt-8 pt-5 border-t border-slate-100">
-            <div className="p-3.5 rounded-2xl bg-blue-50/90 border border-blue-200/80 flex items-center justify-between gap-3">
+          <div className="mt-8 pt-5 border-t border-line">
+            <div className="p-4 rounded-2xl bg-stage border border-line flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-accent text-[#141413] flex items-center justify-center shrink-0 font-bold">
                   <Zap className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">
+                  <div className="text-xs font-bold text-ink font-display">
                     Evaluating or Reviewing Seospace?
                   </div>
-                  <div className="text-[11px] text-slate-600">
+                  <div className="text-[11px] text-mute">
                     Launch the pre-populated Agency Pro workspace in 1 click.
                   </div>
                 </div>
@@ -452,7 +461,7 @@ export function AuthSplitScreen({
               <button
                 type="button"
                 onClick={handleInstantDemo}
-                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 transition cursor-pointer"
+                className="sp-btn sp-btn-accent text-xs shrink-0"
               >
                 1-Click Demo →
               </button>
@@ -461,35 +470,33 @@ export function AuthSplitScreen({
         </div>
 
         {/* RIGHT COLUMN: Interactive Onboarding Showcase */}
-        <div className="lg:col-span-6 bg-[#050814] text-white p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden bg-seospace-dark-grid">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-blue-300 border border-white/10">
-              <Sparkles className="w-3.5 h-3.5" />{" "}
+        <div className="lg:col-span-6 bg-night text-[#f3f0e8] p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden border-t lg:border-t-0 lg:border-l border-[#2a2a2c]">
+          <div className="flex items-center justify-between relative z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-accent text-[#141413]">
+              <Sparkles className="w-3.5 h-3.5" />
               {onboardingSlides[slideIndex].badge}
             </span>
-            <div className="flex items-center gap-1 text-amber-400 text-xs">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span className="font-bold text-white">4.9/5</span>
-              <span className="text-slate-400">(420+ Agencies)</span>
+            <div className="flex items-center gap-1 text-accent text-xs font-mono">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              <span className="font-bold text-[#f3f0e8]">4.9/5</span>
+              <span className="text-[#8a8984]">(420+ Agencies)</span>
             </div>
           </div>
 
-          <div className="relative z-10 my-8 bg-[#0C1226]/95 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          {/* Tactile Mock Audit Box */}
+          <div className="relative z-10 my-8 bg-[#141415] border border-[#2a2a2c] rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-[#2a2a2c]">
               <div>
-                <div className="text-xs text-slate-400">Live Audited Domain</div>
-                <div className="text-sm font-bold text-white flex items-center gap-2 mt-0.5">
+                <div className="text-[11px] font-mono text-[#8a8984] uppercase">Live Audited Domain</div>
+                <div className="text-sm font-bold text-[#f3f0e8] flex items-center gap-2 mt-0.5 font-mono">
                   <span>https://stripe.com</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">
                     Verified
                   </span>
                 </div>
               </div>
-              <span className="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-semibold">
-                ✨ Seospace Neural Engine v4.2
+              <span className="px-3 py-1 rounded-xl bg-accent text-[#141413] text-xs font-bold font-mono">
+                ✨ Neural Engine v4.2
               </span>
             </div>
 
@@ -497,39 +504,39 @@ export function AuthSplitScreen({
               <div>
                 <SegmentedGauge
                   score={92}
-                  sublabel="Your Score is Excellent"
+                  sublabel="Score is Excellent"
                   theme="dark"
                   size="sm"
                 />
               </div>
 
               <div className="space-y-2.5 text-xs">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Active Diagnostics
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[#8a8984] font-mono">
+                  Active Signals
                 </div>
-                <div className="flex items-center gap-2 text-slate-200">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
+                <div className="flex items-center gap-2 text-[#f3f0e8]">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-[#141413] font-bold flex items-center justify-center text-[10px]">
                     ✓
                   </span>
                   <span>Primary H1 &amp; Meta Title aligned</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-200">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
+                <div className="flex items-center gap-2 text-[#f3f0e8]">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-[#141413] font-bold flex items-center justify-center text-[10px]">
                     ✓
                   </span>
                   <span>Cloudflare 1.1.1.1 SPF + DMARC Verified</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-200">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-[10px]">
+                <div className="flex items-center gap-2 text-[#f3f0e8]">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-[#141413] font-bold flex items-center justify-center text-[10px]">
                     ✓
                   </span>
                   <span>White-Label Agency PDF Ready</span>
                 </div>
-                <div className="pt-2 flex flex-wrap gap-1.5">
-                  <span className="px-2 py-0.5 rounded bg-blue-600/30 text-blue-300 text-[11px]">
+                <div className="pt-2 flex flex-wrap gap-1.5 font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-accent text-[11px] font-bold">
                     CRO +14.2%
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-sky-500/30 text-sky-300 text-[11px]">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-400 text-[11px] font-bold">
                     GEO Ready
                   </span>
                 </div>
@@ -538,10 +545,10 @@ export function AuthSplitScreen({
           </div>
 
           <div className="relative z-10">
-            <h2 className="text-2xl font-bold leading-snug">
+            <h2 className="text-2xl font-bold font-display text-[#f3f0e8] leading-snug">
               {onboardingSlides[slideIndex].title}
             </h2>
-            <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+            <p className="mt-2 text-xs sm:text-sm text-[#8a8984] leading-relaxed">
               {onboardingSlides[slideIndex].subtitle}
             </p>
 
@@ -554,13 +561,13 @@ export function AuthSplitScreen({
                     onClick={() => setSlideIndex(idx)}
                     className={`h-2 rounded-full transition-all cursor-pointer ${
                       slideIndex === idx
-                        ? "w-8 bg-blue-500"
-                        : "w-2 bg-slate-700 hover:bg-slate-600"
+                        ? "w-8 bg-accent"
+                        : "w-2 bg-[#2a2a2c] hover:bg-white/40"
                     }`}
                   />
                 ))}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-xs text-[#8a8984] font-mono">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>SOC2 &amp; GDPR Compliant</span>
               </div>

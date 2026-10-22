@@ -22,6 +22,7 @@ import {
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import { usePublicTheme, ThemeToggleButton } from "@/components/ui/PublicChrome";
 import {
   getAuditById,
   getSavedArticles,
@@ -35,6 +36,7 @@ import { SAMPLE_AUDITS } from "@/lib/sample-audits";
 import { AuditReport, PillarKey, WhiteLabelConfig } from "@/types/audit";
 
 export default function AuditReportPage() {
+  const { isDark, toggleTheme } = usePublicTheme(false);
   const params = useParams();
   const reportId = (params?.id as string) || "voice-one-com";
 
@@ -149,30 +151,31 @@ export default function AuditReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 pb-20">
+    <div className="min-h-screen bg-paper text-ink pb-20 font-sans">
       {/* Top Action Control Bar (Hidden when printing to PDF) */}
-      <div className="no-print bg-slate-950 text-white py-2.5 px-6 border-b border-slate-800 sticky top-0 z-30">
+      <div className="no-print bg-night text-[#f3f0e8] py-2.5 px-4 sm:px-6 border-b border-[#2a2a2c] sticky top-0 z-30">
         <div className="w-full max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="text-slate-300 hover:text-white inline-flex items-center gap-1.5 font-medium"
+              className="text-[#8a8984] hover:text-[#f3f0e8] inline-flex items-center gap-1.5 font-medium transition"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
             </Link>
-            <span className="text-slate-700">|</span>
-            <span className="text-slate-400">
+            <span className="text-[#3a3a3c]">|</span>
+            <span className="text-[#8a8984]">
               Audited URL:{" "}
-              <strong className="text-white">{report.url}</strong>
+              <strong className="text-[#f3f0e8] font-mono">{report.url}</strong>
             </span>
-            <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-mono">
+            <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono">
               <Database className="w-3 h-3" />
               {report.metadata?.extractionSource || "RapidAPI + Live DOM"}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 text-[11px]">
+            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
+            <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/40 border border-[#2a2a2c] text-[#8a8984] text-[11px] font-mono">
               {freshlyFetched ? (
                 <span className="text-emerald-400 font-semibold">
                   ✓ Fresh Live Data Fetched &amp; Saved
@@ -191,7 +194,7 @@ export default function AuditReportPage() {
 
             <Link
               href={`/compare?primary=${encodeURIComponent(report.url)}`}
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-cobalt hover:opacity-90 text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition"
             >
               <span>⚔️ Compare vs. Competitor</span>
             </Link>
@@ -199,7 +202,7 @@ export default function AuditReportPage() {
             <button
               onClick={() => handleLiveRescan(undefined, true)}
               disabled={rescanning}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-accent text-[#141413] hover:opacity-90 font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition"
             >
               {rescanning ? (
                 <>
@@ -216,20 +219,20 @@ export default function AuditReportPage() {
 
             <button
               onClick={() => setWhiteLabelPreview(!whiteLabelPreview)}
-              className={`px-3 py-1.5 rounded-lg font-semibold border transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl font-semibold border transition cursor-pointer text-xs ${
                 whiteLabelPreview
-                  ? "bg-blue-600/20 border-blue-500 text-blue-300"
-                  : "bg-slate-900 border-slate-700 text-slate-400"
+                  ? "bg-accent/20 border-accent/40 text-accent font-bold"
+                  : "bg-black/30 border-[#2a2a2c] text-[#8a8984] hover:text-[#f3f0e8]"
               }`}
             >
               {whiteLabelPreview
-                ? "✓ White-Label Agency Mode: ON"
-                : "White-Label Agency Mode: OFF"}
+                ? "✓ White-Label Mode: ON"
+                : "White-Label Mode: OFF"}
             </button>
 
             <button
               onClick={handleCopyShareLink}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-[#f3f0e8] font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>{copiedLink ? "Link Copied!" : "Share Report"}</span>
@@ -237,41 +240,42 @@ export default function AuditReportPage() {
 
             <button
               onClick={() => window.print()}
-              className="px-3.5 py-1.5 rounded-lg bg-white text-slate-950 hover:bg-slate-100 font-bold inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-[#f3f0e8] text-[#141413] hover:bg-white font-bold inline-flex items-center gap-1.5 cursor-pointer transition shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Export White-Label PDF</span>
+              <span>Export PDF</span>
             </button>
 
+            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
             <OpenSiteNavigatorButton variant="dark" label="All Pages" />
           </div>
         </div>
       </div>
 
       {/* Branded Report Header */}
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-card border-b border-line text-ink">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-3 min-h-[5rem] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {whiteLabelPreview ? (
               <div className="flex items-center gap-2.5">
                 <div
                   style={{ backgroundColor: whiteLabel.primaryColor }}
-                  className="w-9 h-9 rounded-xl text-white font-extrabold text-sm flex items-center justify-center shadow-xs"
+                  className="w-10 h-10 rounded-2xl text-white font-extrabold text-sm flex items-center justify-center shadow-xs"
                 >
                   {whiteLabel.agencyName.charAt(0)}
                 </div>
                 <div>
-                  <div className="text-base font-extrabold tracking-tight text-slate-950">
+                  <div className="text-base font-bold tracking-tight text-ink font-display">
                     {whiteLabel.agencyName}
                   </div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-[11px] text-mute font-mono">
                     Official Technical SEO, CRO &amp; AI Search Diagnostic
                   </div>
                 </div>
               </div>
             ) : (
               <Link href="/">
-                <SeospaceLogo />
+                <SeospaceLogo auto />
               </Link>
             )}
           </div>
@@ -286,7 +290,7 @@ export default function AuditReportPage() {
                   ? { backgroundColor: whiteLabel.primaryColor }
                   : undefined
               }
-              className="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs hover:opacity-95 transition"
+              className="px-4 py-2.5 rounded-xl bg-accent text-[#141413] hover:opacity-90 text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition"
             >
               <span>
                 {whiteLabelPreview
@@ -302,23 +306,24 @@ export default function AuditReportPage() {
       {/* Main Report Container */}
       <div className="w-full max-w-[1440px] mx-auto px-6 pt-8 space-y-8">
         {/* Executive Overview Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow text-ink">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50/80 border border-slate-200/70">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 rounded-2xl bg-stage border border-line">
+              <div className="text-xs font-mono font-bold uppercase tracking-wider text-mute mb-2">
                 UNINFLATED MATHEMATICAL SCORE
               </div>
               <SegmentedGauge
                 score={report.overallScore}
                 sublabel={`Grade ${report.letterGrade} — ${report.statusLabel}`}
                 size="lg"
+                theme={isDark ? "dark" : "light"}
               />
               <div className="mt-4 flex items-center gap-3 text-xs">
-                <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-bold">
+                <span className="px-2.5 py-1 rounded-full font-mono bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold">
                   {report.estimatedConversionLift}
                 </span>
-                <span className="text-slate-500">
-                  TTFB: <strong>{report.responseTimeMs}ms</strong>
+                <span className="text-mute font-mono">
+                  TTFB: <strong className="text-ink">{report.responseTimeMs}ms</strong>
                 </span>
               </div>
             </div>
@@ -326,16 +331,16 @@ export default function AuditReportPage() {
             <div className="lg:col-span-8 space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-accent/15 text-accent border border-accent/25">
                     <Sparkles className="w-3.5 h-3.5" /> Seospace Neural Engine
                     + RapidAPI Metadata Diagnostic
                   </span>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-950 mt-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-ink mt-2 font-display">
                     {report.domain} — Growth &amp; Technical SEO Audit
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+                  <span className="text-xs text-mute bg-stage border border-line px-3 py-1.5 rounded-xl font-mono font-medium">
                     Saved Snapshot:{" "}
                     {new Date(report.createdAt).toLocaleDateString()}{" "}
                     {new Date(report.createdAt).toLocaleTimeString([], {
@@ -346,51 +351,51 @@ export default function AuditReportPage() {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200/60">
+              <p className="text-sm text-mute leading-relaxed bg-stage p-4 rounded-2xl border border-line">
                 {report.executiveSummary}
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                <div className="p-3 rounded-xl border border-slate-200/80 bg-white">
-                  <div className="text-[11px] text-slate-400">
+                <div className="p-3.5 rounded-2xl border border-line bg-stage">
+                  <div className="text-[11px] text-mute font-mono">
                     Indexed Words
                   </div>
-                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                  <div className="text-sm font-bold text-ink mt-0.5 font-display">
                     {report.wordCount.toLocaleString()} words
                   </div>
                 </div>
-                <div className="p-3 rounded-xl border border-slate-200/80 bg-white">
-                  <div className="text-[11px] text-slate-400">
+                <div className="p-3.5 rounded-2xl border border-line bg-stage">
+                  <div className="text-[11px] text-mute font-mono">
                     Internal / Ext Links
                   </div>
-                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                  <div className="text-sm font-bold text-ink mt-0.5 font-mono">
                     {report.metadata.internalLinks} /{" "}
                     {report.metadata.externalLinks}
                   </div>
                 </div>
-                <div className="p-3 rounded-xl border border-slate-200/80 bg-white">
-                  <div className="text-[11px] text-slate-400">
+                <div className="p-3.5 rounded-2xl border border-line bg-stage">
+                  <div className="text-[11px] text-mute font-mono">
                     JSON-LD Schema
                   </div>
                   <div
                     className={`text-sm font-bold mt-0.5 ${
                       report.metadata.hasJsonLd
-                        ? "text-emerald-600"
-                        : "text-rose-600"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {report.metadata.hasJsonLd ? "✓ Verified" : "✕ Missing"}
                   </div>
                 </div>
-                <div className="p-3 rounded-xl border border-slate-200/80 bg-white">
-                  <div className="text-[11px] text-slate-400">
+                <div className="p-3.5 rounded-2xl border border-line bg-stage">
+                  <div className="text-[11px] text-mute font-mono">
                     AI Search /llms.txt
                   </div>
                   <div
                     className={`text-sm font-bold mt-0.5 ${
                       report.metadata.hasLlmsTxt
-                        ? "text-emerald-600"
-                        : "text-amber-600"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-amber-600 dark:text-amber-400"
                     }`}
                   >
                     {report.metadata.hasLlmsTxt ? "✓ Active" : "⚠ Missing"}
@@ -401,36 +406,36 @@ export default function AuditReportPage() {
           </div>
 
           {/* 5 Pillar Score Cards Row */}
-          <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="mt-8 pt-6 border-t border-line grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {(Object.keys(report.pillars) as PillarKey[]).map((key) => {
               const p = report.pillars[key];
               return (
                 <div
                   key={key}
-                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between"
+                  className="p-4 rounded-2xl border border-line bg-stage flex flex-col justify-between text-ink"
                 >
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                    <div className="flex items-center justify-between text-xs font-bold text-ink">
                       <span>{p.label}</span>
                       <span
-                        className={`px-2 py-0.5 rounded ${
+                        className={`px-2 py-0.5 rounded-full font-mono text-[11px] border ${
                           p.score >= 80
-                            ? "bg-emerald-100 text-emerald-700"
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                             : p.score >= 60
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-rose-100 text-rose-700"
+                            ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                            : "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
                         }`}
                       >
                         {p.grade}
                       </span>
                     </div>
                     <div className="mt-3 flex items-baseline gap-1">
-                      <span className="text-2xl font-extrabold text-slate-950">
+                      <span className="text-2xl font-extrabold text-ink font-display">
                         {p.score}
                       </span>
-                      <span className="text-xs text-slate-400">/100</span>
+                      <span className="text-xs text-mute font-mono">/100</span>
                     </div>
-                    <div className="mt-2 w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div className="mt-2 w-full h-2 rounded-full bg-card border border-line overflow-hidden">
                       <div
                         style={{ width: `${p.score}%` }}
                         className={`h-full rounded-full ${
@@ -443,7 +448,7 @@ export default function AuditReportPage() {
                       />
                     </div>
                   </div>
-                  <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
+                  <p className="mt-3 text-[11px] text-mute leading-relaxed">
                     {p.summary}
                   </p>
                 </div>
@@ -455,18 +460,18 @@ export default function AuditReportPage() {
         {/* ============================================================
             LIVE EXTRACTED METADATA & RAPIDAPI INSPECTOR SECTION
            ============================================================ */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow space-y-6 text-ink">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
                 REAL-TIME RAPIDAPI URL-TO-METADATA + DOM EXTRACTION
               </span>
-              <h2 className="text-xl font-bold text-slate-950 mt-0.5">
+              <h2 className="text-xl sm:text-2xl font-bold text-ink mt-0.5 font-display">
                 Live Extracted Website Metadata &amp; OpenGraph Tags
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-mute mt-0.5">
                 Authentic metadata payload extracted directly from{" "}
-                <strong>{report.url}</strong> and stored in your server
+                <strong className="text-ink">{report.url}</strong> and stored in your server
                 database.
               </p>
             </div>
@@ -474,9 +479,9 @@ export default function AuditReportPage() {
             <button
               type="button"
               onClick={() => setShowAllMetaTags(!showAllMetaTags)}
-              className="no-print px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-center"
+              className="no-print px-3.5 py-2 rounded-xl border border-line bg-stage hover:bg-stage/80 text-xs font-semibold text-ink inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-center transition"
             >
-              <Code2 className="w-3.5 h-3.5 text-blue-600" />
+              <Code2 className="w-3.5 h-3.5 text-accent" />
               <span>
                 {showAllMetaTags
                   ? "Hide Raw Meta Tag Table"
@@ -487,49 +492,49 @@ export default function AuditReportPage() {
 
           {/* Core Extracted Fields Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="text-[11px] font-bold uppercase text-slate-400">
+            <div className="p-4 rounded-2xl bg-stage border border-line text-ink">
+              <div className="text-[11px] font-mono font-bold uppercase text-mute">
                 Extracted &lt;title&gt; ({report.metadata.title.length} chars)
               </div>
-              <div className="text-xs font-semibold text-slate-900 mt-1 break-words">
+              <div className="text-xs font-semibold text-ink mt-1 break-words">
                 {report.metadata.title || "Missing <title>"}
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="text-[11px] font-bold uppercase text-slate-400">
+            <div className="p-4 rounded-2xl bg-stage border border-line text-ink">
+              <div className="text-[11px] font-mono font-bold uppercase text-mute">
                 Meta Description ({report.metadata.description.length} chars)
               </div>
-              <div className="text-xs text-slate-700 mt-1 line-clamp-3">
+              <div className="text-xs text-mute mt-1 line-clamp-3 leading-relaxed">
                 {report.metadata.description || "Missing meta description"}
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="text-[11px] font-bold uppercase text-slate-400">
+            <div className="p-4 rounded-2xl bg-stage border border-line text-ink">
+              <div className="text-[11px] font-mono font-bold uppercase text-mute">
                 Language / CMS Generator
               </div>
-              <div className="text-xs font-semibold text-slate-900 mt-1">
+              <div className="text-xs font-semibold text-ink mt-1">
                 Lang: {report.metadata.language || "en"} • Generator:{" "}
                 {report.metadata.generator || "Custom / Next.js"}
               </div>
               {report.metadata.modifiedTime && (
-                <div className="text-[11px] text-amber-700 font-medium mt-1">
+                <div className="text-[11px] text-amber-600 dark:text-amber-400 font-mono mt-1">
                   Last Modified: {report.metadata.modifiedTime.slice(0, 10)}
                 </div>
               )}
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="text-[11px] font-bold uppercase text-slate-400">
+            <div className="p-4 rounded-2xl bg-stage border border-line text-ink">
+              <div className="text-[11px] font-mono font-bold uppercase text-mute">
                 Viewport &amp; OpenGraph Image
               </div>
-              <div className="text-xs font-semibold text-slate-900 mt-1 truncate">
+              <div className="text-xs font-semibold text-ink mt-1 truncate">
                 {report.metadata.viewport || "width=device-width, initial-scale=1"}
               </div>
               <div
-                className={`text-[11px] font-bold mt-1 ${
-                  report.metadata.ogImage ? "text-emerald-600" : "text-rose-600"
+                className={`text-[11px] font-mono font-bold mt-1 ${
+                  report.metadata.ogImage ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                 }`}
               >
                 og:image: {report.metadata.ogImage ? "✓ Present" : "✕ Missing"}
@@ -539,17 +544,17 @@ export default function AuditReportPage() {
 
           {/* Raw Meta Tags Key-Value Inspector Table */}
           {showAllMetaTags && rawMetaEntries.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 overflow-hidden">
-              <div className="bg-slate-950 text-white px-4 py-2.5 flex items-center justify-between text-xs">
-                <span className="font-mono font-semibold text-blue-300">
+            <div className="rounded-2xl border border-line overflow-hidden">
+              <div className="bg-night text-[#f3f0e8] px-4 py-2.5 flex items-center justify-between text-xs border-b border-[#2a2a2c]">
+                <span className="font-mono font-semibold text-accent">
                   RapidAPI url-to-metadata → metaTags ({rawMetaEntries.length}{" "}
                   extracted keys)
                 </span>
-                <span className="text-[11px] text-slate-400">
-                  Saved to Server DB (.data/seospace-db.json)
+                <span className="text-[11px] text-[#8a8984] font-mono">
+                  Saved to Server DB
                 </span>
               </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 bg-white">
+              <div className="max-h-72 overflow-y-auto divide-y divide-line bg-card">
                 {rawMetaEntries.map(([k, v]) => {
                   const isDefect =
                     (k === "viewport" &&
@@ -560,19 +565,19 @@ export default function AuditReportPage() {
                   return (
                     <div
                       key={k}
-                      className={`px-4 py-2.5 grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs ${
-                        isDefect ? "bg-rose-50/70" : "hover:bg-slate-50"
+                      className={`px-4 py-2.5 grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs transition ${
+                        isDefect ? "bg-rose-500/10" : "hover:bg-stage/60"
                       }`}
                     >
-                      <div className="sm:col-span-4 font-mono font-bold text-slate-800 flex items-center gap-2">
+                      <div className="sm:col-span-4 font-mono font-bold text-ink flex items-center gap-2">
                         <span>{k}</span>
                         {isDefect && (
-                          <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-sans">
+                          <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-sans">
                             SEO/WCAG Defect
                           </span>
                         )}
                       </div>
-                      <div className="sm:col-span-8 font-mono text-slate-600 break-all">
+                      <div className="sm:col-span-8 font-mono text-mute break-all">
                         {v}
                       </div>
                     </div>
@@ -584,78 +589,78 @@ export default function AuditReportPage() {
 
           {/* Live Cloudflare 1.1.1.1 DNS, Email Security, Wayback & AI Crawler Intelligence */}
           {report.metadata?.dns && (
-            <div className="pt-4 border-t border-slate-100 space-y-3">
+            <div className="pt-4 border-t border-line space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                <div className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
                   CLOUDFLARE 1.1.1.1 DNS-OVER-HTTPS • EMAIL SECURITY &amp; AI CRAWLER ACCESS
                 </div>
-                <span className="text-[11px] font-mono text-slate-400">
+                <span className="text-[11px] font-mono text-mute">
                   Zero-Key Public Intelligence Layer
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                <div className="p-3.5 rounded-2xl bg-stage border border-line text-ink">
+                  <div className="text-[11px] font-mono font-bold uppercase text-mute">
                     Mail Provider &amp; SPF
                   </div>
-                  <div className="font-bold text-slate-900 mt-1">
+                  <div className="font-bold text-ink mt-1 font-display">
                     {report.metadata.dns.mailProvider}
                   </div>
                   <div
                     className={`mt-1 font-semibold ${
                       report.metadata.dns.hasSpf
-                        ? "text-emerald-600"
-                        : "text-rose-600"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     SPF: {report.metadata.dns.hasSpf ? "✓ Configured" : "✕ Missing"}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                <div className="p-3.5 rounded-2xl bg-stage border border-line text-ink">
+                  <div className="text-[11px] font-mono font-bold uppercase text-mute">
                     DMARC Anti-Spoofing Policy
                   </div>
                   <div
                     className={`font-bold mt-1 ${
                       report.metadata.dns.hasDmarc
-                        ? "text-emerald-600"
-                        : "text-rose-600"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {report.metadata.dns.hasDmarc
                       ? `✓ Active (p=${report.metadata.dns.dmarcPolicy})`
                       : "✕ Missing _dmarc TXT"}
                   </div>
-                  <div className="text-[11px] font-mono text-slate-500 mt-1 truncate">
+                  <div className="text-[11px] font-mono text-mute mt-1 truncate">
                     {report.metadata.dns.dmarcRecord ||
                       `_dmarc.${report.domain} not set`}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                <div className="p-3.5 rounded-2xl bg-stage border border-line text-ink">
+                  <div className="text-[11px] font-mono font-bold uppercase text-mute">
                     A Records &amp; Nameservers
                   </div>
-                  <div className="font-mono font-semibold text-slate-900 mt-1 truncate">
+                  <div className="font-mono font-semibold text-ink mt-1 truncate">
                     IP: {report.metadata.dns.aRecords?.[0] || "Edge Anycast"}
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1 truncate">
+                  <div className="text-[11px] text-mute font-mono mt-1 truncate">
                     NS: {report.metadata.dns.nameservers?.slice(0, 2).join(", ") || "Cloudflare"}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">
+                <div className="p-3.5 rounded-2xl bg-stage border border-line text-ink">
+                  <div className="text-[11px] font-mono font-bold uppercase text-mute">
                     Domain Age &amp; AI Crawlers
                   </div>
-                  <div className="font-bold text-slate-900 mt-1">
+                  <div className="font-bold text-ink mt-1">
                     {report.metadata.domainHistory?.firstSeenYear
                       ? `Since ${report.metadata.domainHistory.firstSeenYear} (${report.metadata.domainHistory.domainAgeYears} yrs)`
                       : "Active Domain"}
                   </div>
-                  <div className="text-[11px] text-emerald-700 font-semibold mt-1">
+                  <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
                     GPTBot:{" "}
                     {report.metadata.robotsAnalysis?.allowsGptBot !== false
                       ? "✓ Allowed"
@@ -674,19 +679,19 @@ export default function AuditReportPage() {
         {/* ============================================================
             CONNECTED AI ARTICLES & CONTENT FIXES FOR THIS DOMAIN
            ============================================================ */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-6">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow space-y-6 text-ink">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
                 AUDIT-TO-ARTICLE PIPELINE • SEOSPACE NEURAL ENGINE
               </span>
-              <h2 className="text-xl font-bold text-slate-950 mt-0.5">
+              <h2 className="text-xl sm:text-2xl font-bold text-ink mt-0.5 font-display">
                 Connected AI SEO Articles &amp; Content Fixes for{" "}
                 {report.domain} ({connectedArticles.length})
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-mute mt-0.5">
                 Articles generated to fix keyword gaps and content deficits
-                discovered on <strong>{report.domain}</strong>. Each article is
+                discovered on <strong className="text-ink">{report.domain}</strong>. Each article is
                 viewable, shareable, and mathematically graded.
               </p>
             </div>
@@ -699,7 +704,7 @@ export default function AuditReportPage() {
               )}&keyword=${encodeURIComponent(
                 report.keywords?.[0]?.keyword || report.domain
               )}&autoGenerate=1`}
-              className="no-print px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition shrink-0"
+              className="no-print px-4 py-2.5 rounded-xl bg-accent text-[#141413] hover:opacity-90 text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition shrink-0"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>+ Generate New AI Fix Article for {report.domain}</span>
@@ -707,12 +712,12 @@ export default function AuditReportPage() {
           </div>
 
           {connectedArticles.length === 0 ? (
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-6 rounded-2xl bg-stage border border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-ink">
               <div>
-                <h4 className="text-sm font-bold text-slate-900">
+                <h4 className="text-sm font-bold text-ink">
                   No AI Articles connected to {report.domain} yet
                 </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-mute mt-0.5">
                   Click any failed check or keyword below to generate a complete,
                   mathematically graded SEO article tailored to {report.domain}.
                 </p>
@@ -725,7 +730,7 @@ export default function AuditReportPage() {
                 )}&keyword=${encodeURIComponent(
                   report.keywords?.[0]?.keyword || report.domain
                 )}&autoGenerate=1`}
-                className="px-4 py-2 rounded-xl bg-slate-950 text-white text-xs font-bold shrink-0"
+                className="px-4 py-2 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-bold shrink-0 transition"
               >
                 Generate First Article →
               </Link>
@@ -742,49 +747,49 @@ export default function AuditReportPage() {
                 return (
                   <div
                     key={art.id}
-                    className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-4 hover:border-blue-400 transition"
+                    className="p-5 rounded-2xl border border-line bg-stage flex flex-col justify-between gap-4 hover:border-accent/40 transition text-ink"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2.5">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
-                          <Globe className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink bg-card border border-line px-2.5 py-0.5 rounded-full">
+                          <Globe className="w-3 h-3 text-accent" />
                           Target KW: {art.focusKeyword}
                         </span>
                         <span
-                          className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                          className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
                             g.score >= 85
-                              ? "bg-emerald-100 text-emerald-800"
-                              : "bg-amber-100 text-amber-800"
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                              : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
                           }`}
                         >
                           SEO Score: {g.score}/100 ({g.letterGrade})
                         </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-slate-950 mb-1.5">
+                      <h3 className="text-base font-bold text-ink mb-1.5 font-display">
                         {art.title}
                       </h3>
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-mute line-clamp-2 leading-relaxed">
                         {art.metaDescription || art.content.slice(0, 150)}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-[11px] text-slate-500">
+                    <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[11px] text-mute font-mono">
                         {g.wordCount} words • {g.keywordCount}x keyword hits (
                         {g.density}%)
                       </span>
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/article/${art.id}`}
-                          className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 transition"
+                          className="px-3 py-1.5 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-bold inline-flex items-center gap-1.5 transition"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-3.5 h-3.5 text-accent" />
                           <span>Live Article &amp; SERP Preview ↗</span>
                         </Link>
                         <Link
                           href={`/dashboard?tab=editor&articleId=${art.id}`}
-                          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-semibold inline-flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-xl border border-line bg-card hover:bg-stage text-ink text-xs font-semibold inline-flex items-center gap-1 transition"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
                           <span>Edit</span>
@@ -799,13 +804,13 @@ export default function AuditReportPage() {
         </div>
 
         {/* AI Copywriting & Conversion Rewrites Section */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow text-ink">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
                 SEOSPACE NEURAL ENGINE CONVERSION &amp; SERP REWRITER
               </span>
-              <h2 className="text-xl font-bold text-slate-950 mt-0.5">
+              <h2 className="text-xl sm:text-2xl font-bold text-ink mt-0.5 font-display">
                 Ready-to-Paste Copy &amp; Meta Tag Upgrades for {report.domain}
               </h2>
             </div>
@@ -817,7 +822,7 @@ export default function AuditReportPage() {
               )}&keyword=${encodeURIComponent(
                 report.keywords?.[0]?.keyword || report.domain
               )}`}
-              className="no-print text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
+              className="no-print text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1"
             >
               Open in Live AI SEO Editor <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -827,37 +832,37 @@ export default function AuditReportPage() {
             {report.aiRewrites.map((rw, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl border border-slate-200 p-5 bg-slate-50/50 flex flex-col justify-between space-y-4"
+                className="rounded-2xl border border-line p-5 bg-stage flex flex-col justify-between space-y-4 text-ink"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">
+                    <span className="text-xs font-bold text-ink font-display">
                       {rw.element}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                       {rw.expectedLift}
                     </span>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-white border border-slate-200/80 text-xs">
-                    <div className="text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  <div className="p-3 rounded-xl bg-card border border-line text-xs">
+                    <div className="text-[10px] font-mono font-bold uppercase text-mute mb-1">
                       Current Detected Copy on {report.domain}:
                     </div>
-                    <div className="text-slate-600 break-words">
+                    <div className="text-mute break-words">
                       {rw.currentText}
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-blue-50/90 border border-blue-200 text-xs">
+                  <div className="p-3.5 rounded-xl bg-card border border-accent/40 text-xs text-ink">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold uppercase text-blue-700">
+                      <span className="text-[10px] font-mono font-bold uppercase text-accent">
                         ✨ Recommended High-Converting Copy:
                       </span>
                       <button
                         onClick={() =>
                           handleCopyText(`rw-${idx}`, rw.suggestedText)
                         }
-                        className="no-print text-[11px] font-bold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        className="no-print text-[11px] font-bold text-accent hover:underline inline-flex items-center gap-1 cursor-pointer"
                       >
                         <Copy className="w-3 h-3" />
                         <span>
@@ -865,14 +870,14 @@ export default function AuditReportPage() {
                         </span>
                       </button>
                     </div>
-                    <div className="font-semibold text-slate-950 leading-relaxed">
+                    <div className="font-semibold text-ink leading-relaxed">
                       {rw.suggestedText}
                     </div>
                   </div>
                 </div>
 
-                <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-200/60">
-                  <strong>Why it wins:</strong> {rw.rationale}
+                <div className="text-[11px] text-mute pt-2 border-t border-line">
+                  <strong className="text-ink">Why it wins:</strong> {rw.rationale}
                 </div>
               </div>
             ))}
@@ -880,12 +885,12 @@ export default function AuditReportPage() {
         </div>
 
         {/* High-Intent Keyword Opportunities + Active Diagnostic Checklist */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs h-fit">
-            <h3 className="text-base font-bold text-slate-950 mb-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-ink">
+          <div className="lg:col-span-4 bg-card rounded-3xl border border-line p-6 sp-card-shadow h-fit text-ink">
+            <h3 className="text-base font-bold text-ink mb-1 font-display">
               Keyword Opportunities for {report.domain}
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-mute mb-4">
               Click any keyword to generate a connected, mathematically graded
               SEO article in the AI Studio.
             </p>
@@ -894,22 +899,22 @@ export default function AuditReportPage() {
               {report.keywords.map((kw, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 space-y-2 text-xs"
+                  className="p-3.5 rounded-2xl border border-line bg-stage space-y-2 text-xs text-ink"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="font-bold text-slate-900">{kw.keyword}</div>
+                    <div className="font-bold text-ink">{kw.keyword}</div>
                     <span
-                      className={`px-2 py-0.5 rounded font-bold text-[11px] ${
+                      className={`px-2 py-0.5 rounded-full font-mono font-bold text-[11px] border ${
                         kw.difficulty <= 40
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-amber-100 text-amber-800"
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                          : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
                       }`}
                     >
                       KD {kw.difficulty}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
-                    <span className="text-[11px] text-slate-500">
+                  <div className="flex items-center justify-between pt-1 border-t border-line">
+                    <span className="text-[11px] text-mute font-mono">
                       {kw.volume}/mo • {kw.intent}
                     </span>
                     <Link
@@ -920,7 +925,7 @@ export default function AuditReportPage() {
                       )}&keyword=${encodeURIComponent(
                         kw.keyword
                       )}&autoGenerate=1`}
-                      className="no-print text-[11px] font-bold text-blue-600 hover:underline"
+                      className="no-print text-[11px] font-bold text-accent hover:underline"
                     >
                       + Write AI Article →
                     </Link>
@@ -931,19 +936,19 @@ export default function AuditReportPage() {
           </div>
 
           {/* Right 8 Cols: Active Suggestion & Uninflated Point Checklist */}
-          <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
+          <div className="lg:col-span-8 bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow text-ink">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-950">
+                <h3 className="text-lg font-bold text-ink font-display">
                   Uninflated Point-by-Point Diagnostic Checklist
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-mute mt-0.5">
                   Every check displays exact points earned vs. maximum possible
                   points — zero fake or inflated scoring.
                 </p>
               </div>
 
-              <div className="no-print flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+              <div className="no-print flex items-center gap-1.5 bg-stage p-1 rounded-xl text-xs font-semibold border border-line">
                 {(["all", "critical", "warning", "pass"] as const).map(
                   (sev) => (
                     <button
@@ -951,8 +956,8 @@ export default function AuditReportPage() {
                       onClick={() => setFilterSeverity(sev)}
                       className={`px-3 py-1.5 rounded-lg capitalize transition cursor-pointer ${
                         filterSeverity === sev
-                          ? "bg-white text-slate-950 shadow-2xs"
-                          : "text-slate-600 hover:text-slate-900"
+                          ? "bg-ink text-paper shadow-xs"
+                          : "text-mute hover:text-ink"
                       }`}
                     >
                       {sev}
@@ -966,7 +971,7 @@ export default function AuditReportPage() {
               {filteredChecks.map((chk) => (
                 <div
                   key={chk.id}
-                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/40 space-y-3"
+                  className="p-4 rounded-2xl border border-line bg-stage space-y-3 text-ink"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
@@ -984,15 +989,15 @@ export default function AuditReportPage() {
                         </span>
                       )}
                       <div>
-                        <div className="text-sm font-bold text-slate-950">
+                        <div className="text-sm font-bold text-ink font-display">
                           {chk.title}
                         </div>
-                        <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                        <p className="text-xs text-mute mt-0.5 leading-relaxed">
                           {chk.description}
                         </p>
                         {chk.currentValue && (
-                          <div className="mt-1.5 text-[11px] text-slate-500 break-all">
-                            <strong>Detected:</strong> {chk.currentValue}
+                          <div className="mt-1.5 text-[11px] text-mute font-mono break-all">
+                            <strong className="text-ink">Detected:</strong> {chk.currentValue}
                           </div>
                         )}
                       </div>
@@ -1002,18 +1007,18 @@ export default function AuditReportPage() {
                       {typeof chk.pointsEarned === "number" &&
                         typeof chk.pointsMax === "number" && (
                           <span
-                            className={`px-2 py-0.5 rounded font-mono text-[11px] font-bold ${
+                            className={`px-2 py-0.5 rounded-full font-mono text-[11px] font-bold border ${
                               chk.severity === "pass"
-                                ? "bg-emerald-100 text-emerald-800"
+                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                                 : chk.severity === "warning"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-rose-100 text-rose-800"
+                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                                : "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
                             }`}
                           >
                             +{chk.pointsEarned}/{chk.pointsMax} pts
                           </span>
                         )}
-                      <span className="px-2.5 py-0.5 rounded-md bg-slate-200/70 text-slate-700 text-[10px] font-bold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-card border border-line text-mute text-[10px] font-mono font-bold uppercase">
                         {chk.pillar}
                       </span>
                     </div>
@@ -1021,8 +1026,8 @@ export default function AuditReportPage() {
 
                   {chk.codeSnippet && (
                     <div className="pl-8">
-                      <div className="rounded-xl bg-slate-950 text-blue-300 p-3.5 text-xs font-mono relative">
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1.5 font-sans">
+                      <div className="rounded-xl bg-night text-[#f3f0e8] p-3.5 text-xs font-mono relative border border-[#2a2a2c]">
+                        <div className="flex items-center justify-between text-[10px] text-[#8a8984] mb-1.5 font-sans">
                           <span>Recommended Fix Snippet</span>
                           <div className="flex items-center gap-3">
                             {chk.severity !== "pass" && (
@@ -1036,7 +1041,7 @@ export default function AuditReportPage() {
                                     report.keywords?.[0]?.keyword ||
                                     report.domain
                                 )}&autoGenerate=1`}
-                                className="no-print text-emerald-400 hover:underline font-semibold"
+                                className="no-print text-accent hover:underline font-semibold"
                               >
                                 ✨ Generate AI Fix Article →
                               </Link>
@@ -1045,7 +1050,7 @@ export default function AuditReportPage() {
                               onClick={() =>
                                 handleCopyText(chk.id, chk.codeSnippet!)
                               }
-                              className="no-print text-blue-400 hover:underline cursor-pointer"
+                              className="no-print text-accent hover:underline cursor-pointer"
                             >
                               {copiedIndex === chk.id ? "Copied!" : "Copy Code"}
                             </button>
@@ -1064,7 +1069,7 @@ export default function AuditReportPage() {
         </div>
 
         {/* White-Label Report Footer */}
-        <footer className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <footer className="bg-card rounded-2xl border border-line p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mute">
           <div>
             {whiteLabelPreview
               ? whiteLabel.footerNote
@@ -1073,7 +1078,7 @@ export default function AuditReportPage() {
           {!whiteLabel.hidePoweredBy && (
             <Link
               href="/"
-              className="font-bold text-blue-600 hover:underline shrink-0"
+              className="font-bold text-accent hover:underline shrink-0"
             >
               Powered by Seospace AI ↗
             </Link>

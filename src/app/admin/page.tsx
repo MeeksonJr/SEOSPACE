@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import { usePublicTheme, ThemeToggleButton } from "@/components/ui/PublicChrome";
 import {
   getAdminUsers,
   getCapturedLeads,
@@ -42,6 +43,7 @@ interface SystemHealth {
 }
 
 export default function AdminPortalPage() {
+  const { isDark, toggleTheme } = usePublicTheme(false);
   const [users, setUsers] = useState<WorkspaceUser[]>([]);
   const [totalAudits, setTotalAudits] = useState(0);
   const [totalLeads, setTotalLeads] = useState(0);
@@ -140,46 +142,51 @@ export default function AdminPortalPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 pb-20">
-      <header className="bg-slate-950 text-white border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-[4rem] flex flex-wrap items-center justify-between gap-2">
+    <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans pb-20">
+      {/* Admin Chrome Header */}
+      <header className="bg-card border-b border-line text-ink sticky top-0 z-30 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 min-h-[4.5rem] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Link href="/">
-              <SeospaceLogo darkText={false} size="sm" />
+              <SeospaceLogo auto size="sm" />
             </Link>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-              OWNER ADMIN PORTAL
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold font-mono bg-accent text-[#141413] shadow-xs">
+              OWNER OPERATIONS
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-xs">
-            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
+          <div className="flex items-center gap-2.5 text-xs">
             <Link
               href="/dashboard"
-              className="text-slate-300 hover:text-white inline-flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-stage hover:bg-card border border-line text-ink font-semibold inline-flex items-center gap-1.5 transition"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Return to Workspace
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Workspace Dashboard</span>
             </Link>
+            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
+            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8 flex-1 w-full">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-950">
-              SaaS Owner Operations & Revenue Control Center
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
+              Telemetry &amp; Revenue Overview
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-ink mt-1">
+              Operations &amp; Revenue Control Center
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Live metrics calculated from your workspace audits, captured
-              leads, and real-time API diagnostics.
+            <p className="text-xs sm:text-sm text-mute mt-1">
+              Real-time metrics calculated from your workspace audits, captured leads, and live API diagnostics.
             </p>
           </div>
           <button
             type="button"
             onClick={runLiveSystemDiagnostic}
             disabled={testingHealth}
-            className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+            className="sp-btn sp-btn-primary text-xs font-bold inline-flex items-center gap-2 shrink-0"
           >
             {testingHealth ? (
               <>
@@ -197,12 +204,12 @@ export default function AdminPortalPage() {
 
         {/* Real Calculated KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+          <div className="bg-card rounded-3xl border border-line p-5 sp-card-shadow">
+            <div className="flex items-center justify-between text-xs text-mute font-mono font-semibold">
               <span>ACTIVE RECURRING MRR</span>
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-950 mt-2">
+            <div className="text-3xl font-extrabold font-mono text-ink mt-2">
               ${totalMrr}/mo
             </div>
             <div className="text-[11px] text-emerald-600 font-semibold mt-1">
@@ -210,59 +217,59 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+          <div className="bg-card rounded-3xl border border-line p-5 sp-card-shadow">
+            <div className="flex items-center justify-between text-xs text-mute font-mono font-semibold">
               <span>SAVED AUDIT REPORTS</span>
-              <Activity className="w-4 h-4 text-indigo-600" />
+              <Activity className="w-4 h-4 text-accent" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-950 mt-2">
+            <div className="text-3xl font-extrabold font-mono text-ink mt-2">
               {totalAudits}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
+            <div className="text-[11px] text-mute mt-1">
               +{totalArticles} AI SEO Articles in Studio
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+          <div className="bg-card rounded-3xl border border-line p-5 sp-card-shadow">
+            <div className="flex items-center justify-between text-xs text-mute font-mono font-semibold">
               <span>CAPTURED WIDGET LEADS</span>
-              <Users className="w-4 h-4 text-blue-600" />
+              <Users className="w-4 h-4 text-cobalt" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-950 mt-2">
+            <div className="text-3xl font-extrabold font-mono text-ink mt-2">
               {totalLeads}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
+            <div className="text-[11px] text-mute mt-1">
               Est. Agency Pipeline: ${(totalLeads * 1500).toLocaleString()}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+          <div className="bg-card rounded-3xl border border-line p-5 sp-card-shadow">
+            <div className="flex items-center justify-between text-xs text-mute font-mono font-semibold">
               <span>NEURAL ENGINE LATENCY</span>
               <Database className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-extrabold text-emerald-600 mt-2">
+            <div className="text-3xl font-extrabold font-mono text-emerald-600 mt-2">
               {health ? `${health.geminiLatencyMs}ms` : "..."}
             </div>
-            <div className="text-[11px] text-slate-500 mt-1">
+            <div className="text-[11px] text-mute mt-1 truncate">
               Engine: {health?.modelUsed || "Seospace Neural Engine v4.2"}
             </div>
           </div>
         </div>
 
         {/* Live System Integration Health Status */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs">
-          <h2 className="text-base font-bold text-slate-950 mb-4">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow">
+          <h2 className="text-lg font-bold font-display text-ink mb-4">
             Live System &amp; API Integration Health Check
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
+            <div className="p-4 rounded-2xl bg-stage border border-line flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs">
-                <div className="font-bold text-slate-900">
+                <div className="font-bold text-ink font-display">
                   {health?.modelUsed || "Seospace Neural Engine v4.2"}
                 </div>
-                <p className="text-slate-600 mt-0.5">
+                <p className="text-mute mt-0.5 leading-relaxed">
                   {health?.geminiOnline
                     ? `Verified Online — Live round-trip response in ${health.geminiLatencyMs}ms.`
                     : "Pinging Seospace Neural Engine..."}
@@ -270,33 +277,31 @@ export default function AdminPortalPage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
-              <CreditCard className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-stage border border-line flex items-start gap-3">
+              <CreditCard className="w-5 h-5 text-accent shrink-0 mt-0.5" />
               <div className="text-xs">
-                <div className="font-bold text-slate-900">
+                <div className="font-bold text-ink font-display">
                   Stripe Billing ({health?.stripeAccountId || "acct_1Qxf8DFZKCl4K7QE"})
                 </div>
-                <p className="text-slate-600 mt-0.5">
-                  Pro ($29/mo) &amp; Agency ($79/mo) live prices &amp; hosted links
-                  verified.
+                <p className="text-mute mt-0.5 leading-relaxed">
+                  Pro ($29/mo) &amp; Agency ($79/mo) live prices &amp; hosted links verified.
                 </p>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
+            <div className="p-4 rounded-2xl bg-stage border border-line flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs">
-                <div className="font-bold text-slate-900 flex items-center gap-2">
+                <div className="font-bold text-ink font-display flex items-center gap-2">
                   <span>{health?.databaseEngine || "Supabase PostgreSQL"}</span>
                   {health?.supabaseLatencyMs ? (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-200/70 text-emerald-800 font-mono">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-mono border border-emerald-500/20">
                       {health.supabaseLatencyMs}ms
                     </span>
                   ) : null}
                 </div>
-                <p className="text-slate-600 mt-0.5">
-                  {totalAudits} audits, {totalArticles} articles, and{" "}
-                  {totalLeads} leads persisted with real-time RLS tenant isolation.
+                <p className="text-mute mt-0.5 leading-relaxed">
+                  {totalAudits} audits, {totalArticles} articles, and {totalLeads} leads persisted with real-time RLS tenant isolation.
                 </p>
               </div>
             </div>
@@ -304,62 +309,61 @@ export default function AdminPortalPage() {
         </div>
 
         {/* User Management Table */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xs">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
-              <h2 className="text-base font-bold text-slate-950">
-                User & Subscription Management ({users.length})
+              <h2 className="text-lg font-bold font-display text-ink">
+                User &amp; Subscription Management ({users.length})
               </h2>
-              <p className="text-xs text-slate-500">
-                Anyone who signs up on /signup appears here. Click any user&apos;s
-                plan badge to toggle their subscription tier.
+              <p className="text-xs text-mute mt-0.5">
+                Anyone who signs up on /signup appears here. Click any user&apos;s plan badge to cycle their subscription tier.
               </p>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-2xl border border-line bg-stage">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-400">
-                  <th className="py-3 px-3">User</th>
-                  <th className="py-3 px-3">Email</th>
-                  <th className="py-3 px-3">Plan Tier (Click to Toggle)</th>
-                  <th className="py-3 px-3">Credits Used</th>
-                  <th className="py-3 px-3">Monthly Revenue</th>
-                  <th className="py-3 px-3">Joined</th>
+                <tr className="border-b border-line text-[11px] uppercase tracking-wider text-mute font-mono bg-card/60">
+                  <th className="py-3 px-4">User</th>
+                  <th className="py-3 px-4">Email</th>
+                  <th className="py-3 px-4">Plan Tier (Click to Toggle)</th>
+                  <th className="py-3 px-4">Credits Used</th>
+                  <th className="py-3 px-4">Monthly Revenue</th>
+                  <th className="py-3 px-4">Joined</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {users.map((u) => {
                   const mrr =
                     u.plan === "agency" ? 79 : u.plan === "pro" ? 29 : 0;
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50">
-                      <td className="py-3.5 px-3 font-bold text-slate-900">
+                    <tr key={u.id} className="hover:bg-card/75 transition">
+                      <td className="py-3.5 px-4 font-bold text-ink">
                         {u.name}
                       </td>
-                      <td className="py-3.5 px-3 text-slate-600">{u.email}</td>
-                      <td className="py-3.5 px-3">
+                      <td className="py-3.5 px-4 text-mute font-mono">{u.email}</td>
+                      <td className="py-3.5 px-4">
                         <button
                           onClick={() => cycleUserPlan(u)}
-                          className={`px-3 py-1 rounded-full font-bold uppercase text-[10px] cursor-pointer transition ${
+                          className={`px-3 py-1 rounded-full font-bold uppercase text-[10px] font-mono cursor-pointer transition ${
                             u.plan === "agency"
-                              ? "bg-blue-600 text-white"
+                              ? "bg-accent text-[#141413] shadow-xs"
                               : u.plan === "pro"
-                              ? "bg-indigo-100 text-indigo-700"
-                              : "bg-slate-200 text-slate-700"
+                              ? "bg-cobalt text-white shadow-xs"
+                              : "bg-card text-ink border border-line"
                           }`}
                         >
                           {u.plan} ↻
                         </button>
                       </td>
-                      <td className="py-3.5 px-3 text-slate-700">
+                      <td className="py-3.5 px-4 text-ink font-mono">
                         {u.creditsUsed} / {u.creditsLimit}
                       </td>
-                      <td className="py-3.5 px-3 font-bold text-emerald-700">
+                      <td className="py-3.5 px-4 font-bold font-mono text-emerald-600">
                         ${mrr}/mo
                       </td>
-                      <td className="py-3.5 px-3 text-slate-400">{u.joined}</td>
+                      <td className="py-3.5 px-4 text-mute font-mono">{u.joined}</td>
                     </tr>
                   );
                 })}

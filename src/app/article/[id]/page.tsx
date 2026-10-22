@@ -32,6 +32,7 @@ import {
   ArticleDraft,
 } from "@/lib/storage/workspace-store";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
+import { usePublicTheme, ThemeToggleButton } from "@/components/ui/PublicChrome";
 
 function renderFormattedArticle(content: string, highlightKeyword?: string) {
   const lines = content.split("\n");
@@ -47,7 +48,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       part.toLowerCase() === highlightKeyword.trim().toLowerCase() ? (
         <mark
           key={idx}
-          className="bg-indigo-500/25 text-indigo-200 px-1.5 py-0.5 rounded font-semibold border border-indigo-500/30"
+          className="bg-butter text-[#141413] px-1.5 py-0.5 rounded font-semibold border border-amber-300/60"
         >
           {part}
         </mark>
@@ -68,7 +69,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <h3
           key={index}
-          className="text-lg font-bold font-display text-white mt-6 mb-2 tracking-tight"
+          className="text-lg font-bold font-display text-ink mt-6 mb-2 tracking-tight"
         >
           {highlightText(line.replace(/^###\s+/, ""))}
         </h3>
@@ -77,7 +78,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <h2
           key={index}
-          className="text-xl sm:text-2xl font-bold font-display text-white mt-8 mb-3 pb-2 border-b border-white/[0.08] tracking-tight"
+          className="text-xl sm:text-2xl font-bold font-display text-ink mt-8 mb-3 pb-2 border-b border-line tracking-tight"
         >
           {highlightText(line.replace(/^##\s+/, ""))}
         </h2>
@@ -86,7 +87,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <h2
           key={index}
-          className="text-2xl font-bold font-display text-white mt-8 mb-3 tracking-tight"
+          className="text-2xl font-bold font-display text-ink mt-8 mb-3 tracking-tight"
         >
           {highlightText(line.replace(/^#\s+/, ""))}
         </h2>
@@ -99,9 +100,9 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <div
           key={index}
-          className="flex items-start gap-3 pl-2 py-1 text-slate-300 leading-relaxed"
+          className="flex items-start gap-3 pl-2 py-1 text-ink/90 leading-relaxed"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2.5 shrink-0" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2.5 shrink-0" />
           <span className="text-[15px]">
             {highlightText(line.replace(/^[•\-*]\s+/, ""))}
           </span>
@@ -112,9 +113,9 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <div
           key={index}
-          className="flex items-start gap-3 pl-2 py-1 text-slate-300 leading-relaxed"
+          className="flex items-start gap-3 pl-2 py-1 text-ink/90 leading-relaxed"
         >
-          <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded mt-0.5 shrink-0">
+          <span className="text-xs font-mono font-bold text-ink bg-stage border border-line px-1.5 py-0.5 rounded mt-0.5 shrink-0">
             {numMatch ? numMatch[1] : "•"}
           </span>
           <span className="text-[15px]">
@@ -132,7 +133,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <h2
           key={index}
-          className="text-xl font-bold font-display text-white mt-7 mb-2.5 tracking-tight"
+          className="text-xl font-bold font-display text-ink mt-7 mb-2.5 tracking-tight"
         >
           {highlightText(line)}
         </h2>
@@ -141,7 +142,7 @@ function renderFormattedArticle(content: string, highlightKeyword?: string) {
       elements.push(
         <p
           key={index}
-          className="text-[15.5px] text-slate-300 leading-relaxed mb-3"
+          className="text-[15.5px] text-ink/90 leading-relaxed mb-3"
         >
           {highlightText(line)}
         </p>
@@ -193,6 +194,7 @@ ${bodyHtml}
 }
 
 export default function ArticlePreviewPage() {
+  const { isDark, toggleTheme } = usePublicTheme(false);
   const params = useParams();
   const rawId = typeof params?.id === "string" ? params.id : "art-voiceone-guide";
 
@@ -259,10 +261,10 @@ export default function ArticlePreviewPage() {
 
   if (loading || !article || !grade) {
     return (
-      <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <Sparkles className="w-5 h-5 text-indigo-400 animate-spin" />
-          Loading AI Article Preview & Mathematical SEO Grader...
+      <div className="min-h-screen bg-paper text-ink flex items-center justify-center font-sans">
+        <div className="flex items-center gap-3 text-mute text-sm">
+          <Sparkles className="w-5 h-5 text-accent animate-spin" />
+          <span>Loading AI Article Preview &amp; Mathematical SEO Grader...</span>
         </div>
       </div>
     );
@@ -276,132 +278,139 @@ export default function ArticlePreviewPage() {
   const readingTimeMin = Math.max(1, Math.ceil(grade.wordCount / 200));
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100">
+    <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans pb-20">
       {/* Top Action Header */}
-      <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0B0F17]/90 backdrop-blur-xl print:hidden">
-        <div className="w-full px-4 sm:px-6 lg:px-10 py-2.5 min-h-[4rem] flex flex-wrap items-center justify-between gap-2.5">
+      <header className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur-md print:hidden">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-3 min-h-[4.5rem] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href={`/dashboard?tab=editor&articleId=${article.id}`}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-2 rounded-lg transition shrink-0"
+              className="flex items-center gap-1.5 text-xs font-semibold text-ink bg-stage hover:bg-card border border-line px-3.5 py-2 rounded-xl transition shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>AI Studio</span>
+              <span>AI Content Studio</span>
             </Link>
 
             {article.linkedAuditId && (
               <Link
                 href={`/report/${article.linkedAuditId}`}
-                className="hidden md:flex items-center gap-1.5 text-xs font-medium text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 border border-indigo-500/20 px-3 py-2 rounded-lg transition shrink-0"
+                className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-ink bg-stage hover:bg-card border border-line px-3.5 py-2 rounded-xl transition shrink-0"
               >
-                <Globe className="w-3.5 h-3.5" />
-                Connected Audit: {article.linkedDomain || article.linkedAuditId}
-                <ExternalLink className="w-3 h-3 opacity-75" />
+                <Globe className="w-3.5 h-3.5 text-accent" />
+                <span className="truncate max-w-[180px]">
+                  Audit: {article.linkedDomain || article.linkedAuditId}
+                </span>
+                <ExternalLink className="w-3 h-3 opacity-60" />
               </Link>
             )}
           </div>
 
           {/* Center View Mode Switcher */}
-          <div className="hidden lg:flex items-center gap-1 bg-slate-950/90 border border-white/[0.08] p-1 rounded-xl">
+          <div className="hidden lg:flex items-center gap-1 bg-stage border border-line p-1 rounded-2xl">
             <button
               onClick={() => setActiveView("blog")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeView === "blog"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-night text-[#f3f0e8] shadow-xs"
+                  : "text-mute hover:text-ink"
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
-              Live Blog Preview
+              <span>Live Article</span>
             </button>
             <button
               onClick={() => setActiveView("serp")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeView === "serp"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-night text-[#f3f0e8] shadow-xs"
+                  : "text-mute hover:text-ink"
               }`}
             >
               <Search className="w-3.5 h-3.5" />
-              Google SERP & Social Preview
+              <span>SERP &amp; Social</span>
             </button>
             <button
               onClick={() => setActiveView("scorecard")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeView === "scorecard"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-night text-[#f3f0e8] shadow-xs"
+                  : "text-mute hover:text-ink"
               }`}
             >
               <Award className="w-3.5 h-3.5" />
-              Uninflated SEO Grade ({grade.score}/100)
+              <span>SEO Scorecard ({grade.score}/100)</span>
             </button>
             <button
               onClick={() => setActiveView("html")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeView === "html"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-night text-[#f3f0e8] shadow-xs"
+                  : "text-mute hover:text-ink"
               }`}
             >
               <Code2 className="w-3.5 h-3.5" />
-              Clean HTML Export
+              <span>HTML Export</span>
             </button>
           </div>
 
           {/* Right Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
             <button
               onClick={() => handleCopy("markdown")}
-              className="flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-2.5 sm:px-3 py-2 rounded-lg transition"
+              className="flex items-center gap-1.5 text-xs font-semibold bg-stage hover:bg-card border border-line text-ink px-3 py-2 rounded-xl transition cursor-pointer"
             >
               {copiedType === "markdown" ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
               ) : (
-                <FileText className="w-3.5 h-3.5 text-slate-400" />
+                <FileText className="w-3.5 h-3.5 text-mute" />
               )}
-              {copiedType === "markdown" ? "Copied MD!" : "Copy MD"}
+              <span>{copiedType === "markdown" ? "Copied MD!" : "Copy MD"}</span>
             </button>
+
             {activeView !== "html" && (
               <button
                 onClick={() => handleCopy("html")}
-                className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
+                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-stage hover:bg-card border border-line text-ink px-3 py-2 rounded-xl transition cursor-pointer"
               >
                 {copiedType === "html" ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
                 ) : (
-                  <Copy className="w-3.5 h-3.5 text-indigo-400" />
+                  <Copy className="w-3.5 h-3.5 text-accent" />
                 )}
-                {copiedType === "html" ? "Copied HTML!" : "Copy HTML"}
+                <span>{copiedType === "html" ? "Copied HTML!" : "Copy HTML"}</span>
               </button>
             )}
+
             <button
               onClick={() => window.print()}
-              className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-stage hover:bg-card border border-line text-ink px-3 py-2 rounded-xl transition cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5 text-slate-400" />
-              PDF
+              <Printer className="w-3.5 h-3.5 text-mute" />
+              <span>PDF</span>
             </button>
+
             <button
               onClick={() => handleCopy("share")}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg transition shadow-lg shadow-indigo-600/20"
+              className="flex items-center gap-1.5 text-xs font-bold bg-accent text-[#141413] hover:opacity-90 px-3.5 py-2 rounded-xl transition shadow-xs cursor-pointer"
             >
               {copiedType === "share" ? (
                 <Check className="w-3.5 h-3.5" />
               ) : (
                 <Share2 className="w-3.5 h-3.5" />
               )}
-              {copiedType === "share" ? "Copied!" : "Share"}
+              <span>{copiedType === "share" ? "Copied!" : "Share Link"}</span>
             </button>
+
+            <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
+            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
           </div>
         </div>
       </header>
 
       {/* Main Content Layout */}
-      <main className="w-full px-4 sm:px-6 lg:px-10 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left 8 or 12 Columns: Article Preview / SERP / Scorecard / HTML */}
+      <main className="w-full px-4 sm:px-6 lg:px-10 py-8 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-[1440px] mx-auto">
+          {/* Left Column: Article Preview / SERP / Scorecard / HTML */}
           <div
             className={`${
               activeView === "scorecard" ? "lg:col-span-12" : "lg:col-span-8"
@@ -413,38 +422,38 @@ export default function ArticlePreviewPage() {
                 <button
                   key={mode}
                   onClick={() => setActiveView(mode)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition cursor-pointer ${
                     activeView === mode
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-900 text-slate-400 border border-white/[0.08]"
+                      ? "bg-night text-[#f3f0e8] shadow-xs"
+                      : "bg-card text-mute border border-line"
                   }`}
                 >
                   {mode === "blog"
-                    ? "Live Blog Preview"
+                    ? "Live Article"
                     : mode === "serp"
-                    ? "SERP & Social Preview"
+                    ? "SERP & Social"
                     : mode === "scorecard"
-                    ? `SEO Grade (${grade.score})`
+                    ? `SEO Score (${grade.score})`
                     : "HTML Code"}
                 </button>
               ))}
             </div>
 
             {activeView === "blog" && (
-              <article className="rounded-3xl bg-slate-900/75 border border-white/[0.08] overflow-hidden shadow-2xl">
+              <article className="rounded-3xl bg-card border border-line overflow-hidden sp-card-shadow">
                 {/* Editorial Hero Banner */}
-                <div className="p-6 sm:p-10 border-b border-white/[0.08] bg-gradient-to-br from-indigo-950/40 via-slate-900/90 to-slate-950">
+                <div className="p-6 sm:p-10 border-b border-line bg-stage">
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-3 py-1 rounded-full">
-                        <Globe className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink bg-card border border-line px-3 py-1 rounded-full font-mono">
+                        <Globe className="w-3.5 h-3.5 text-accent" />
                         {displayDomain}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#141413] bg-butter border border-amber-300/60 px-3 py-1 rounded-full">
                         <Tag className="w-3 h-3" />
-                        Focus Keyword: &ldquo;{article.focusKeyword}&rdquo;
+                        Keyword: &ldquo;{article.focusKeyword}&rdquo;
                       </span>
-                      <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-white/[0.04] border border-white/[0.08] px-3 py-1 rounded-full">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-mute bg-card border border-line px-3 py-1 rounded-full font-mono">
                         <Clock className="w-3 h-3" />
                         {readingTimeMin} min read • {grade.wordCount} words
                       </span>
@@ -452,39 +461,37 @@ export default function ArticlePreviewPage() {
 
                     <button
                       onClick={() => setHighlightKw(!highlightKw)}
-                      className={`text-xs px-3 py-1 rounded-full border transition print:hidden ${
+                      className={`text-xs px-3 py-1 rounded-full border transition cursor-pointer font-mono font-semibold print:hidden ${
                         highlightKw
-                          ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-200"
-                          : "bg-white/[0.03] border-white/[0.08] text-slate-400"
+                          ? "bg-butter text-[#141413] border-amber-300/80 shadow-xs"
+                          : "bg-card border-line text-mute hover:text-ink"
                       }`}
                     >
-                      {highlightKw
-                        ? "Keyword Highlight: ON"
-                        : "Keyword Highlight: OFF"}
+                      {highlightKw ? "✓ Keyword Highlight ON" : "Keyword Highlight OFF"}
                     </button>
                   </div>
 
-                  <h1 className="text-2xl sm:text-4xl font-bold font-display text-white tracking-tight leading-tight mb-4">
+                  <h1 className="text-2xl sm:text-4xl font-extrabold font-display text-ink tracking-tight leading-tight mb-4">
                     {article.title}
                   </h1>
 
                   {article.metaDescription && (
-                    <p className="text-sm sm:text-base text-slate-300 leading-relaxed bg-slate-950/60 border border-white/[0.06] rounded-xl p-4">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-indigo-400 block mb-1">
-                        SEO Meta Description ({grade.metaLength} chars)
+                    <div className="text-sm sm:text-base text-mute leading-relaxed bg-card border border-line rounded-2xl p-4">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-accent font-bold block mb-1">
+                        Meta Description ({grade.metaLength} chars)
                       </span>
                       {article.metaDescription}
-                    </p>
+                    </div>
                   )}
 
-                  <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
+                  <div className="mt-5 pt-4 border-t border-line flex flex-wrap items-center justify-between gap-4 text-xs text-mute font-mono">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-[11px]">
+                      <span className="w-5 h-5 rounded-md bg-accent text-[#141413] font-bold text-[11px] flex items-center justify-center">
                         S
-                      </div>
+                      </span>
                       <span>
-                        Authored via{" "}
-                        <strong className="text-slate-200">
+                        Authored by{" "}
+                        <strong className="text-ink">
                           Seospace Neural Engine v4.2
                         </strong>
                       </span>
@@ -494,8 +501,8 @@ export default function ArticlePreviewPage() {
                 </div>
 
                 {/* Formatted Article Body */}
-                <div className="p-6 sm:p-10">
-                  <div className="max-w-none">
+                <div className="p-6 sm:p-12">
+                  <div className="max-w-3xl mx-auto">
                     {renderFormattedArticle(
                       article.content,
                       highlightKw ? article.focusKeyword : undefined
@@ -503,38 +510,36 @@ export default function ArticlePreviewPage() {
                   </div>
 
                   {/* Connected Domain Conversion CTA */}
-                  <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-cyan-950/40 border border-indigo-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-night text-[#f3f0e8] border border-[#2a2a2c] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                     <div>
-                      <div className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">
-                        Ready to Publish on {displayDomain}
+                      <div className="text-xs font-mono font-bold uppercase tracking-wider text-accent mb-1">
+                        Target Domain: {displayDomain}
                       </div>
-                      <h4 className="text-base font-bold text-white">
-                        Deploy this SEO-verified article directly to your CMS
+                      <h4 className="text-lg font-bold font-display text-[#f3f0e8]">
+                        Publish this SEO-verified article directly to your CMS
                       </h4>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Mathematically graded at{" "}
-                        <strong className="text-emerald-400">
+                      <p className="text-xs text-[#8a8984] mt-1">
+                        Graded at{" "}
+                        <strong className="text-emerald-400 font-mono">
                           {grade.score}/100 ({grade.letterGrade})
                         </strong>{" "}
-                        with {grade.keywordCount} natural occurrences of &ldquo;
+                        with {grade.keywordCount} verified occurrences of &ldquo;
                         {article.focusKeyword}&rdquo;.
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 print:hidden">
                       <button
                         onClick={() => handleCopy("html")}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition"
+                        className="sp-btn sp-btn-accent text-xs"
                       >
-                        {copiedType === "html"
-                          ? "Copied Clean HTML!"
-                          : "Copy Clean HTML"}
+                        {copiedType === "html" ? "Copied Clean HTML!" : "Copy Clean HTML"}
                       </button>
                       <Link
                         href={`/dashboard?tab=editor&articleId=${article.id}`}
-                        className="bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5"
+                        className="px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-[#f3f0e8] text-xs font-semibold transition inline-flex items-center gap-1.5"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
-                        Edit Article
+                        <span>Edit</span>
                       </Link>
                     </div>
                   </div>
@@ -545,43 +550,43 @@ export default function ArticlePreviewPage() {
             {activeView === "serp" && (
               <div className="space-y-6">
                 {/* Google Search Result Simulator */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/75 border border-white/[0.08]">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="p-6 sm:p-8 rounded-3xl bg-card border border-line sp-card-shadow">
+                  <div className="flex items-center justify-between mb-5">
                     <div>
-                      <h2 className="text-lg font-bold font-display text-white">
+                      <h2 className="text-lg font-bold font-display text-ink">
                         Live Google Search (SERP) Snippet Preview
                       </h2>
-                      <p className="text-xs text-slate-400">
-                        Exact pixel & character rendering of how Google indexes
+                      <p className="text-xs text-mute mt-0.5">
+                        Pixel &amp; character rendering of how Google indexes
                         this article for &ldquo;{article.focusKeyword}&rdquo;.
                       </p>
                     </div>
-                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-                      Desktop & Mobile Indexed
+                    <span className="text-xs font-mono font-bold text-ink bg-stage border border-line px-3 py-1 rounded-full">
+                      Desktop &amp; Mobile SERP
                     </span>
                   </div>
 
-                  <div className="p-6 rounded-2xl bg-[#1f1f1f] border border-white/[0.08] max-w-2xl">
+                  <div className="p-6 rounded-2xl bg-stage border border-line max-w-2xl">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs font-bold text-indigo-300 uppercase">
+                      <div className="w-7 h-7 rounded-full bg-card border border-line flex items-center justify-center text-xs font-bold text-accent uppercase font-mono">
                         {displayDomain.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs text-[#dadce0] font-medium">
+                        <div className="text-xs text-ink font-medium">
                           {displayDomain}
                         </div>
-                        <div className="text-[11px] text-[#bdc1c6]">
+                        <div className="text-[11px] text-mute font-mono">
                           https://{displayDomain} › blog › {slug}
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-xl text-[#8ab4f8] hover:underline cursor-pointer font-normal leading-snug mb-1.5">
+                    <h3 className="text-xl text-cobalt hover:underline cursor-pointer font-normal leading-snug mb-1.5 font-sans">
                       {article.title.length > 60
                         ? article.title.slice(0, 59) + "..."
                         : article.title}
                     </h3>
-                    <p className="text-sm text-[#bdc1c6] leading-relaxed">
-                      <span className="text-[#9aa0a6]">
+                    <p className="text-sm text-mute leading-relaxed">
+                      <span className="text-ink/80 font-medium">
                         {article.updatedAt} —{" "}
                       </span>
                       {article.metaDescription
@@ -592,28 +597,28 @@ export default function ArticlePreviewPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
-                    <div className="p-3.5 rounded-xl bg-slate-950/70 border border-white/[0.06]">
-                      <div className="text-[11px] text-slate-400">
-                        Title Tag Length
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                    <div className="p-4 rounded-2xl bg-stage border border-line">
+                      <div className="text-[11px] text-mute font-mono uppercase">
+                        Title Length
                       </div>
-                      <div className="text-sm font-mono font-bold text-white mt-0.5">
+                      <div className="text-base font-mono font-bold text-ink mt-1">
                         {grade.titleLength} / 60 chars
                       </div>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-950/70 border border-white/[0.06]">
-                      <div className="text-[11px] text-slate-400">
-                        Meta Description Length
+                    <div className="p-4 rounded-2xl bg-stage border border-line">
+                      <div className="text-[11px] text-mute font-mono uppercase">
+                        Meta Description
                       </div>
-                      <div className="text-sm font-mono font-bold text-white mt-0.5">
+                      <div className="text-base font-mono font-bold text-ink mt-1">
                         {grade.metaLength} / 155 chars
                       </div>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-slate-950/70 border border-white/[0.06]">
-                      <div className="text-[11px] text-slate-400">
-                        URL Slug Structure
+                    <div className="p-4 rounded-2xl bg-stage border border-line">
+                      <div className="text-[11px] text-mute font-mono uppercase">
+                        Canonical Slug
                       </div>
-                      <div className="text-sm font-mono font-bold text-emerald-400 mt-0.5 truncate">
+                      <div className="text-base font-mono font-bold text-accent mt-1 truncate">
                         /blog/{slug}
                       </div>
                     </div>
@@ -621,41 +626,37 @@ export default function ArticlePreviewPage() {
                 </div>
 
                 {/* OpenGraph Social Card Simulator */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/75 border border-white/[0.08]">
-                  <h2 className="text-lg font-bold font-display text-white mb-1">
+                <div className="p-6 sm:p-8 rounded-3xl bg-card border border-line sp-card-shadow">
+                  <h2 className="text-lg font-bold font-display text-ink mb-1">
                     OpenGraph Social Preview (LinkedIn / X / Slack)
                   </h2>
-                  <p className="text-xs text-slate-400 mb-5">
-                    Preview of how this article renders when shared on social
-                    feeds.
+                  <p className="text-xs text-mute mb-5">
+                    How this article renders when shared across social channels.
                   </p>
 
-                  <div className="max-w-xl rounded-2xl overflow-hidden border border-white/[0.12] bg-slate-950 shadow-xl">
-                    <div className="h-48 bg-gradient-to-br from-indigo-600/30 via-slate-900 to-cyan-500/20 p-6 flex flex-col justify-between border-b border-white/[0.08]">
+                  <div className="max-w-xl rounded-2xl overflow-hidden border border-line bg-stage shadow-sm">
+                    <div className="h-44 bg-night text-[#f3f0e8] p-6 flex flex-col justify-between border-b border-[#2a2a2c]">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-black/40 text-indigo-300 border border-indigo-500/30">
+                        <span className="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-accent border border-white/10">
                           {displayDomain}
                         </span>
-                        <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                        <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 font-bold">
                           SEO Grade: {grade.score}/100
                         </span>
                       </div>
-                      <div>
-                        <div className="text-lg font-bold font-display text-white line-clamp-2">
-                          {article.title}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-slate-900">
-                      <div className="text-[11px] uppercase tracking-wider text-slate-400 mb-1">
-                        {displayDomain}
-                      </div>
-                      <div className="text-sm font-bold text-white mb-1">
+                      <div className="text-lg font-bold font-display text-[#f3f0e8] line-clamp-2">
                         {article.title}
                       </div>
-                      <div className="text-xs text-slate-400 line-clamp-2">
-                        {article.metaDescription ||
-                          article.content.slice(0, 140)}
+                    </div>
+                    <div className="p-4 bg-card">
+                      <div className="text-[11px] uppercase tracking-wider text-mute font-mono mb-1">
+                        {displayDomain}
+                      </div>
+                      <div className="text-sm font-bold text-ink mb-1 font-display">
+                        {article.title}
+                      </div>
+                      <div className="text-xs text-mute line-clamp-2">
+                        {article.metaDescription || article.content.slice(0, 140)}
                       </div>
                     </div>
                   </div>
@@ -664,32 +665,31 @@ export default function ArticlePreviewPage() {
             )}
 
             {activeView === "scorecard" && (
-              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/75 border border-white/[0.08] space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
+              <div className="p-6 sm:p-10 rounded-3xl bg-card border border-line sp-card-shadow space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-line">
                   <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
                       100% Uninflated Mathematical Grading
                     </span>
-                    <h2 className="text-2xl font-bold font-display text-white mt-1">
+                    <h2 className="text-2xl font-bold font-display text-ink mt-1">
                       7-Point Content SEO Verification Breakdown
                     </h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Every point is strictly earned from verifiable text,
-                      character length, density, and heading checks — zero
-                      artificial score floors.
+                    <p className="text-xs text-mute mt-1">
+                      Every point is strictly earned from verifiable text length,
+                      keyword density, and heading hierarchy.
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 bg-slate-950/90 border border-white/[0.08] px-5 py-3 rounded-2xl shrink-0">
+                  <div className="flex items-center gap-4 bg-stage border border-line px-5 py-3 rounded-2xl shrink-0">
                     <div>
-                      <div className="text-[11px] text-slate-400 uppercase">
+                      <div className="text-[11px] text-mute uppercase font-mono">
                         Total Score
                       </div>
-                      <div className="text-3xl font-bold font-mono text-emerald-400">
+                      <div className="text-3xl font-bold font-mono text-ink">
                         {grade.score}
-                        <span className="text-sm text-slate-500">/100</span>
+                        <span className="text-sm text-mute">/100</span>
                       </div>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl font-bold font-mono text-emerald-300">
+                    <div className="w-12 h-12 rounded-2xl bg-accent text-[#141413] flex items-center justify-center text-xl font-bold font-mono shadow-xs">
                       {grade.letterGrade}
                     </div>
                   </div>
@@ -699,33 +699,33 @@ export default function ArticlePreviewPage() {
                   {grade.checks.map((chk) => (
                     <div
                       key={chk.id}
-                      className="p-4 rounded-2xl bg-slate-950/70 border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-4 rounded-2xl bg-stage border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="flex items-start gap-3">
                         {chk.status === "pass" ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                         ) : chk.status === "warning" ? (
-                          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                         ) : (
-                          <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                          <XCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                         )}
                         <div>
-                          <div className="text-sm font-bold text-white">
+                          <div className="text-sm font-bold text-ink font-display">
                             {chk.label}
                           </div>
-                          <div className="text-xs text-slate-400 mt-0.5">
+                          <div className="text-xs text-mute mt-0.5">
                             {chk.detail}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                         <span
-                          className={`text-xs font-mono font-bold px-3 py-1 rounded-lg border ${
+                          className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border ${
                             chk.status === "pass"
-                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25"
+                              ? "bg-card text-emerald-700 border-emerald-300"
                               : chk.status === "warning"
-                              ? "bg-amber-500/10 text-amber-300 border-amber-500/25"
-                              : "bg-rose-500/10 text-rose-300 border-rose-500/25"
+                              ? "bg-butter text-[#141413] border-amber-300"
+                              : "bg-card text-rose-600 border-rose-300"
                           }`}
                         >
                           +{chk.earnedPoints} / {chk.maxPoints} pts
@@ -738,176 +738,167 @@ export default function ArticlePreviewPage() {
             )}
 
             {activeView === "html" && (
-              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/75 border border-white/[0.08]">
+              <div className="p-6 sm:p-8 rounded-3xl bg-card border border-line sp-card-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-lg font-bold font-display text-white">
+                    <h2 className="text-lg font-bold font-display text-ink">
                       Production-Ready HTML + Meta Tags
                     </h2>
-                    <p className="text-xs text-slate-400">
-                      Copy and paste directly into WordPress, Webflow, Shopify,
-                      or Next.js.
+                    <p className="text-xs text-mute">
+                      Copy and paste directly into WordPress, Webflow, Shopify, or Next.js.
                     </p>
                   </div>
                   <button
                     onClick={() => handleCopy("html")}
-                    className="flex items-center gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl transition"
+                    className="sp-btn sp-btn-accent text-xs"
                   >
                     {copiedType === "html" ? (
                       <Check className="w-3.5 h-3.5" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
-                    {copiedType === "html" ? "Copied HTML!" : "Copy All HTML"}
+                    <span>{copiedType === "html" ? "Copied!" : "Copy Code"}</span>
                   </button>
                 </div>
-                <pre className="p-5 rounded-2xl bg-slate-950 border border-white/[0.08] text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+                <pre className="p-5 rounded-2xl bg-night text-[#f3f0e8] border border-[#2a2a2c] text-xs font-mono overflow-x-auto leading-relaxed">
                   {convertToCleanHtml(article, grade.score)}
                 </pre>
               </div>
             )}
           </div>
 
-          {/* Right 4 Columns: Live Mathematical SEO Grader Sidebar (Hidden when already viewing the full-width Scorecard tab) */}
+          {/* Right Column: Live Mathematical SEO Grader Sidebar */}
           {activeView !== "scorecard" && (
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 print:hidden">
-            <div className="p-6 rounded-3xl bg-slate-900/75 border border-white/[0.08]">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
-                    Real-Time Content Grader
-                  </span>
-                  <h3 className="text-base font-bold font-display text-white">
-                    Mathematical SEO Score
-                  </h3>
+            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 print:hidden">
+              <div className="p-6 rounded-3xl bg-card border border-line sp-card-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-accent">
+                      Content Grader
+                    </span>
+                    <h3 className="text-base font-bold font-display text-ink">
+                      Mathematical Score
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold font-mono text-ink">
+                      {grade.score}
+                      <span className="text-xs text-mute">/100</span>
+                    </div>
+                    <div className="text-[11px] font-mono font-bold text-accent">
+                      Grade {grade.letterGrade}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
+
+                {/* Solid Progress bar */}
+                <div className="h-2.5 rounded-full bg-stage overflow-hidden mb-5 border border-line">
                   <div
-                    className={`text-3xl font-bold font-mono ${
+                    className={`h-full rounded-full transition-all duration-500 ${
                       grade.score >= 85
-                        ? "text-emerald-400"
+                        ? "bg-accent"
                         : grade.score >= 65
-                        ? "text-amber-400"
-                        : "text-rose-400"
+                        ? "bg-cobalt"
+                        : "bg-rose-500"
                     }`}
-                  >
-                    {grade.score}
-                    <span className="text-xs text-slate-500">/100</span>
-                  </div>
-                  <div className="text-[11px] font-mono text-slate-400">
-                    Grade {grade.letterGrade}
-                  </div>
+                    style={{ width: `${grade.score}%` }}
+                  />
                 </div>
-              </div>
 
-              {/* Progress bar */}
-              <div className="h-2.5 rounded-full bg-slate-950 overflow-hidden mb-5 border border-white/[0.06]">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    grade.score >= 85
-                      ? "bg-gradient-to-r from-emerald-500 to-cyan-400"
-                      : grade.score >= 65
-                      ? "bg-gradient-to-r from-amber-500 to-indigo-500"
-                      : "bg-rose-500"
-                  }`}
-                  style={{ width: `${grade.score}%` }}
-                />
-              </div>
-
-              {/* Key Telemetry Metrics */}
-              <div className="grid grid-cols-3 gap-2.5 mb-5">
-                <div className="p-3 rounded-xl bg-slate-950/70 border border-white/[0.06] text-center">
-                  <div className="text-[10px] uppercase text-slate-400">
-                    Words
-                  </div>
-                  <div className="text-sm font-bold font-mono text-white mt-0.5">
-                    {grade.wordCount}
-                  </div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-950/70 border border-white/[0.06] text-center">
-                  <div className="text-[10px] uppercase text-slate-400">
-                    KW Hits
-                  </div>
-                  <div className="text-sm font-bold font-mono text-indigo-300 mt-0.5">
-                    {grade.keywordCount}x
-                  </div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-950/70 border border-white/[0.06] text-center">
-                  <div className="text-[10px] uppercase text-slate-400">
-                    Density
-                  </div>
-                  <div className="text-sm font-bold font-mono text-emerald-400 mt-0.5">
-                    {grade.density}%
-                  </div>
-                </div>
-              </div>
-
-              {/* 7 Checks List */}
-              <div className="space-y-2.5">
-                {grade.checks.map((c) => (
-                  <div
-                    key={c.id}
-                    className="p-3 rounded-xl bg-slate-950/60 border border-white/[0.06]"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                        {c.status === "pass" ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        ) : c.status === "warning" ? (
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                        )}
-                        <span>{c.label}</span>
-                      </div>
-                      <span className="text-[11px] font-mono font-bold text-slate-300 shrink-0">
-                        {c.earnedPoints}/{c.maxPoints}
-                      </span>
+                {/* Key Telemetry Metrics */}
+                <div className="grid grid-cols-3 gap-2.5 mb-5">
+                  <div className="p-3 rounded-2xl bg-stage border border-line text-center">
+                    <div className="text-[10px] uppercase text-mute font-mono">
+                      Words
                     </div>
-                    <p className="text-[11px] text-slate-400 pl-5 leading-relaxed">
-                      {c.detail}
-                    </p>
+                    <div className="text-sm font-bold font-mono text-ink mt-0.5">
+                      {grade.wordCount}
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="p-3 rounded-2xl bg-stage border border-line text-center">
+                    <div className="text-[10px] uppercase text-mute font-mono">
+                      KW Hits
+                    </div>
+                    <div className="text-sm font-bold font-mono text-accent mt-0.5">
+                      {grade.keywordCount}x
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-stage border border-line text-center">
+                    <div className="text-[10px] uppercase text-mute font-mono">
+                      Density
+                    </div>
+                    <div className="text-sm font-bold font-mono text-ink mt-0.5">
+                      {grade.density}%
+                    </div>
+                  </div>
+                </div>
 
-              {/* Connected Audit Box */}
-              {article.linkedAuditId && (
-                <div className="mt-5 pt-5 border-t border-white/[0.08]">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                    Connected Website Audit
+                {/* 7 Checks List */}
+                <div className="space-y-2.5">
+                  {grade.checks.map((c) => (
+                    <div
+                      key={c.id}
+                      className="p-3 rounded-xl bg-stage border border-line"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                          {c.status === "pass" ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          ) : c.status === "warning" ? (
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                          )}
+                          <span>{c.label}</span>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-ink shrink-0">
+                          {c.earnedPoints}/{c.maxPoints}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-mute pl-5 leading-relaxed">
+                        {c.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Connected Audit Box */}
+                {article.linkedAuditId && (
+                  <div className="mt-5 pt-5 border-t border-line">
+                    <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-mute mb-2">
+                      Connected Website Audit
+                    </div>
+                    <Link
+                      href={`/report/${article.linkedAuditId}`}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-stage hover:bg-card border border-line transition group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Globe className="w-4 h-4 text-accent shrink-0" />
+                        <div className="truncate">
+                          <div className="text-xs font-bold text-ink truncate font-mono">
+                            {article.linkedDomain || article.linkedAuditId}
+                          </div>
+                          <div className="text-[11px] text-mute">
+                            View Live Audit Report
+                          </div>
+                        </div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-mute group-hover:text-accent transition shrink-0" />
+                    </Link>
                   </div>
+                )}
+
+                <div className="mt-4">
                   <Link
-                    href={`/report/${article.linkedAuditId}`}
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/25 transition group"
+                    href={`/dashboard?tab=editor&articleId=${article.id}`}
+                    className="w-full sp-btn sp-btn-primary text-xs flex items-center justify-center gap-2"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Globe className="w-4 h-4 text-indigo-400 shrink-0" />
-                      <div className="truncate">
-                        <div className="text-xs font-bold text-white truncate">
-                          {article.linkedDomain || article.linkedAuditId}
-                        </div>
-                        <div className="text-[11px] text-indigo-300">
-                          View Live SEO & Metadata Audit
-                        </div>
-                      </div>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-indigo-400 group-hover:translate-x-0.5 transition shrink-0" />
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>Open in AI Content Studio</span>
                   </Link>
                 </div>
-              )}
-
-              <div className="mt-4">
-                <Link
-                  href={`/dashboard?tab=editor&articleId=${article.id}`}
-                  className="w-full flex items-center justify-center gap-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white text-xs font-semibold py-2.5 rounded-xl transition"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                  Open in AI Content Studio Editor
-                </Link>
               </div>
             </div>
-          </div>
           )}
         </div>
       </main>
