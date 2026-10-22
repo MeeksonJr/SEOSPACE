@@ -130,8 +130,9 @@ export default function AgencyHubPage() {
 
       const data = await res.json();
       if (data.success && data.workspace) {
-        // Refresh local workspace store
-        setWorkspaces([...TrustPulseStore.getWorkspaces()]);
+        // Save in browser store and refresh state
+        TrustPulseStore.saveWorkspace(data.workspace);
+        setWorkspaces([data.workspace, ...TrustPulseStore.getWorkspaces().filter((w) => w.id !== data.workspace.id)]);
         setCreatedSummary({
           workspace: data.workspace,
           reviewCount: data.reviewCount || 4,
