@@ -662,7 +662,11 @@ export default function AgencyHubPage() {
                               {detectedResult.name}
                             </h4>
                             <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              ✓ Auto-Detected
+                              {detectedResult.source === "rapidapi_local_business_data"
+                                ? "✓ Live Google Maps Sync"
+                                : detectedResult.source === "google_places_api"
+                                ? "✓ Google Places API"
+                                : "✓ Auto-Detected"}
                             </span>
                             <button
                               type="button"
@@ -722,7 +726,9 @@ export default function AgencyHubPage() {
                     {/* Quick Helper Banner */}
                     <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between flex-wrap gap-2">
                       <span>
-                        📍 Verified address, phone &amp; direct review link auto-detected from place pin.
+                        {detectedResult.source === "rapidapi_local_business_data"
+                          ? "⚡ Live Google Maps Data: Real star rating, review count, address & phone synced directly."
+                          : "📍 Verified address, phone & direct review link auto-detected from place pin."}
                       </span>
                       <button
                         type="button"

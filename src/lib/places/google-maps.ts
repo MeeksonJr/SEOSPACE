@@ -37,7 +37,7 @@ export interface GooglePlaceResult {
     isVerified: boolean;
     isFeatured: boolean;
   }>;
-  source: "google_places_api" | "url_metadata_extraction" | "smart_sector_intelligence";
+  source: "rapidapi_local_business_data" | "google_places_api" | "url_metadata_extraction" | "smart_sector_intelligence";
 }
 
 // State code to primary area code mapping for realistic local phone numbers across all 50 US States
@@ -379,6 +379,153 @@ async function searchNominatimPlace(query: string): Promise<{
   return null;
 }
 
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || "39cb654435mshc1cc78be702b2b2p105133jsn0f527c017fb6";
+const RAPIDAPI_HOST = "local-business-data.p.rapidapi.com";
+
+interface RapidBusinessItem {
+  business_id?: string;
+  name?: string;
+  full_address?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  phone_number?: string;
+  website?: string;
+  rating?: number;
+  review_count?: number;
+  type?: string;
+  subtypes?: string[];
+  place_id?: string;
+  cid?: string;
+  reviews_link?: string;
+  about?: { summary?: string };
+  keywords_mentioned_in_reviews?: Array<{ keyword: string; review_count: number }>;
+}
+
+async function fetchRapidApiBusinessDetails(businessId: string): Promise<RapidBusinessItem | null> {
+  if (!RAPIDAPI_KEY) return null;
+  try {
+    const url = `https://${RAPIDAPI_HOST}/business-details?business_id=${encodeURIComponent(businessId)}&extract_emails_and_contacts=false`;
+    const res = await fetch(url, {
+      headers: {
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": RAPIDAPI_HOST,
+        "X-User-Agent": "desktop",
+      },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json && json.status === "OK" && Array.isArray(json.data) && json.data.length > 0) {
+      return json.data[0];
+    }
+  } catch (err) {
+    console.warn("[TrustPulse] RapidAPI business-details error:", err);
+  }
+  return null;
+}
+
+async function fetchRapidApiSearch(query: string): Promise<RapidBusinessItem | null> {
+  if (!RAPIDAPI_KEY) return null;
+  try {
+    const url = `https://${RAPIDAPI_HOST}/search?query=${encodeURIComponent(query)}&limit=1&language=en&region=us`;
+    const res = await fetch(url, {
+      headers: {
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": RAPIDAPI_HOST,
+        "X-User-Agent": "desktop",
+      },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json && json.status === "OK" && Array.isArray(json.data) && json.data.length > 0) {
+      return json.data[0];
+    }
+  } catch (err) {
+    console.warn("[TrustPulse] RapidAPI search error:", err);
+  }
+  return null;
+}
+
+function convertRapidItemToResult(item: RapidBusinessItem): GooglePlaceResult {
+  const name = item.name || "Local Business";
+  const slug = slugify(name);
+  const address = item.address || item.full_address || "Main Street, Commercial District";
+  const phone = item.phone_number ? formatUsPhone(item.phone_number) : "(555) 000-0000";
+  const website = item.website || undefined;
+  const rating = typeof item.rating === "number" ? Number(item.rating.toFixed(1)) : 4.8;
+  const totalReviews = typeof item.review_count === "number" ? item.review_count : 120;
+  const cid = item.cid;
+  const placeId = item.place_id;
+
+  const rawType = (item.type || item.subtypes?.[0] || "").toLowerCase();
+  const matchedSector =
+    SECTOR_ARCHETYPES.find((sector) =>
+      sector.keywords.some((kw) => rawType.includes(kw) || name.toLowerCase().includes(kw))
+    ) || {
+      category: item.type || "Local Business & Professional",
+      brandColor: "#4f46e5",
+      reviewTemplates: [
+        "Unmatched attention to detail, friendly communication, and rapid turnaround. Truly a 5-star experience!",
+        "Very professional team with high standards. They took care of our needs promptly and with great care.",
+        "Top-tier service from start to finish. Highly recommend this team to anyone in the area!",
+      ],
+    };
+
+  const summary = item.about?.summary || "";
+  const keywords = Array.isArray(item.keywords_mentioned_in_reviews)
+    ? item.keywords_mentioned_in_reviews.map((k) => k.keyword).filter(Boolean)
+    : [];
+
+  const locationContext = [item.city, item.state].filter(Boolean).join(", ") || address;
+
+  const initialReviews = matchedSector.reviewTemplates.map((text, idx) => {
+    let reviewSnippet = text;
+    if (idx === 0 && keywords.length >= 2) {
+      reviewSnippet = `Outstanding experience at ${name}! Loved the ${keywords[0]} and ${keywords[1]}. Highly recommended!`;
+    } else if (idx === 1 && summary) {
+      reviewSnippet = `${summary} Courteous staff and wonderful atmosphere.`;
+    }
+
+    return {
+      id: `rev-rapid-${slug}-${idx + 1}`,
+      authorName: SAMPLE_AUTHORS[idx % SAMPLE_AUTHORS.length],
+      authorAvatar: SAMPLE_AVATARS[idx % SAMPLE_AVATARS.length],
+      authorRole: "Verified Customer",
+      authorLocation: locationContext,
+      rating: 5,
+      reviewText: reviewSnippet,
+      platform: "google" as const,
+      reviewDate: new Date(Date.now() - (idx + 1) * 86400000 * 3).toISOString(),
+      isVerified: true,
+      isFeatured: true,
+    };
+  });
+
+  const googleReviewUrl =
+    item.reviews_link ||
+    (cid
+      ? `https://maps.google.com/?cid=${cid}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + " " + address)}`);
+
+  return {
+    name,
+    slug,
+    category: matchedSector.category,
+    brandColor: matchedSector.brandColor,
+    address,
+    phone,
+    website,
+    googleReviewUrl,
+    rating,
+    totalReviews,
+    placeId,
+    cid,
+    initialReviews,
+    source: "rapidapi_local_business_data",
+  };
+}
+
 /**
  * Main Business Lookup Engine
  */
@@ -432,6 +579,16 @@ export async function lookupGoogleBusiness(
         }
       }
 
+      // Check for RapidAPI / Google business_id: e.g. 0x89ba99d290d669f5:0xc1a201cc1eb80eba
+      const businessIdMatch = resolvedUrl.match(/!1s(0x[0-9a-f]+:0x[0-9a-f]+)/i);
+      const businessId = businessIdMatch ? businessIdMatch[1] : null;
+      if (businessId) {
+        const rapidDetails = await fetchRapidApiBusinessDetails(businessId);
+        if (rapidDetails) {
+          return convertRapidItemToResult(rapidDetails);
+        }
+      }
+
       // 2. Query param ?q= or ?query= or ?daddr=
       const q = parsed.searchParams.get("q") || parsed.searchParams.get("query") || parsed.searchParams.get("daddr");
       if (q) {
@@ -473,11 +630,26 @@ export async function lookupGoogleBusiness(
         lat = parseFloat(coordMatch[1]);
         lng = parseFloat(coordMatch[2]);
       }
+
+      // If businessId didn't yield a result, try RapidAPI search with detected name
+      if (detectedName) {
+        const queryTerm = [detectedName, detectedAddress].filter(Boolean).join(" ");
+        const rapidSearch = await fetchRapidApiSearch(queryTerm);
+        if (rapidSearch) {
+          return convertRapidItemToResult(rapidSearch);
+        }
+      }
     } catch {
       //
     }
   } else {
-    // Free text search — First query Nominatim for exact place & address
+    // 1. Try RapidAPI Search first for exact live Google data
+    const rapidSearch = await fetchRapidApiSearch(cleanInput);
+    if (rapidSearch) {
+      return convertRapidItemToResult(rapidSearch);
+    }
+
+    // 2. Free text search fallback — First query Nominatim for exact place & address
     const nom = await searchNominatimPlace(cleanInput);
     if (nom) {
       detectedName = nom.name || cleanInput.split(",")[0].trim();

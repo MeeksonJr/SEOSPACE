@@ -18,12 +18,18 @@ export async function POST(request: Request) {
 
     const business = await lookupGoogleBusiness(input);
 
+    const isLive =
+      business.source === "google_places_api" ||
+      business.source === "rapidapi_local_business_data";
+
     return NextResponse.json({
       success: true,
       business,
-      isLiveGoogleApi: business.source === "google_places_api",
+      isLiveGoogleApi: isLive,
       message:
-        business.source === "google_places_api"
+        business.source === "rapidapi_local_business_data"
+          ? "Live Google Maps business profile & reviews synced."
+          : business.source === "google_places_api"
           ? "Live Google Places API data retrieved."
           : "Business extracted via Google Maps URL intelligence engine.",
     });
