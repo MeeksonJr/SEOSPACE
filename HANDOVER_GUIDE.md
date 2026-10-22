@@ -1,57 +1,70 @@
-# Seospace AI (AuditPulse Edition) — Turnkey SaaS Handover & Flippa Guide
+# TrustPulse AI — 15-Minute Turnkey Buyer Handover Guide
 
-Welcome! This document serves both as your **Vercel Deployment Checklist** and the **Official Buyer Handover Documentation** when you sell the SaaS on Flippa.
-
----
-
-## 1. Live Architecture & Zero-Holding-Cost Stack
-
-- **Framework:** Next.js 15 (App Router, TypeScript, Tailwind CSS v4)
-- **AI Engine:** Google Gemini 2.5 Flash (`@google/genai`) with automatic multi-key failover + deterministic fallback
-- **Payments:** Stripe Subscriptions & Hosted Payment Links
-- **Database & Auth:** Supabase PostgreSQL (`supabase/schema.sql`) + Hybrid Zero-Downtime Client Store
-- **Monthly Idle Hosting Cost:** **$0.00 / month** (Vercel Free Hobby Tier + Google AI Studio Free Tier + Supabase Free Tier)
+Congratulations on acquiring **TrustPulse AI**! This guide outlines the exact, step-by-step process to transfer ownership of the repository, Vercel hosting, Supabase database, and Stripe billing in under 15 minutes.
 
 ---
 
-## 2. Live Stripe Products & Payment Links Configured
+## 1. Quick Checklist
 
-The following live Stripe Products, Prices, and Hosted Payment Links are pre-configured in `.env.local` and `src/lib/stripe/plans.ts`:
-
-| Plan Tier | Billing | Price | Stripe Product ID | Stripe Price ID | Hosted Payment Link |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Growth Pro** | Monthly | **$29/mo** | `prod_VU42KsJoHvt5NP` | `price_1UT5vaFZKCl4K7QEY7LlKX4v` | `https://buy.stripe.com/4gM28reqk2tFaj7ctH9k400` |
-| **Growth Pro** | Annual | **$276/yr** ($23/mo) | `prod_VU42KsJoHvt5NP` | `price_1UT5vgFZKCl4K7QEF7p1hCNn` | `https://buy.stripe.com/7sYdR96XS2tF2QF2T79k401` |
-| **Agency White-Label** | Monthly | **$79/mo** | `prod_VU42J9WVtaF6E9` | `price_1UT5vnFZKCl4K7QE3bSWBV22` | `https://buy.stripe.com/3cI6oH3LG6JVdvj2T79k402` |
-| **Agency White-Label** | Annual | **$756/yr** ($63/mo) | `prod_VU42J9WVtaF6E9` | `price_1UT5vpFZKCl4K7QEBvJ79Uju` | `https://buy.stripe.com/aFafZh81Wb0bezn1P39k403` |
+- [ ] GitHub Repository Transfer
+- [ ] Vercel Project Transfer
+- [ ] Supabase Project Transfer (or new free project connection)
+- [ ] Google Gemini API Key Setup (Free tier)
+- [ ] Stripe Connect / Payment Links Update
 
 ---
 
-## 3. Deploying to Vercel in 2 Minutes
+## 2. Step-by-Step Handover Protocol
 
-1. Push this repository to your GitHub account.
-2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
-3. Add the environment variables from `.env.local` into **Vercel Project Settings → Environment Variables**:
-   - `GEMINI_API_KEY`
-   - `GEMINI_API_KEY_FALLBACK`
-   - `NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID`
-   - `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID`
-   - `NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID`
-   - `NEXT_PUBLIC_STRIPE_AGENCY_ANNUAL_PRICE_ID`
-   - `NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK`
-   - `NEXT_PUBLIC_STRIPE_PRO_ANNUAL_LINK`
-   - `NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_LINK`
-   - `NEXT_PUBLIC_STRIPE_AGENCY_ANNUAL_LINK`
-4. Click **Deploy**.
+### Step 1: GitHub Repository Transfer (2 minutes)
+1. In GitHub, go to repository **Settings** > scroll to **Danger Zone** > click **Transfer ownership**.
+2. Enter the buyer's GitHub username or organization name.
+3. The buyer accepts the transfer notification.
+
+### Step 2: Vercel Deployment Ownership (3 minutes)
+1. Go to your Vercel Dashboard > Select `trustpulse-ai` (or current project).
+2. Go to **Settings** > **General** > scroll to **Transfer Project**.
+3. Enter the buyer's Vercel team/account name.
+4. Once transferred, the buyer can add their custom domain (e.g. `trustpulse.io`) under **Settings** > **Domains**.
+
+### Step 3: Google Gemini API Key (2 minutes)
+1. Visit [Google AI Studio](https://aistudio.google.com/) and log in with any Google account.
+2. Click **Create API Key**. It is 100% free with 15 requests per minute (more than enough for AI review replies).
+3. In Vercel Project Settings > **Environment Variables**:
+   - Set `GEMINI_API_KEY` = your new key.
+
+### Step 4: Supabase Database Transfer (4 minutes)
+TrustPulse is built with dual-storage capability:
+1. **Option A (Instant Transfer)**: The seller invites the buyer as an Owner in Supabase project settings (`Project Settings` > `Team` > `Invite Member`), then leaves the project.
+2. **Option B (New Free Supabase Project)**:
+   - Create a free project at [supabase.com](https://supabase.com).
+   - In Vercel, update `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+### Step 5: Stripe Billing Configuration (4 minutes)
+1. In your Stripe Dashboard, navigate to **Product Catalog**.
+2. Create your three subscription products:
+   - **Starter**: $19 / month
+   - **Growth Pro**: $49 / month
+   - **Agency White-Label**: $129 / month
+3. Create Payment Links for each plan and paste them into `.env.local` / Vercel Environment Variables:
+   - `NEXT_PUBLIC_STRIPE_STARTER_LINK`
+   - `NEXT_PUBLIC_STRIPE_PRO_LINK`
+   - `NEXT_PUBLIC_STRIPE_AGENCY_LINK`
 
 ---
 
-## 4. Key Routes to Showcase in Your Flippa Listing Screenshots
+## 3. Post-Handover Growth Playbook for the Buyer
 
-1. **`/` (Marketing Landing Page):** Features both **Light Mode Studio** and **Midnight Dark Mode Hero** toggle, live URL scanner, 90/100 segmented score gauge, interactive ROI calculator, and Stripe pricing table.
-2. **`/login` & `/signup` (Split-Screen Auth & Onboarding):** Includes 1-click Google OAuth, Magic Link, onboarding carousel, and a **1-Click Demo Sandbox button** for Flippa buyers.
-3. **`/dashboard` (Executive Intelligence Workspace):** Dark wave greeting banner, sparkline KPIs, Proactive Intelligence Engine, 40-tick Portfolio Health Score gauge, and global audited domains watchlist.
-4. **`/dashboard?tab=editor` (Seospace Live AI Content & SEO Score Studio):** Real-time rich content editor with live 0–100 SEO Score gauge, keyword pills, green/red active checklist, and Gemini 2.5 AI Assistant auto-optimizer.
-5. **`/report/stripe-com` (White-Label Public Audit & PDF Export):** 5-pillar diagnostic report with AI copywriting rewrites, code snippets, and 1-click White-Label PDF export.
-6. **`/widget` (Embeddable Agency Lead-Capture Widget):** Standalone & iframe-ready lead magnet form that feeds directly into the Agency CRM.
-7. **`/admin` (Owner Admin Portal):** MRR tracker, user tier switcher, and live integration health monitor.
+### How to get your first 10 agency clients ($1,490/mo MRR):
+1. **Target Niche**: Cosmetic dentists, orthodontists, high-end auto repair, HVAC contractors, and cosmetic spas.
+2. **The Cold Loom Video Pitch**:
+   - Find a local business with a 4.4 or 4.5 star rating on Google Maps with 2 or 3 recent negative complaints.
+   - Record a 90-second video:
+     > *"Hi Dr. [Name], I noticed a 1-star review on your Google profile from last week that dropped your rating from 4.8 to 4.4. We built a Negative Review Shield QR stand that sits on your reception desk. If a customer is happy, it routes them to Google in 1 tap. If they had a long wait or billing confusion, it routes them to a private text box to your office manager so you can fix it before it ever hurts your public rating. Would you like a free counter stand for your desk this week?"*
+3. **Conversion**: 1 in 5 local business owners will immediately take you up on this.
+4. **Charge**: $99 to $199/month per location for the software and monthly PDF report.
+
+---
+
+## 4. Support & Warranty
+The seller provides 14 days of post-acquisition technical support via email or Slack to ensure a smooth transition.

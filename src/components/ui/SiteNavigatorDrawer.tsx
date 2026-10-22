@@ -24,13 +24,17 @@ import {
   Users,
   Wrench,
   X,
+  QrCode,
+  Building2,
+  Star,
+  Sliders,
 } from "lucide-react";
-import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
+import { TrustPulseLogo } from "@/components/ui/TrustPulseLogo";
 
 export function triggerSiteNavigator(open?: boolean) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
-    new CustomEvent("seospace:toggle-nav", { detail: { open } })
+    new CustomEvent("trustpulse:toggle-nav", { detail: { open } })
   );
 }
 
@@ -52,27 +56,25 @@ export function OpenSiteNavigatorButton({
         setDrawerOpen(custom.detail.open);
       }
     };
-    window.addEventListener("seospace:nav-state", handleState);
-    return () => window.removeEventListener("seospace:nav-state", handleState);
+    window.addEventListener("trustpulse:nav-state", handleState);
+    return () => window.removeEventListener("trustpulse:nav-state", handleState);
   }, []);
 
   if (drawerOpen) return null;
-
-  const baseStyles =
-    variant === "dark"
-      ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-700"
-      : variant === "glass"
-      ? "bg-white/10 hover:bg-white/20 text-white border-white/20"
-      : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200/90";
 
   return (
     <button
       type="button"
       onClick={() => triggerSiteNavigator(true)}
-      title="Open Universal Site Navigator (All Pages • Ctrl+K)"
-      className={`no-print px-3 py-2 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer shrink-0 ${baseStyles} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all cursor-pointer ${
+        variant === "dark"
+          ? "bg-slate-900 text-white hover:bg-slate-800"
+          : variant === "glass"
+          ? "bg-white/80 backdrop-blur border border-slate-200 text-slate-800 hover:bg-white"
+          : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+      } ${className}`}
     >
-      <Compass className="w-3.5 h-3.5 text-blue-500" />
+      <Compass className="w-3.5 h-3.5 text-emerald-600" />
       <span>{label}</span>
     </button>
   );
@@ -80,147 +82,112 @@ export function OpenSiteNavigatorButton({
 
 const NAV_SECTIONS = [
   {
-    heading: "Core Workspace & AI Studio",
+    heading: "Core Social Proof & Reputation Suite",
     items: [
       {
         href: "/",
-        label: "Landing Page & Live Scanner",
-        desc: "Hero URL audit, keyword discovery & ROI calculator",
+        label: "Landing Page & Live Simulator",
+        desc: "Interactive widget switcher, shield simulator & ROI calculator",
         icon: Home,
       },
       {
         href: "/dashboard",
-        label: "Executive Workspace Dashboard",
-        desc: "Portfolio KPIs, saved audits & real-time signals",
+        label: "Reputation Overview Dashboard",
+        desc: "Live average rating (4.94★), total reviews & quick actions",
         icon: LayoutDashboard,
       },
       {
-        href: "/dashboard?tab=editor",
-        label: "AI SEO Content Studio",
-        desc: "Multi-article editor, 0-100 grader & AI co-pilot",
-        icon: BookOpen,
-      },
-      {
-        href: "/dashboard?tab=whitelabel",
-        label: "White-Label Agency PDF Studio",
-        desc: "Custom agency logo, colors & booking CTA",
-        icon: Palette,
-      },
-      {
-        href: "/dashboard?tab=widget",
-        label: "Lead Capture CRM & Widget",
-        desc: "Manage captured agency prospects & export CSV",
-        icon: Users,
-      },
-      {
-        href: "/dashboard?tab=billing",
-        label: "Subscription & Stripe Billing",
-        desc: "Starter, Pro ($19/mo) & Agency ($49/mo) plans",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    heading: "Growth Tools & Competitive Intelligence",
-    items: [
-      {
-        href: "/compare",
-        label: "Competitor Domain Battlecard",
-        desc: "Head-to-head 2-URL comparison & 1-click outrank",
-        icon: Swords,
-      },
-      {
-        href: "/tools",
-        label: "4-in-1 Free SEO & DNS Tools",
-        desc: "/llms.txt, JSON-LD, robots.txt & live 1.1.1.1 DNS",
-        icon: Wrench,
-      },
-      {
-        href: "/docs",
-        label: "REST API & Webhook Playground",
-        desc: "Interactive browser console & cURL snippets",
-        icon: Terminal,
-      },
-    ],
-  },
-  {
-    heading: "Live Shareable Reports & Previews",
-    items: [
-      {
-        href: "/report/voice-one-com",
-        label: "Audit Report: voice-one.com",
-        desc: "Saved Edge Crawler + Cloudflare DoH DNS diagnostic",
-        icon: Globe,
-      },
-      {
-        href: "/report/stripe-com",
-        label: "Audit Report: stripe.com",
-        desc: "Enterprise 92/100 (A+) benchmark report",
+        href: "/dashboard/shield",
+        label: "Negative Review Shield Inbox",
+        desc: "Private 1-3 star customer grievances caught before Google",
         icon: ShieldCheck,
       },
       {
-        href: "/article/art-voiceone-guide",
-        label: "Shareable AI Article & Grader",
-        desc: "Live blog view, SERP snippet & clean HTML export",
-        icon: FileText,
+        href: "/dashboard/widgets",
+        label: "Interactive Widget Studio",
+        desc: "Floating toasts, Wall of Love masonry & 1-line script generator",
+        icon: Code2,
       },
       {
-        href: "/widget",
-        label: "Public Lead-Gen Audit Widget",
-        desc: "Standalone embeddable agency lead magnet form",
-        icon: Code2,
+        href: "/dashboard/qr-studio",
+        label: "Printable QR Stand Studio",
+        desc: "Download printable 4x6 table tents for reception & dining tables",
+        icon: QrCode,
+      },
+      {
+        href: "/dashboard/ai-replies",
+        label: "Gemini AI Review Auto-Responder",
+        desc: "Synthesize 3 SEO-boosted and de-escalating replies in 1.8s",
+        icon: Sparkles,
+      },
+      {
+        href: "/dashboard/agency",
+        label: "Agency White-Label Hub",
+        desc: "Multi-client management and monthly PDF performance reports",
+        icon: Building2,
       },
     ],
   },
   {
-    heading: "Administration, Legal & Public Manifests",
+    heading: "Live Customer Funnels & Embeds",
     items: [
       {
-        href: "/admin",
-        label: "SaaS Owner Admin Portal",
-        desc: "MRR control center, user tiers & API health check",
-        icon: Activity,
+        href: "/r/apex-dental",
+        label: "Dental Clinic Review Funnel",
+        desc: "Test the 5-star gatekeeper & negative review shield live",
+        icon: Star,
+      },
+      {
+        href: "/r/bayview-auto",
+        label: "German Auto Shop Funnel",
+        desc: "Live mobile-optimized customer feedback experience",
+        icon: Star,
+      },
+      {
+        href: "/embed/widget-apex-wall",
+        label: "Standalone Wall of Love iFrame",
+        desc: "Embeddable masonry view of verified patient reviews",
+        icon: Globe,
+      },
+    ],
+  },
+  {
+    heading: "Documentation, Security & Legal",
+    items: [
+      {
+        href: "/docs",
+        label: "REST API & Embed Documentation",
+        desc: "Interactive cURL and JSON console for developers",
+        icon: Terminal,
       },
       {
         href: "/security",
-        label: "Security, SOC2 & Crawler Manifests",
-        desc: "Live /robots.txt, /sitemap.xml, /llms.txt & RLS status",
+        label: "Security & SOC2 Readiness",
+        desc: "PostgreSQL RLS, TLS 1.3 transit & zero-retention AI policy",
         icon: ShieldCheck,
       },
       {
         href: "/legal/privacy",
-        label: "Privacy Policy & GDPR / CCPA DPA",
-        desc: "Subprocessors, data retention & zero AI training policy",
+        label: "Privacy Policy & GDPR / CCPA",
+        desc: "Confidentiality of intercepted negative customer grievances",
         icon: FileText,
       },
       {
         href: "/legal/terms",
         label: "Terms of Service & Agency License",
-        desc: "Commercial white-label PDF rights & 30-day guarantee",
+        desc: "Commercial white-label resale rights and Stripe billing terms",
         icon: BookOpen,
-      },
-      {
-        href: "/login",
-        label: "Sign In / Switch Account",
-        desc: "Password, Magic Link & 1-Click Demo sandbox",
-        icon: LogIn,
-      },
-      {
-        href: "/signup",
-        label: "Create Growth Workspace",
-        desc: "Instant onboarding for new agency accounts",
-        icon: UserPlus,
       },
     ],
   },
 ];
 
 export function SiteNavigatorDrawer() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const handleCustomToggle = (e: Event) => {
+    const handleToggle = (e: Event) => {
       const custom = e as CustomEvent<{ open?: boolean }>;
       if (typeof custom.detail?.open === "boolean") {
         setOpen(custom.detail.open);
@@ -229,125 +196,97 @@ export function SiteNavigatorDrawer() {
       }
     };
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setOpen((prev) => !prev);
-      }
-    };
-
-    window.addEventListener("seospace:toggle-nav", handleCustomToggle);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("seospace:toggle-nav", handleCustomToggle);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    window.addEventListener("trustpulse:toggle-nav", handleToggle);
+    return () => window.removeEventListener("trustpulse:toggle-nav", handleToggle);
   }, []);
 
-  // Automatically close drawer on route change
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  // Broadcast drawer open state so OpenSiteNavigatorButton hides when already open
-  useEffect(() => {
-    if (typeof window === "undefined") return;
     window.dispatchEvent(
-      new CustomEvent("seospace:nav-state", { detail: { open } })
+      new CustomEvent("trustpulse:nav-state", { detail: { open } })
     );
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
   }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="no-print fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
         onClick={() => setOpen(false)}
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
       />
 
-          {/* Drawer Content */}
-          <aside className="relative z-10 w-full max-w-sm bg-slate-950 text-white h-full border-l border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
-            {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <SeospaceLogo darkText={false} size="sm" />
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  ALL PAGES
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close Navigation Drawer"
-                className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 cursor-pointer transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Scrollable Links List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              {NAV_SECTIONS.map((sec) => (
-                <div key={sec.heading} className="space-y-2">
-                  <div className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    {sec.heading}
-                  </div>
-                  <div className="space-y-1">
-                    {sec.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive =
-                        pathname === item.href ||
-                        (item.href !== "/" &&
-                          !item.href.includes("?") &&
-                          pathname?.startsWith(item.href));
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setOpen(false)}
-                          className={`flex items-start gap-3 p-2.5 rounded-2xl border transition ${
-                            isActive
-                              ? "bg-blue-600/20 border-blue-500/50 text-white"
-                              : "bg-slate-900/50 border-slate-800/60 hover:bg-slate-900 hover:border-slate-700 text-slate-200"
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                              isActive
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-800 text-blue-400"
-                            }`}
-                          >
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold truncate">
-                              {item.label}
-                            </div>
-                            <div className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                              {item.desc}
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Drawer Footer */}
-            <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="inline-flex items-center gap-1.5 text-blue-300 font-semibold">
-                <Sparkles className="w-3.5 h-3.5" /> Seospace Neural Engine v4.2
-              </span>
-              <span>Press ESC to close</span>
-            </div>
-          </aside>
+      {/* Drawer Panel */}
+      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+        {/* Drawer Header */}
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+          <TrustPulseLogo auto size="sm" />
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
+
+        {/* Links Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+          {NAV_SECTIONS.map((sec) => (
+            <div key={sec.heading} className="space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block px-2">
+                {sec.heading}
+              </span>
+              <div className="space-y-1">
+                {sec.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-start gap-3 p-2.5 rounded-xl transition-all ${
+                        isActive
+                          ? "bg-emerald-50 text-emerald-900 font-semibold"
+                          : "hover:bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          isActive
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold leading-tight">
+                          {item.label}
+                        </div>
+                        <div className="text-[11px] text-slate-500 leading-tight mt-0.5 truncate">
+                          {item.desc}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Drawer Footer */}
+        <div className="p-4 border-t border-slate-200 bg-slate-50 text-center text-xs text-slate-500">
+          TrustPulse AI • Complete Sitemap &amp; Navigator
+        </div>
+      </div>
+    </div>
   );
 }

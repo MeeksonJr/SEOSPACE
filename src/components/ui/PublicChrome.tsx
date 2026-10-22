@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
+import { TrustPulseLogo } from "@/components/ui/TrustPulseLogo";
 import { MotionEffects } from "@/components/ui/Motion";
 import { triggerSiteNavigator } from "@/components/ui/SiteNavigatorDrawer";
 
-const THEME_STORAGE_KEY = "seospace_theme_mode";
+const THEME_STORAGE_KEY = "trustpulse_theme_mode";
 
 function applyTheme(dark: boolean) {
   if (typeof document !== "undefined") {
@@ -31,10 +31,9 @@ export function usePublicTheme(defaultDark = false) {
         applyTheme(custom.detail.isDark);
       }
     };
-    window.addEventListener("seospace:theme-change", handle);
-    return () => window.removeEventListener("seospace:theme-change", handle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    window.addEventListener("trustpulse:theme-change", handle);
+    return () => window.removeEventListener("trustpulse:theme-change", handle);
+  }, [defaultDark]);
 
   const setTheme = (nextDark: boolean) => {
     setIsDark(nextDark);
@@ -42,7 +41,7 @@ export function usePublicTheme(defaultDark = false) {
     if (typeof window !== "undefined") {
       window.localStorage.setItem(THEME_STORAGE_KEY, nextDark ? "dark" : "light");
       window.dispatchEvent(
-        new CustomEvent("seospace:theme-change", { detail: { isDark: nextDark } })
+        new CustomEvent("trustpulse:theme-change", { detail: { isDark: nextDark } })
       );
     }
   };
@@ -139,15 +138,6 @@ export function ThemeToggleButton({
   );
 }
 
-const NAV = [
-  { href: "/#how", label: "How it works" },
-  { href: "/tools", label: "Free tools" },
-  { href: "/compare", label: "Compare" },
-  { href: "/docs", label: "API" },
-  { href: "/security", label: "Security" },
-  { href: "/#pricing", label: "Pricing" },
-];
-
 export function PublicNavbar({
   isDark,
   onToggleTheme,
@@ -169,35 +159,35 @@ export function PublicNavbar({
     <header className="sticky top-0 z-50 px-2.5 sm:px-4 lg:px-6 pt-2.5 sm:pt-3 w-full max-w-full">
       <div className="mx-auto max-w-5xl xl:max-w-6xl w-full flex items-center justify-between gap-2 sm:gap-4 rounded-full border border-line bg-card/95 backdrop-blur px-3 sm:px-4 py-2 sp-card-shadow">
         {/* Brand Logo */}
-        <Link href="/" className="shrink-0 pl-0.5" aria-label="Seospace home">
-          <SeospaceLogo auto size="sm" />
+        <Link href="/" className="shrink-0 pl-0.5" aria-label="TrustPulse AI home">
+          <TrustPulseLogo auto size="sm" />
         </Link>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-0.5 lg:gap-1 text-[0.8rem] font-medium min-w-0">
           <Link
-            href="/tools"
+            href="/#shield"
             className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
           >
-            Tools
+            Review Shield
           </Link>
           <Link
-            href="/compare"
+            href="/#widgets"
             className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
           >
-            Compare
+            Widgets
           </Link>
           <Link
-            href="/docs"
+            href="/#ai-replies"
             className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
           >
-            API
+            AI Replies
           </Link>
           <Link
-            href="/security"
-            className="hidden lg:inline-flex px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
+            href="/#roi"
+            className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
           >
-            Security
+            Agency ROI
           </Link>
           <Link
             href="/#pricing"
@@ -205,140 +195,137 @@ export function PublicNavbar({
           >
             Pricing
           </Link>
+          <Link
+            href="/docs"
+            className="px-2.5 lg:px-3 py-1.5 rounded-full text-mute hover:text-ink hover:bg-stage transition-colors"
+          >
+            Docs
+          </Link>
         </nav>
 
-        {/* Right Actions */}
+        {/* Right CTA cluster */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <ThemeToggleButton isDark={isDark} onToggle={onToggleTheme} />
 
           <Link
-            href="/login"
-            className="hidden lg:inline-flex px-2.5 py-1.5 text-[0.8rem] font-medium text-ink hover:underline underline-offset-4"
+            href="/r/apex-dental"
+            target="_blank"
+            className="hidden sm:inline-flex items-center gap-1 text-[0.78rem] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 transition-colors"
           >
-            Sign in
+            <span>Live Funnel</span>
+            <span aria-hidden>↗</span>
           </Link>
 
           <Link
             href="/dashboard"
-            className="sp-btn sp-btn-primary !py-1.5 !px-3 sm:!px-3.5 !text-xs hidden sm:inline-flex"
+            className="inline-flex items-center justify-center rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-[0.78rem] px-3.5 sm:px-4 py-1.5 transition-colors shadow-sm"
           >
-            <span>Live demo</span> <span aria-hidden>↗</span>
+            Dashboard
           </Link>
 
+          {/* Mobile hamburger button */}
           <button
             type="button"
-            onClick={() => setOpen(true)}
-            className="md:hidden sp-btn sp-btn-ghost !py-1.5 !px-2.5 !text-xs font-semibold"
-            aria-label="Open menu"
-            aria-expanded={open}
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen(!open)}
+            className="md:hidden inline-flex items-center justify-center h-8 w-8 rounded-full border border-line bg-card text-ink hover:bg-stage cursor-pointer transition-colors"
           >
-            Menu
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {open ? (
+                <path d="M18 6 6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile drop menu */}
       {open && (
-        <div
-          className="fixed inset-0 z-[60] bg-night text-[#f3f0e8] flex flex-col p-6 sm:p-10 overflow-y-auto"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="flex items-center justify-between">
-            <SeospaceLogo darkText={false} size="sm" />
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="sp-btn sp-btn-ghost !text-[#f3f0e8] !border-[#f3f0e8]/60 !py-1.5 !px-3.5 !text-xs"
-            >
-              Close ✕
-            </button>
-          </div>
-          <nav className="mt-8 flex flex-col">
+        <div className="md:hidden fixed inset-x-3 top-16 z-50 rounded-3xl border border-line bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-ink">
+          <nav className="flex flex-col space-y-3">
             {[
-              { href: "/", label: "Home" },
-              { href: "/#how", label: "How it works" },
-              { href: "/tools", label: "Free Tools Suite" },
-              { href: "/compare", label: "Competitor Battlecard" },
-              { href: "/docs", label: "Developer REST API" },
-              { href: "/widget", label: "Embeddable Widget" },
-              { href: "/security", label: "Security & Trust" },
-              { href: "/#pricing", label: "Plans & Pricing" },
-              { href: "/dashboard", label: "Open Workspace Demo ↗" },
-              { href: "/login", label: "Sign in" },
+              { href: "/#shield", label: "Negative Review Shield" },
+              { href: "/#widgets", label: "Embeddable Social Proof Widgets" },
+              { href: "/#ai-replies", label: "Gemini AI Review Responder" },
+              { href: "/#roi", label: "Agency Retainer Calculator" },
+              { href: "/#pricing", label: "Pricing & Plans" },
+              { href: "/r/apex-dental", label: "Test Live QR Funnel ↗" },
+              { href: "/dashboard", label: "Client Workspace Dashboard ↗" },
+              { href: "/docs", label: "Documentation & API" },
             ].map((n, i) => (
               <Link
                 key={n.href + n.label}
                 href={n.href}
                 onClick={() => setOpen(false)}
-                className="sp-display text-2xl sm:text-3xl py-2.5 border-b border-white/10 flex items-baseline justify-between hover:text-[#ff4d14] transition-colors"
+                className="text-lg font-bold py-2 border-b border-line flex items-center justify-between hover:text-emerald-500 transition-colors"
               >
                 <span>{n.label}</span>
-                <span className="sp-eyebrow !text-[0.62rem] text-white/40">
+                <span className="text-xs text-mute font-mono">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </Link>
             ))}
           </nav>
-          <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/10">
-            <span className="sp-eyebrow text-white/60">Theme Mode:</span>
+          <div className="mt-6 flex items-center justify-between pt-4 border-t border-line">
+            <span className="text-xs font-mono uppercase text-mute">Theme Mode:</span>
             <ThemeToggleButton isDark={isDark} onToggle={onToggleTheme} size="sm" />
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              triggerSiteNavigator(true);
-            }}
-            className="mt-6 sp-eyebrow text-left text-white/60 hover:text-white cursor-pointer"
-          >
-            All pages &amp; files drawer ↗
-          </button>
         </div>
       )}
     </header>
   );
 }
 
-const FOOT_COLS: Array<{ title: string; links: Array<{ href: string; label: string; ext?: boolean }> }> = [
+const FOOT_COLS: Array<{
+  title: string;
+  links: Array<{ href: string; label: string; ext?: boolean }>;
+}> = [
   {
     title: "Product",
     links: [
-      { href: "/dashboard", label: "Workspace" },
-      { href: "/dashboard?tab=editor", label: "AI article studio" },
-      { href: "/dashboard?tab=whitelabel", label: "White-label reports" },
-      { href: "/dashboard?tab=widget", label: "Lead widget & CRM" },
-      { href: "/dashboard?tab=billing", label: "Plans & billing" },
+      { href: "/dashboard", label: "Reputation Dashboard" },
+      { href: "/dashboard/widgets", label: "Widget Studio (Toasts & Wall)" },
+      { href: "/dashboard/shield", label: "Shielded Feedback Inbox" },
+      { href: "/dashboard/ai-replies", label: "Gemini Review Responder" },
+      { href: "/dashboard/qr-studio", label: "Printable QR Code Studio" },
     ],
   },
   {
-    title: "Free tools",
+    title: "Live Demos",
     links: [
-      { href: "/tools", label: "llms.txt, schema & DNS tools" },
-      { href: "/compare", label: "Competitor battlecard" },
-      { href: "/report/voice-one-com", label: "Sample audit: voice-one.com" },
-      { href: "/report/stripe-com", label: "Sample audit: stripe.com" },
-      { href: "/article/art-voiceone-guide", label: "Sample AI article" },
+      { href: "/r/apex-dental", label: "Dental Clinic Review Funnel" },
+      { href: "/r/bayview-auto", label: "German Auto Shop Funnel" },
+      { href: "/embed/widget-apex-wall", label: "Standalone Wall of Love" },
+      { href: "/dashboard/agency", label: "Agency Multi-Client Hub" },
     ],
   },
   {
-    title: "Developers",
+    title: "Integrations & API",
     links: [
-      { href: "/docs", label: "REST API & webhooks" },
-      { href: "/widget", label: "Embed widget" },
+      { href: "/docs", label: "Widget 1-Line Script API" },
+      { href: "/api/widget/script?id=widget-apex-toasts", label: "CDN Embed Engine" },
       { href: "/robots.txt", label: "/robots.txt", ext: true },
       { href: "/sitemap.xml", label: "/sitemap.xml", ext: true },
-      { href: "/llms.txt", label: "/llms.txt", ext: true },
     ],
   },
   {
-    title: "Company",
+    title: "Company & Legal",
     links: [
-      { href: "/security", label: "Security & trust" },
-      { href: "/legal/privacy", label: "Privacy & DPA" },
-      { href: "/legal/terms", label: "Terms & licence" },
-      { href: "/login", label: "Sign in" },
-      { href: "/admin", label: "Owner admin" },
+      { href: "/security", label: "Security & SOC2 Readiness" },
+      { href: "/legal/privacy", label: "Privacy Policy & GDPR" },
+      { href: "/legal/terms", label: "Terms of Service" },
+      { href: "/login", label: "Client Login" },
+      { href: "/admin", label: "Admin Panel" },
     ],
   },
 ];
@@ -356,21 +343,28 @@ export function PublicFooter({
       <footer className="mt-auto bg-night text-[#f3f0e8] relative overflow-hidden">
         <div className="mx-auto max-w-[88rem] px-5 sm:px-8 pt-16 sm:pt-24">
           <div className="grid lg:grid-cols-12 gap-10 items-end">
-            <h2 className="sp-display text-[clamp(2.6rem,8vw,7rem)] lg:col-span-8" data-reveal>
-              Audit it.
+            <h2 className="sp-display text-[clamp(2.4rem,7vw,6.5rem)] lg:col-span-8">
+              Protect your stars.
               <br />
-              Fix it. <span className="text-[#ff4d14]">Send it.</span>
+              Amplify your <span className="text-emerald-400">social proof.</span>
             </h2>
-            <div className="lg:col-span-4 space-y-5" data-reveal data-delay="2">
+            <div className="lg:col-span-4 space-y-5">
               <p className="text-[#f3f0e8]/70 text-[0.95rem] leading-relaxed max-w-sm">
-                Scan any website in seconds, ship the fixes with AI, and hand clients a report that carries your brand, not ours.
+                Shield local businesses from unfair 1-star public reviews while streaming verified 5-star customer praise into high-converting website widgets.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/dashboard" className="sp-btn sp-btn-accent">
-                  Open live demo <span aria-hidden>↗</span>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 transition-colors shadow-lg"
+                >
+                  Open Live Demo Workspace <span aria-hidden className="ml-1">↗</span>
                 </Link>
-                <Link href="/signup" className="sp-btn sp-btn-ghost !text-[#f3f0e8] !border-[#f3f0e8]/50 hover:!bg-[#f3f0e8] hover:!text-[#141413]">
-                  Start free
+                <Link
+                  href="/r/apex-dental"
+                  target="_blank"
+                  className="inline-flex items-center justify-center rounded-full border border-white/20 hover:bg-white/10 text-white font-medium px-5 py-3 transition-colors"
+                >
+                  Test QR Shield Funnel
                 </Link>
               </div>
             </div>
@@ -378,9 +372,9 @@ export function PublicFooter({
 
           <div className="mt-16 sm:mt-20 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 border-t border-white/10 pt-10">
             <div className="col-span-2 lg:col-span-1 space-y-4">
-              <SeospaceLogo darkText={false} />
+              <TrustPulseLogo darkText={false} />
               <p className="text-xs leading-relaxed text-white/50 max-w-[16rem]">
-                SEO, conversion, AI-search and DNS audits with a white-label report engine.
+                Autonomous Social Proof, Multi-Source Review Aggregator &amp; Negative Review Shield for Local Businesses &amp; Agencies.
               </p>
             </div>
             {FOOT_COLS.map((col) => (
@@ -390,11 +384,19 @@ export function PublicFooter({
                   {col.links.map((l) => (
                     <li key={l.label}>
                       {l.ext ? (
-                        <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#ff4d14] transition-colors font-mono text-[0.78rem]">
+                        <a
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white/80 hover:text-emerald-400 transition-colors font-mono text-[0.78rem]"
+                        >
                           {l.label} ↗
                         </a>
                       ) : (
-                        <Link href={l.href} className="text-white/80 hover:text-[#ff4d14] transition-colors">
+                        <Link
+                          href={l.href}
+                          className="text-white/80 hover:text-emerald-400 transition-colors"
+                        >
                           {l.label}
                         </Link>
                       )}
@@ -407,22 +409,28 @@ export function PublicFooter({
 
           <div className="mt-14 py-6 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/50">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              All systems operational · © {new Date().getFullYear()} Seospace AI Inc.
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              All systems operational · © {new Date().getFullYear()} TrustPulse AI Inc. Built for zero-cost operation.
             </div>
             <div className="flex items-center gap-5">
-              <button type="button" onClick={() => triggerSiteNavigator(true)} className="hover:text-white cursor-pointer">
+              <button
+                type="button"
+                onClick={() => triggerSiteNavigator(true)}
+                className="hover:text-white cursor-pointer"
+              >
                 All pages
               </button>
-              {onToggleTheme && <ThemeToggleButton isDark={isDark} onToggle={onToggleTheme} />}
+              {onToggleTheme && (
+                <ThemeToggleButton isDark={isDark} onToggle={onToggleTheme} />
+              )}
             </div>
           </div>
         </div>
         <div
           aria-hidden="true"
-          className="sp-display select-none text-center text-[clamp(5rem,26vw,24rem)] leading-[0.72] text-white/[0.045] -mb-[0.06em] pointer-events-none"
+          className="sp-display select-none text-center text-[clamp(4.5rem,24vw,22rem)] leading-[0.72] text-white/[0.035] -mb-[0.06em] pointer-events-none"
         >
-          seospace
+          trustpulse
         </div>
       </footer>
     </>

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://seospace-kappa.vercel.app";
+  const baseUrl = "https://trustpulse-ai.vercel.app";
 
   return {
     rules: [
@@ -10,17 +10,13 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           "/",
           "/dashboard",
-          "/compare",
-          "/tools",
+          "/r/",
+          "/embed/",
           "/docs",
-          "/widget",
-          "/report/",
-          "/article/",
-          "/legal/",
           "/security",
-          "/llms.txt",
+          "/legal/",
         ],
-        disallow: ["/api/stripe/webhook"],
+        disallow: ["/api/shield/submit"],
       },
       {
         userAgent: [
@@ -32,7 +28,7 @@ export default function robots(): MetadataRoute.Robots {
           "Google-Extended",
           "Applebot-Extended",
         ],
-        allow: ["/", "/compare", "/tools", "/docs", "/report/", "/article/", "/llms.txt"],
+        allow: ["/", "/docs", "/security", "/r/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
