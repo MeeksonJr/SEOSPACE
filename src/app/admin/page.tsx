@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import {
   getAdminUsers,
   getCapturedLeads,
@@ -102,7 +103,8 @@ export default function AdminPortalPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-3 text-xs">
+            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
             <Link
               href="/dashboard"
               className="text-slate-300 hover:text-white inline-flex items-center gap-1"

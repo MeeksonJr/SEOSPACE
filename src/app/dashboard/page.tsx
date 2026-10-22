@@ -21,7 +21,12 @@ import {
   Home,
   LayoutGrid,
   Loader2,
+  Menu,
   Palette,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   RefreshCw,
   Search,
   Settings,
@@ -29,9 +34,11 @@ import {
   Sparkles,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import {
   deleteArticle,
   deleteAuditById,
@@ -108,6 +115,9 @@ function DashboardContent() {
   const [aiNote, setAiNote] = useState("");
   const [newArticlePrompt, setNewArticlePrompt] = useState("");
   const [showNewArticleModal, setShowNewArticleModal] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [rightGraderOpen, setRightGraderOpen] = useState(true);
 
   function loadArticleIntoState(art: SavedArticle) {
     setEditorTitle(art.title);
@@ -508,190 +518,327 @@ function DashboardContent() {
     return articles.filter((a) => a.linkedDomain === libraryDomainFilter);
   }, [articles, libraryDomainFilter]);
 
-  return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F6F9] flex flex-col lg:flex-row text-slate-900">
-      {/* CONSTANT NON-SCROLLING LEFT SIDEBAR */}
-      <aside className="w-full lg:w-64 lg:h-screen bg-white border-b lg:border-b-0 lg:border-r border-slate-200/90 flex flex-col justify-between p-4 shrink-0 lg:overflow-hidden">
-        <div>
-          <div className="flex items-center justify-between px-2 py-1.5">
-            <Link href="/">
-              <SeospaceLogo size="sm" />
-            </Link>
+  const sidebarInnerContent = (isMobile = false) => (
+    <>
+      <div>
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <Link href="/" onClick={() => isMobile && setMobileSidebarOpen(false)}>
+            <SeospaceLogo size="sm" />
+          </Link>
+          <div className="flex items-center gap-1.5">
             <Link
               href="/admin"
+              onClick={() => isMobile && setMobileSidebarOpen(false)}
               title="Owner Admin Portal"
               className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
             >
               Admin
             </Link>
+            {isMobile ? (
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                title="Close Sidebar"
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDesktopSidebarOpen(false)}
+                title="Collapse Left Sidebar"
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer transition"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            )}
           </div>
+        </div>
 
-          <div className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
-            <div className="flex items-center gap-2.5 truncate">
-              <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                {whiteLabel.agencyName.charAt(0)}
-              </div>
-              <span className="text-xs font-semibold text-slate-800 truncate">
-                {whiteLabel.agencyName || "Seospace Agency"}
-              </span>
+        <div className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 truncate">
+            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+              {whiteLabel.agencyName.charAt(0)}
             </div>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 uppercase shrink-0">
-              {user.plan}
+            <span className="text-xs font-semibold text-slate-800 truncate">
+              {whiteLabel.agencyName || "Seospace Agency"}
+            </span>
+          </div>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 uppercase shrink-0">
+            {user.plan}
+          </span>
+        </div>
+
+        <div className="mt-6">
+          <div className="px-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Workspace Menu
+          </div>
+          <nav className="space-y-1">
+            {[
+              { id: "overview", label: "Home & Intelligence", icon: Home },
+              {
+                id: "editor",
+                label: `AI Articles (${articles.length})`,
+                icon: BookOpen,
+              },
+              {
+                id: "whitelabel",
+                label: "White-Label Branding",
+                icon: Palette,
+              },
+              {
+                id: "widget",
+                label: `Lead CRM (${leads.length})`,
+                icon: Users,
+              },
+              { id: "billing", label: "Billing & Plans", icon: CreditCard },
+            ].map((item) => {
+              const Icon = item.icon;
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id as DashboardTab);
+                    if (isMobile) setMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                    active
+                      ? "bg-blue-50/90 text-blue-600 border border-blue-200/60 shadow-2xs"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 ${
+                      active ? "text-blue-600" : "text-slate-400"
+                    }`}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Bottom Neural Engine Status Card + Quick Access & Profile */}
+      <div className="mt-4 space-y-3">
+        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span>Seospace Neural Engine</span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            RapidAPI live metadata extraction &amp; mathematical SEO grading
+            active.
+          </p>
+          <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold">
+            <button
+              onClick={() => {
+                setActiveTab("editor");
+                setEditorViewMode("write");
+                setShowNewArticleModal(true);
+                if (isMobile) setMobileSidebarOpen(false);
+              }}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              + Generate New AI Article
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-1 pt-2 border-t border-slate-100">
+          <div className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+            All Platform Pages
+          </div>
+          <Link
+            href={
+              latestAudit ? `/report/${latestAudit.id}` : "/report/voice-one-com"
+            }
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <HelpCircle className="w-4 h-4 text-slate-400" />
+            <span>Latest Audited Report</span>
+          </Link>
+          <Link
+            href={`/article/${activeArticleId}`}
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <Eye className="w-4 h-4 text-slate-400" />
+            <span>View Shareable Article</span>
+          </Link>
+          <Link
+            href="/compare"
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <Globe className="w-4 h-4 text-blue-600" />
+            <span>Competitor Battlecard</span>
+          </Link>
+          <Link
+            href="/tools"
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <Code className="w-4 h-4 text-emerald-600" />
+            <span>Free SEO &amp; DNS Tools</span>
+          </Link>
+          <Link
+            href="/docs"
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <LayoutGrid className="w-4 h-4 text-indigo-600" />
+            <span>REST API Playground</span>
+          </Link>
+          <button
+            onClick={() => {
+              setActiveTab("whitelabel");
+              if (isMobile) setMobileSidebarOpen(false);
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
+          >
+            <Settings className="w-4 h-4 text-slate-400" />
+            <span>Agency Settings</span>
+          </button>
+        </div>
+
+        <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-2">
+          <div className="flex items-center gap-2.5 truncate">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+              {user.name.charAt(0)}
+            </div>
+            <div className="leading-tight truncate">
+              <div className="text-xs font-bold text-slate-900 truncate">
+                {user.name}
+              </div>
+              <div className="text-[10px] text-slate-400 truncate">
+                {user.email}
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/login"
+            className="text-[10px] font-semibold text-slate-400 hover:text-slate-700"
+          >
+            Sign Out
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F6F9] flex flex-col lg:flex-row text-slate-900">
+      {/* DESKTOP CONSTANT NON-SCROLLING LEFT SIDEBAR (Collapsible via desktopSidebarOpen) */}
+      {desktopSidebarOpen && (
+        <aside className="hidden lg:flex lg:w-64 lg:h-screen bg-white border-r border-slate-200/90 flex-col justify-between p-4 shrink-0 overflow-hidden">
+          {sidebarInnerContent(false)}
+        </aside>
+      )}
+
+      {/* MOBILE & TABLET SLIDE-OVER SIDEBAR DRAWER */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div
+            onClick={() => setMobileSidebarOpen(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+          />
+          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-white border-r border-slate-200 p-4 flex flex-col justify-between overflow-y-auto shadow-2xl">
+            {sidebarInnerContent(true)}
+          </aside>
+        </div>
+      )}
+
+      {/* FULL-WIDTH INDEPENDENTLY SCROLLABLE RIGHT WORKSPACE AREA */}
+      <main className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto flex flex-col">
+        {/* UNIVERSAL STICKY WORKSPACE TOP BAR (Open/Close Sidebar + Access Pages Anywhere) */}
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 h-14 flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Mobile Sidebar Open Button */}
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label="Open Workspace Sidebar"
+              className="lg:hidden px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/90 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Menu className="w-4 h-4 text-blue-600" />
+              <span>Sidebar</span>
+            </button>
+
+            {/* Desktop Sidebar Open/Close Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
+              title={
+                desktopSidebarOpen ? "Hide Left Sidebar" : "Open Left Sidebar"
+              }
+              className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 text-xs font-semibold cursor-pointer transition"
+            >
+              {desktopSidebarOpen ? (
+                <>
+                  <PanelLeftClose className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Hide Sidebar</span>
+                </>
+              ) : (
+                <>
+                  <PanelLeftOpen className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Open Sidebar</span>
+                </>
+              )}
+            </button>
+
+            <div className="lg:hidden">
+              <Link href="/">
+                <SeospaceLogo size="sm" />
+              </Link>
+            </div>
+
+            <span className="hidden sm:inline-block text-slate-300">|</span>
+            <span className="hidden sm:inline-block text-xs font-bold text-slate-700 truncate">
+              {activeTab === "overview"
+                ? "Executive Intelligence"
+                : activeTab === "editor"
+                ? "AI SEO Content Studio"
+                : activeTab === "whitelabel"
+                ? "White-Label PDF Branding"
+                : activeTab === "widget"
+                ? "Lead Capture CRM"
+                : "Subscription & Stripe Billing"}
             </span>
           </div>
 
-          <div className="mt-6">
-            <div className="px-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              General Menu
-            </div>
-            <nav className="space-y-1">
-              {[
-                { id: "overview", label: "Home & Intelligence", icon: Home },
-                {
-                  id: "editor",
-                  label: `AI Articles (${articles.length})`,
-                  icon: BookOpen,
-                },
-                {
-                  id: "whitelabel",
-                  label: "White-Label Branding",
-                  icon: Palette,
-                },
-                {
-                  id: "widget",
-                  label: `Lead CRM (${leads.length})`,
-                  icon: Users,
-                },
-                { id: "billing", label: "Billing & Plans", icon: CreditCard },
-              ].map((item) => {
-                const Icon = item.icon;
-                const active = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id as DashboardTab)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                      active
-                        ? "bg-blue-50/90 text-blue-600 border border-blue-200/60 shadow-2xs"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
-                  >
-                    <Icon
-                      className={`w-4 h-4 ${
-                        active ? "text-blue-600" : "text-slate-400"
-                      }`}
-                    />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Bottom Neural Engine Status Card + Support & Profile */}
-        <div className="mt-4 space-y-3">
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span>Seospace Neural Engine</span>
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-              RapidAPI live metadata extraction &amp; mathematical SEO grading
-              active.
-            </p>
-            <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold">
-              <button
-                onClick={() => {
-                  setActiveTab("editor");
-                  setEditorViewMode("write");
-                  setShowNewArticleModal(true);
-                }}
-                className="text-blue-600 hover:underline cursor-pointer"
-              >
-                + Generate New AI Article
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-1 pt-2 border-t border-slate-100">
-            <div className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
-              Quick Access
-            </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
-              href={
-                latestAudit
-                  ? `/report/${latestAudit.id}`
-                  : "/report/voice-one-com"
-              }
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+              href="/"
+              className="hidden md:inline-flex px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
             >
-              <HelpCircle className="w-4 h-4 text-slate-400" />
-              <span>Latest Audited Report</span>
-            </Link>
-            <Link
-              href={`/article/${activeArticleId}`}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
-            >
-              <Eye className="w-4 h-4 text-slate-400" />
-              <span>View Shareable Article</span>
+              Home
             </Link>
             <Link
               href="/compare"
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="hidden sm:inline-flex px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
             >
-              <Globe className="w-4 h-4 text-blue-600" />
-              <span>Competitor Battlecard</span>
+              Battlecard
             </Link>
             <Link
               href="/tools"
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="hidden md:inline-flex px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
             >
-              <Code className="w-4 h-4 text-emerald-600" />
-              <span>Free SEO &amp; DNS Tools</span>
+              Free Tools
             </Link>
             <Link
               href="/docs"
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="hidden xl:inline-flex px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition"
             >
-              <LayoutGrid className="w-4 h-4 text-indigo-600" />
-              <span>REST API Playground</span>
+              API Docs
             </Link>
-            <button
-              onClick={() => setActiveTab("whitelabel")}
-              className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
-            >
-              <Settings className="w-4 h-4 text-slate-400" />
-              <span>Agency Settings</span>
-            </button>
+            <OpenSiteNavigatorButton label="All Pages" />
           </div>
-
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between px-2">
-            <div className="flex items-center gap-2.5 truncate">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                {user.name.charAt(0)}
-              </div>
-              <div className="leading-tight truncate">
-                <div className="text-xs font-bold text-slate-900 truncate">
-                  {user.name}
-                </div>
-                <div className="text-[10px] text-slate-400 truncate">
-                  {user.email}
-                </div>
-              </div>
-            </div>
-            <Link
-              href="/login"
-              className="text-[10px] font-semibold text-slate-400 hover:text-slate-700"
-            >
-              Sign Out
-            </Link>
-          </div>
-        </div>
-      </aside>
-
-      {/* FULL-WIDTH INDEPENDENTLY SCROLLABLE RIGHT WORKSPACE AREA */}
-      <main className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
+        </header>
         {/* ============================================================
             TAB 1: 100% DATA-DRIVEN EXECUTIVE INTELLIGENCE DASHBOARD
            ============================================================ */}
@@ -1368,7 +1515,24 @@ function DashboardContent() {
                 </button>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRightGraderOpen(!rightGraderOpen)}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  {rightGraderOpen ? (
+                    <>
+                      <PanelRightClose className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Hide Score Panel</span>
+                    </>
+                  ) : (
+                    <>
+                      <PanelRightOpen className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Show Score Panel ({articleGrade.score}/100)</span>
+                    </>
+                  )}
+                </button>
                 <Link
                   href={`/article/${activeArticleId}`}
                   className="px-3.5 py-1.5 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-700 text-xs font-bold inline-flex items-center gap-1.5 transition"
@@ -1579,8 +1743,12 @@ function DashboardContent() {
                ============================================================ */}
             {editorViewMode !== "library" && (
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
-                {/* Left 8 Cols: Write Mode OR Live Blog & SERP Preview Mode */}
-                <div className="lg:col-span-8 p-6 sm:p-8 flex flex-col">
+                {/* Left 8 or 12 Cols: Write Mode OR Live Blog & SERP Preview Mode */}
+                <div
+                  className={`${
+                    rightGraderOpen ? "lg:col-span-8" : "lg:col-span-12"
+                  } p-4 sm:p-8 flex flex-col`}
+                >
                   {editorViewMode === "write" ? (
                     <>
                       {/* Working Formatting Toolbar */}
@@ -1786,8 +1954,9 @@ function DashboardContent() {
                   )}
                 </div>
 
-                {/* Right-Hand Mathematical SEO Score Panel (4 cols) */}
-                <div className="lg:col-span-4 p-6 bg-slate-50/40 space-y-6">
+                {/* Right-Hand Mathematical SEO Score Panel (4 cols, collapsible via rightGraderOpen) */}
+                {rightGraderOpen && (
+                <div className="lg:col-span-4 p-4 sm:p-6 bg-slate-50/40 space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-slate-900">
@@ -2057,6 +2226,7 @@ function DashboardContent() {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             )}
           </div>

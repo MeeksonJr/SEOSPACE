@@ -31,6 +31,7 @@ import {
   gradeArticleReal,
   ArticleDraft,
 } from "@/lib/storage/workspace-store";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 
 function renderFormattedArticle(content: string, highlightKeyword?: string) {
   const lines = content.split("\n");
@@ -278,14 +279,14 @@ export default function ArticlePreviewPage() {
     <div className="min-h-screen bg-[#0B0F17] text-slate-100">
       {/* Top Action Header */}
       <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0B0F17]/90 backdrop-blur-xl print:hidden">
-        <div className="w-full px-6 lg:px-10 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-2.5 min-h-[4rem] flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href={`/dashboard?tab=editor&articleId=${article.id}`}
-              className="flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-2 rounded-lg transition shrink-0"
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-2 rounded-lg transition shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back to AI Studio
+              <span>AI Studio</span>
             </Link>
 
             {article.linkedAuditId && (
@@ -349,10 +350,11 @@ export default function ArticlePreviewPage() {
           </div>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
             <button
               onClick={() => handleCopy("markdown")}
-              className="flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
+              className="flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-2.5 sm:px-3 py-2 rounded-lg transition"
             >
               {copiedType === "markdown" ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -363,7 +365,7 @@ export default function ArticlePreviewPage() {
             </button>
             <button
               onClick={() => handleCopy("html")}
-              className="flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 px-3 py-2 rounded-lg transition"
             >
               {copiedType === "html" ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -381,14 +383,14 @@ export default function ArticlePreviewPage() {
             </button>
             <button
               onClick={() => handleCopy("share")}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-lg transition shadow-lg shadow-indigo-600/20"
+              className="flex items-center gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg transition shadow-lg shadow-indigo-600/20"
             >
               {copiedType === "share" ? (
                 <Check className="w-3.5 h-3.5" />
               ) : (
                 <Share2 className="w-3.5 h-3.5" />
               )}
-              {copiedType === "share" ? "Link Copied!" : "Share Article"}
+              {copiedType === "share" ? "Copied!" : "Share"}
             </button>
           </div>
         </div>

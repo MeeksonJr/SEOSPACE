@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import {
   getAuditById,
   getSavedArticles,
@@ -241,13 +242,15 @@ export default function AuditReportPage() {
               <Printer className="w-3.5 h-3.5" />
               <span>Export White-Label PDF</span>
             </button>
+
+            <OpenSiteNavigatorButton variant="dark" label="All Pages" />
           </div>
         </div>
       </div>
 
       {/* Branded Report Header */}
       <header className="bg-white border-b border-slate-200">
-        <div className="w-full max-w-[1440px] mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-3 min-h-[5rem] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {whiteLabelPreview ? (
               <div className="flex items-center gap-2.5">

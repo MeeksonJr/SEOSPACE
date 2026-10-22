@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { SiteNavigatorDrawer } from "@/components/ui/SiteNavigatorDrawer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,8 +37,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+      <body className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
         {children}
+        <SiteNavigatorDrawer />
       </body>
     </html>
   );

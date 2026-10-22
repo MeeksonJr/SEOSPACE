@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import {
   getAdminUsers,
   saveWorkspaceUser,
@@ -149,18 +150,21 @@ export function AuthSplitScreen({
     <div className="min-h-screen bg-slate-100/80 flex items-center justify-center p-4 sm:p-6 lg:p-10">
       <div className="w-full max-w-6xl bg-white rounded-[32px] border border-slate-200/90 shadow-2xl shadow-slate-300/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[700px]">
         {/* LEFT COLUMN: Clean Onboarding & Login Form */}
-        <div className="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-between">
+        <div className="lg:col-span-6 p-5 sm:p-10 lg:p-12 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <Link href="/">
                 <SeospaceLogo size="md" />
               </Link>
-              <Link
-                href="/"
-                className="text-xs font-medium text-slate-500 hover:text-slate-900 transition"
-              >
-                ← Back to Home
-              </Link>
+              <div className="flex items-center gap-2">
+                <OpenSiteNavigatorButton label="All Pages" />
+                <Link
+                  href="/"
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                >
+                  ← Home
+                </Link>
+              </div>
             </div>
 
             <div className="mt-10">

@@ -11,6 +11,7 @@ import {
   FileText,
   Globe,
   Loader2,
+  Menu,
   Moon,
   Play,
   Search,
@@ -18,10 +19,12 @@ import {
   Star,
   Sun,
   TrendingUp,
+  X,
   Zap,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import { PRICING_PLANS } from "@/lib/stripe/plans";
 import {
   findSavedAuditByUrl,
@@ -158,6 +161,7 @@ export default function LandingPage() {
   // Interactive ROI Calculator state
   const [auditsSentPerMonth, setAuditsSentPerMonth] = useState(25);
   const [clientRetainerValue, setClientRetainerValue] = useState(1500);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   async function handleRunAudit(e?: React.FormEvent, presetUrl?: string) {
     if (e) e.preventDefault();
@@ -285,12 +289,12 @@ export default function LandingPage() {
               : "bg-white/85 border-slate-200/80"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <Link href="/">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+            <Link href="/" className="shrink-0">
               <SeospaceLogo darkText={!heroDark} />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <nav className="hidden xl:flex items-center gap-6 text-sm font-medium">
               <a
                 href="#features"
                 className={
@@ -373,7 +377,13 @@ export default function LandingPage() {
               </Link>
             </nav>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Universal Site Navigator Button */}
+              <OpenSiteNavigatorButton
+                variant={heroDark ? "dark" : "light"}
+                label="All Pages"
+              />
+
               {/* Toggle between Image 2 (Light Hero) and Image 3 (Dark Hero) */}
               <button
                 onClick={() => setHeroDark(!heroDark)}
@@ -387,19 +397,19 @@ export default function LandingPage() {
                 {heroDark ? (
                   <>
                     <Sun className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Light Hero</span>
+                    <span className="hidden md:inline">Light Hero</span>
                   </>
                 ) : (
                   <>
                     <Moon className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Dark Hero</span>
+                    <span className="hidden md:inline">Dark Hero</span>
                   </>
                 )}
               </button>
 
               <Link
                 href="/login"
-                className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
+                className={`hidden sm:inline-flex px-3.5 py-2 rounded-full text-xs sm:text-sm font-semibold border transition ${
                   heroDark
                     ? "border-slate-700 text-white hover:bg-slate-800"
                     : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 shadow-2xs"
@@ -409,7 +419,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/signup"
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+                className={`hidden sm:inline-flex px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition ${
                   heroDark
                     ? "bg-white text-slate-950 hover:bg-slate-100"
                     : "bg-slate-950 text-white hover:bg-slate-800 shadow-sm"
@@ -417,8 +427,152 @@ export default function LandingPage() {
               >
                 Sign Up
               </Link>
+
+              {/* Mobile / Tablet Inline Menu Button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle Navigation Menu"
+                className={`xl:hidden p-2 rounded-xl border transition cursor-pointer ${
+                  heroDark
+                    ? "border-slate-700 bg-slate-900 text-white hover:bg-slate-800"
+                    : "border-slate-200 bg-slate-100 text-slate-900 hover:bg-slate-200"
+                }`}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-4 h-4" />
+                ) : (
+                  <Menu className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Mobile & Tablet Expandable Navigation Bar */}
+          {mobileMenuOpen && (
+            <div
+              className={`xl:hidden border-t px-4 py-4 space-y-3 ${
+                heroDark
+                  ? "bg-[#050814] border-slate-800 text-slate-200"
+                  : "bg-white border-slate-200 text-slate-800"
+              }`}
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-semibold">
+                <a
+                  href="#features"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Features
+                </a>
+                <a
+                  href="#pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Pricing
+                </a>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/dashboard?tab=editor"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  AI SEO Editor
+                </Link>
+                <Link
+                  href="/compare"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Battlecard
+                </Link>
+                <Link
+                  href="/tools"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Free Tools
+                </Link>
+                <Link
+                  href="/docs"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  REST API Docs
+                </Link>
+                <Link
+                  href="/widget"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-3 py-2.5 rounded-xl border ${
+                    heroDark
+                      ? "border-slate-800 bg-slate-900/60 hover:bg-slate-800"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
+                  Agency Widget
+                </Link>
+              </div>
+              <div className="flex sm:hidden items-center gap-2 pt-1">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex-1 text-center py-2.5 rounded-xl text-xs font-semibold border ${
+                    heroDark
+                      ? "border-slate-700 text-white"
+                      : "border-slate-200 text-slate-900"
+                  }`}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex-1 text-center py-2.5 rounded-xl text-xs font-semibold ${
+                    heroDark
+                      ? "bg-white text-slate-950"
+                      : "bg-slate-950 text-white"
+                  }`}
+                >
+                  Sign Up Free
+                </Link>
+              </div>
+            </div>
+          )}
         </header>
 
         {/* HERO CONTENT */}

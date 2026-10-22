@@ -17,6 +17,7 @@ import {
   getWhiteLabelConfig,
   saveAuditReport,
 } from "@/lib/storage/workspace-store";
+import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 
 function WidgetFormContent() {
   const router = useRouter();
@@ -70,14 +71,17 @@ function WidgetFormContent() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <span
             style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
           >
             <Sparkles className="w-3.5 h-3.5" /> Free 60-Second Website Audit
           </span>
-          <span className="text-xs font-bold text-slate-400">{agencyName}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-400">{agencyName}</span>
+            <OpenSiteNavigatorButton label="All Pages" />
+          </div>
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-950 tracking-tight">
