@@ -35,6 +35,7 @@ import {
   Trash2,
   Users,
   X,
+  Zap,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
@@ -87,6 +88,8 @@ function DashboardContent() {
   );
   const [wlSavedToast, setWlSavedToast] = useState(false);
   const [copiedWidget, setCopiedWidget] = useState(false);
+  const [testingWebhook, setTestingWebhook] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
 
   // Live URL Scanner inside Dashboard
   const [scanUrl, setScanUrl] = useState("");
@@ -479,6 +482,85 @@ function DashboardContent() {
     a.href = url;
     a.download = "seospace-captured-agency-leads.csv";
     a.click();
+  }
+
+  function handleExportLeadsJson() {
+    const blob = new Blob([JSON.stringify(leads, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "seospace-captured-agency-leads.json";
+    a.click();
+  }
+
+  function handleExportAuditsCsv() {
+    const header =
+      "Domain,URL,Score,Grade,Status,SEO,CRO,GEO,WCAG,DNS,Extraction_Source,Date\n";
+    const rows = audits
+      .map(
+        (a) =>
+          `"${a.domain}","${a.url}",${a.overallScore},"${a.letterGrade}","${
+            a.statusLabel
+          }",${a.pillars?.seo?.score || 0},${a.pillars?.cro?.score || 0},${
+            a.pillars?.geo?.score || 0
+          },${a.pillars?.a11y?.score || 0},${
+            a.pillars?.security?.score || 0
+          },"${a.metadata?.extractionSource || "Edge Crawler + DOM"}","${
+            a.createdAt
+          }"`
+      )
+      .join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `seospace-audited-domains-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    a.click();
+  }
+
+  function handleExportAuditsJson() {
+    const blob = new Blob([JSON.stringify(audits, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `seospace-audited-domains-${new Date()
+      .toISOString()
+      .slice(0, 10)}.json`;
+    a.click();
+  }
+
+  async function handleTestWebhook() {
+    if (!whiteLabel.webhookUrl?.trim()) {
+      setWebhookStatus("Please enter a webhook URL first.");
+      setTimeout(() => setWebhookStatus(null), 3000);
+      return;
+    }
+    setTestingWebhook(true);
+    setWebhookStatus(null);
+    try {
+      const res = await fetch("/api/widget/test-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhookUrl: whiteLabel.webhookUrl.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setWebhookStatus(`✓ Test Ping Sent! Provider: ${data.provider} (${data.latencyMs}ms)`);
+      } else {
+        setWebhookStatus(`× Error: ${data.error || "Failed to reach webhook URL"}`);
+      }
+    } catch {
+      setWebhookStatus("× Network error testing webhook.");
+    } finally {
+      setTestingWebhook(false);
+      setTimeout(() => setWebhookStatus(null), 6000);
+    }
   }
 
   function handleSaveWhiteLabel(e: React.FormEvent) {
@@ -1274,9 +1356,29 @@ function DashboardContent() {
                     connected AI fix articles.
                   </p>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-stage border border-line text-xs font-semibold text-ink">
-                  {audits.length} Active Reports
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportAuditsCsv}
+                    title="Download all saved audit reports as CSV spreadsheet"
+                    className="px-3 py-1.5 rounded-xl border border-line bg-stage hover:bg-card text-ink text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-accent" />
+                    <span>Export CSV</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportAuditsJson}
+                    title="Export complete audits database as JSON"
+                    className="px-3 py-1.5 rounded-xl border border-line bg-stage hover:bg-card text-ink text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Code className="w-3.5 h-3.5 text-cobalt" />
+                    <span>JSON</span>
+                  </button>
+                  <span className="px-3 py-1.5 rounded-xl bg-stage border border-line text-xs font-mono font-bold text-ink">
+                    {audits.length} Audits
+                  </span>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -2417,18 +2519,26 @@ function DashboardContent() {
                   to capture high-intent prospect emails automatically.
                 </p>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleExportLeadsCsv}
-                  className="px-4 py-2.5 rounded-xl border border-line bg-stage hover:bg-stage/80 text-ink text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
+                  className="px-3.5 py-2 rounded-xl border border-line bg-stage hover:bg-card text-ink text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
                 >
-                  <Download className="w-3.5 h-3.5 text-mute" />
+                  <Download className="w-3.5 h-3.5 text-accent" />
                   <span>Export CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportLeadsJson}
+                  className="px-3.5 py-2 rounded-xl border border-line bg-stage hover:bg-card text-ink text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
+                >
+                  <Code className="w-3.5 h-3.5 text-cobalt" />
+                  <span>JSON</span>
                 </button>
                 <Link
                   href="/widget"
-                  className="px-4 py-2.5 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-semibold inline-flex items-center gap-2 transition shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-ink text-paper hover:bg-ink/90 text-xs font-semibold inline-flex items-center gap-2 transition shadow-xs"
                 >
                   <span>Test Live Widget Page</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -2461,6 +2571,79 @@ function DashboardContent() {
               <pre className="p-4 rounded-2xl bg-night text-[#f3f0e8] border border-[#2a2a2c] text-xs overflow-x-auto font-mono">
                 {embedSnippet}
               </pre>
+            </div>
+
+            {/* Instant Inbound Lead Webhook Dispatcher (Discord, Slack, Zapier) */}
+            <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow space-y-4 text-ink">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-accent">
+                    Real-Time Lead Alert Dispatcher
+                  </span>
+                  <h3 className="text-base font-bold text-ink font-display mt-0.5">
+                    Instant Webhook Integration (Discord, Slack, Zapier)
+                  </h3>
+                  <p className="text-xs text-mute mt-0.5">
+                    Every time a prospect submits their URL on your website, Seospace instantly sends a rich lead notification to your private channel or CRM.
+                  </p>
+                </div>
+                {webhookStatus && (
+                  <span className={`text-xs px-3 py-1.5 rounded-xl font-mono font-semibold border ${
+                    webhookStatus.startsWith("✓")
+                      ? "bg-card text-emerald-600 border-emerald-300"
+                      : "bg-card text-rose-600 border-rose-300"
+                  }`}>
+                    {webhookStatus}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <input
+                  type="url"
+                  placeholder="https://discord.com/api/webhooks/... or https://hooks.slack.com/..."
+                  value={whiteLabel.webhookUrl || ""}
+                  onChange={(e) => {
+                    const next = { ...whiteLabel, webhookUrl: e.target.value };
+                    setWhiteLabel(next);
+                    saveWhiteLabelConfig(next);
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-2xl bg-stage border border-line text-xs font-mono text-ink placeholder:text-mute focus:outline-none focus:border-accent"
+                />
+                <button
+                  type="button"
+                  onClick={handleTestWebhook}
+                  disabled={testingWebhook}
+                  className="px-4 py-2.5 rounded-2xl bg-accent text-[#141413] hover:opacity-90 text-xs font-bold inline-flex items-center justify-center gap-2 cursor-pointer transition shrink-0"
+                >
+                  {testingWebhook ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending Test Ping...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>Send Test Webhook Ping</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-[11px] text-mute font-mono">
+                <div className="p-3 rounded-xl bg-stage border border-line">
+                  <strong className="text-ink block">Discord (Free, 60s):</strong>
+                  Channel Settings → Integrations → Webhooks → Copy URL.
+                </div>
+                <div className="p-3 rounded-xl bg-stage border border-line">
+                  <strong className="text-ink block">Slack (Free, 2 mins):</strong>
+                  api.slack.com/apps → Incoming Webhooks → Activate.
+                </div>
+                <div className="p-3 rounded-xl bg-stage border border-line">
+                  <strong className="text-ink block">Zapier / Make (Free):</strong>
+                  Catch Hook URL → Pipe leads directly to Google Sheets or HubSpot.
+                </div>
+              </div>
             </div>
 
             {/* Captured Leads CRM Table with Status Cycling & Delete */}

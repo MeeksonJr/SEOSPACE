@@ -16,6 +16,7 @@ export const DEFAULT_WHITELABEL_CONFIG: WhiteLabelConfig = {
   footerNote:
     "Prepared exclusively by Apex Digital Growth Agency. Confidential Technical SEO, CRO & AI Search Diagnostic.",
   hidePoweredBy: true,
+  webhookUrl: "",
 };
 
 export const SAMPLE_CAPTURED_LEADS: CapturedLead[] = [

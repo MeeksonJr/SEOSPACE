@@ -75,6 +75,49 @@ export async function POST(req: NextRequest) {
     if (body.type === "save_lead" && body.lead) {
       const saved = saveLeadToServerDb(body.lead);
       await upsertLeadToSupabase(saved);
+
+      // Asynchronously trigger agency webhook if configured
+      const currentDb = readServerDb();
+      const webhookUrl = currentDb.whiteLabel?.webhookUrl;
+      if (webhookUrl && /^https?:\/\//i.test(webhookUrl)) {
+        const isDiscord = /discord(?:app)?\.com\/api\/webhooks/i.test(webhookUrl);
+        const isSlack = /hooks\.slack\.com/i.test(webhookUrl);
+        let payload: Record<string, unknown>;
+        if (isDiscord) {
+          payload = {
+            username: "Seospace Lead Engine",
+            embeds: [
+              {
+                title: "🎯 New Inbound Agency Lead Captured!",
+                color: 0xff4d14,
+                fields: [
+                  { name: "Prospect Name", value: saved.name || "Anonymous", inline: true },
+                  { name: "Work Email", value: saved.email || "None", inline: true },
+                  { name: "Website URL", value: saved.websiteUrl || "None", inline: false },
+                  { name: "Score", value: `${saved.auditScore || 0}/100`, inline: true },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          };
+        } else if (isSlack) {
+          payload = {
+            text: `🎯 *New Inbound Agency Lead Captured!*\n*Prospect:* ${saved.name} (${saved.email})\n*Website:* ${saved.websiteUrl}\n*Score:* ${saved.auditScore}/100`,
+          };
+        } else {
+          payload = {
+            event: "lead.created",
+            timestamp: new Date().toISOString(),
+            lead: saved,
+          };
+        }
+        fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      }
+
       return NextResponse.json({ ok: true, lead: saved, db: readServerDb() });
     }
 

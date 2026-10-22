@@ -10,6 +10,7 @@ import {
   Code2,
   Copy,
   Database,
+  Download,
   ExternalLink,
   Eye,
   Globe,
@@ -116,6 +117,46 @@ export default function AuditReportPage() {
     } finally {
       setRescanning(false);
     }
+  }
+
+  function handleExportJson() {
+    const blob = new Blob([JSON.stringify(report, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `seospace-audit-${report.domain}-${new Date()
+      .toISOString()
+      .slice(0, 10)}.json`;
+    a.click();
+  }
+
+  function handleExportCsv() {
+    const headers =
+      "Check_ID,Pillar,Check_Name,Status,Points_Earned,Points_Max,Severity,Impact_Score,Recommendation\n";
+    const rows = (report.checks || [])
+      .map(
+        (c) =>
+          `"${c.id}","${c.pillar}","${c.title}","${c.severity}",${
+            c.pointsEarned
+          },${c.pointsMax},"${c.severity}",${c.impactScore},"${(
+            c.recommendedValue ||
+            c.description ||
+            ""
+          ).replace(/"/g, '""')}"`
+      )
+      .join("\n");
+    const blob = new Blob([headers + rows], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `seospace-diagnostic-${report.domain}-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    a.click();
   }
 
   const filteredChecks = report.checks.filter((c) =>
@@ -240,10 +281,28 @@ export default function AuditReportPage() {
 
             <button
               onClick={() => window.print()}
-              className="px-3.5 py-1.5 rounded-xl bg-[#f3f0e8] text-[#141413] hover:bg-white font-bold inline-flex items-center gap-1.5 cursor-pointer transition shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-[#f3f0e8] text-[#141413] hover:bg-white font-bold inline-flex items-center gap-1.5 cursor-pointer transition shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Export PDF</span>
+              <span>PDF</span>
+            </button>
+
+            <button
+              onClick={handleExportCsv}
+              title="Download diagnostic checklist as CSV"
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-[#f3f0e8] font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
+            >
+              <Download className="w-3.5 h-3.5 text-accent" />
+              <span>CSV</span>
+            </button>
+
+            <button
+              onClick={handleExportJson}
+              title="Download complete audit payload as JSON"
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-[#f3f0e8] font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
+            >
+              <Code2 className="w-3.5 h-3.5 text-[#f5d547]" />
+              <span>JSON</span>
             </button>
 
             <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />

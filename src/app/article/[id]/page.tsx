@@ -259,6 +259,25 @@ export default function ArticlePreviewPage() {
     setTimeout(() => setCopiedType(null), 2500);
   };
 
+  const handleExportJson = () => {
+    if (!article) return;
+    const exportData = {
+      article,
+      mathematicalGrade: grade,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `seospace-article-${article.focusKeyword
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")}.json`;
+    a.click();
+  };
+
   if (loading || !article || !grade) {
     return (
       <div className="min-h-screen bg-paper text-ink flex items-center justify-center font-sans">
@@ -387,6 +406,15 @@ export default function ArticlePreviewPage() {
             >
               <Printer className="w-3.5 h-3.5 text-mute" />
               <span>PDF</span>
+            </button>
+
+            <button
+              onClick={handleExportJson}
+              title="Export complete article payload and mathematical rubric as JSON"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-stage hover:bg-card border border-line text-ink px-3 py-2 rounded-xl transition cursor-pointer"
+            >
+              <Code2 className="w-3.5 h-3.5 text-cobalt" />
+              <span>JSON</span>
             </button>
 
             <button

@@ -169,6 +169,7 @@ export interface WhiteLabelConfig {
   contactEmail: string;
   footerNote: string;
   hidePoweredBy: boolean;
+  webhookUrl?: string;
 }
 
 export interface CapturedLead {
