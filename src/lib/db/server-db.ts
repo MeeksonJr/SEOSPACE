@@ -215,7 +215,7 @@ export async function upsertAuditToSupabase(report: AuditReport): Promise<void> 
         estimated_conversion_lift: report.estimatedConversionLift || "+15%",
         extraction_source:
           report.metadata?.extractionSource ||
-          "RapidAPI + Cloudflare DoH + Live DOM",
+          "Seospace Edge Crawler + Cloudflare DoH + Live DOM",
         has_spf: Boolean(report.metadata?.dns?.hasSpf),
         has_dmarc: Boolean(report.metadata?.dns?.hasDmarc),
         dmarc_policy: report.metadata?.dns?.dmarcPolicy || "missing",

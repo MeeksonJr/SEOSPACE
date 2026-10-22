@@ -64,7 +64,7 @@ function CompareContent() {
     setLoading(true);
     setStatusMessage(
       refresh
-        ? "Fetching fresh live RapidAPI + Cloudflare DoH DNS + DOM audits for both domains..."
+        ? "Fetching fresh live Edge Crawler + Cloudflare DoH DNS + DOM audits for both domains..."
         : "Resolving saved-first database snapshots (or scanning live if new)..."
     );
 

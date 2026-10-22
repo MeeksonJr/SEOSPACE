@@ -682,7 +682,7 @@ function DashboardContent() {
             <span>Seospace Neural Engine</span>
           </div>
           <p className="text-[11px] text-mute mt-1 leading-relaxed">
-            RapidAPI live metadata &amp; mathematical grading active.
+            Seospace edge crawling &amp; mathematical grading active.
           </p>
           <button
             onClick={() => {
@@ -872,7 +872,7 @@ function DashboardContent() {
                       type="text"
                       value={scanUrl}
                       onChange={(e) => setScanUrl(e.target.value)}
-                      placeholder="Scan any live URL via RapidAPI + DOM (e.g. voice-one.com/services/)..."
+                      placeholder="Scan any live URL for real-time SEO + DOM diagnostics (e.g. voice-one.com/services/)..."
                       className="bg-transparent text-xs sm:text-sm text-[#f3f0e8] placeholder:text-[#8a8984] focus:outline-none w-full"
                     />
                   </div>
@@ -1064,7 +1064,7 @@ function DashboardContent() {
                       </div>
                     </div>
                     <div className="pt-3 mt-3 border-t border-line text-[11px] text-mute">
-                      Click any domain for full RapidAPI metadata &amp; PDF report
+                      Click any domain for full DOM metadata &amp; PDF report
                     </div>
                   </div>
 
@@ -1269,7 +1269,7 @@ function DashboardContent() {
                     Global Audited Domains Watchlist
                   </h3>
                   <p className="text-xs text-mute mt-0.5">
-                    Re-scan any domain live via RapidAPI Metadata + Seospace
+                    Re-scan any domain live via Edge DOM Crawler + Seospace
                     Neural Engine, open its White-Label PDF report, or generate
                     connected AI fix articles.
                   </p>
@@ -1326,7 +1326,7 @@ function DashboardContent() {
                           <td className="py-3.5 px-3 text-mute">
                             <span className="px-2 py-0.5 rounded-md bg-stage border border-line text-ink font-mono text-[11px]">
                               {item.metadata?.extractionSource ||
-                                "RapidAPI + Live DOM"}
+                                "Seospace Edge Crawler + DOM"}
                             </span>
                           </td>
                           <td className="py-3.5 px-3 text-mute font-mono">

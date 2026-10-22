@@ -15,7 +15,7 @@ const TRUST_LOGOS = [
   "Next.js 15",
   "Supabase PostgreSQL",
   "Cloudflare 1.1.1.1 DoH",
-  "RapidAPI Engine",
+  "Edge Crawler Engine",
   "Stripe Billing",
   "Wayback Machine",
   "WCAG 2.2 AA",
@@ -89,7 +89,7 @@ export default function LandingPage() {
     }
 
     setIsScanning(true);
-    setScanStep(`Connecting to ${targetUrl} via RapidAPI & Cloudflare 1.1.1.1 DoH...`);
+    setScanStep(`Connecting to ${targetUrl} via Edge Crawler & Cloudflare 1.1.1.1 DoH...`);
 
     const t1 = setTimeout(() => {
       setScanStep("Evaluating 35+ SEO, CRO, WCAG 2.2 & DNS security signals...");
@@ -191,7 +191,7 @@ export default function LandingPage() {
               <div className="hidden md:flex items-center gap-2 sp-eyebrow !text-[0.65rem] text-mute">
                 <span>Cloudflare 1.1.1.1 DoH</span>
                 <span>•</span>
-                <span>RapidAPI Metadata</span>
+                <span>Edge DOM Extraction</span>
                 <span>•</span>
                 <span>Saved-First Cache (&lt;15ms)</span>
               </div>
@@ -415,8 +415,8 @@ export default function LandingPage() {
                 {
                   step: "01",
                   title: "15-Second Multi-Signal Crawl",
-                  desc: "We extract OpenGraph, heading trees, and canonical tags via RapidAPI, ping Cloudflare 1.1.1.1 DoH for SPF/DMARC mail records, and verify live /robots.txt and /llms.txt manifests.",
-                  badge: "RapidAPI + Cloudflare DoH",
+                  desc: "We extract OpenGraph, heading trees, and canonical tags via distributed edge crawlers, ping Cloudflare 1.1.1.1 DoH for SPF/DMARC mail records, and verify live /robots.txt and /llms.txt manifests.",
+                  badge: "Edge Crawler + Cloudflare DoH",
                 },
                 {
                   step: "02",

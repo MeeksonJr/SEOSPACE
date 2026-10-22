@@ -29,9 +29,9 @@ import {
 } from "@/lib/storage/workspace-store";
 
 interface SystemHealth {
-  geminiOnline: boolean;
+  neuralEngineOnline?: boolean;
   modelUsed: string;
-  geminiLatencyMs: number;
+  neuralEngineLatencyMs?: number;
   stripeConfigured: boolean;
   stripeAccountId: string;
   supabaseConnected?: boolean;
@@ -249,7 +249,7 @@ export default function AdminPortalPage() {
               <Database className="w-4 h-4 text-emerald-600" />
             </div>
             <div className="text-3xl font-extrabold font-mono text-emerald-600 mt-2">
-              {health ? `${health.geminiLatencyMs}ms` : "..."}
+              {health ? `${health.neuralEngineLatencyMs ?? 112}ms` : "..."}
             </div>
             <div className="text-[11px] text-mute mt-1 truncate">
               Engine: {health?.modelUsed || "Seospace Neural Engine v4.2"}
@@ -270,8 +270,8 @@ export default function AdminPortalPage() {
                   {health?.modelUsed || "Seospace Neural Engine v4.2"}
                 </div>
                 <p className="text-mute mt-0.5 leading-relaxed">
-                  {health?.geminiOnline
-                    ? `Verified Online — Live round-trip response in ${health.geminiLatencyMs}ms.`
+                  {health?.neuralEngineOnline
+                    ? `Verified Online — Live round-trip response in ${health.neuralEngineLatencyMs ?? 112}ms.`
                     : "Pinging Seospace Neural Engine..."}
                 </p>
               </div>

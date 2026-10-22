@@ -149,7 +149,7 @@ const NAV_SECTIONS = [
       {
         href: "/report/voice-one-com",
         label: "Audit Report: voice-one.com",
-        desc: "Saved RapidAPI + Cloudflare DoH DNS diagnostic",
+        desc: "Saved Edge Crawler + Cloudflare DoH DNS diagnostic",
         icon: Globe,
       },
       {

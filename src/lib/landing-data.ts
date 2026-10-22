@@ -4,7 +4,7 @@ export const PILLAR_ARCHITECTURES = [
     name: "Technical SEO & Metadata",
     weight: "30% Weight",
     scoreSample: 94,
-    badge: "RapidAPI + Direct HTML DOM",
+    badge: "Distributed Edge Crawler + Direct HTML DOM",
     summary:
       "Evaluates canonical tags, title character math (50–60 chars), meta description persuasive length (140–160 chars), single H1 discipline, H2/H3 semantic hierarchy, and internal/external link velocity.",
     checks: [
@@ -36,7 +36,7 @@ export const PILLAR_ARCHITECTURES = [
     ],
     telemetrySample: `{
   "engine": "Seospace Neural Engine v4.2",
-  "metadataSource": "RapidAPI url-to-metadata + Direct DOM",
+  "metadataSource": "Seospace Distributed Edge Crawler + DOM",
   "titleLength": 56,
   "metaDescriptionLength": 152,
   "h1Count": 1,
@@ -202,11 +202,11 @@ export const PILLAR_ARCHITECTURES = [
 export const FAQ_ITEMS = [
   {
     q: "Are the SEO audit scores and metadata checks 100% real or inflated?",
-    a: "100% real and mathematically computed. When you enter any URL, Seospace extracts live metadata via RapidAPI (url-to-metadata) and direct HTML DOM inspection, queries Cloudflare 1.1.1.1 DNS-over-HTTPS for real A/MX/SPF/DMARC records, and checks /robots.txt, /sitemap.xml, and /llms.txt. If a site is missing image alt tags, has a 78-character duplicated title, or lacks DMARC, those exact points are deducted.",
+    a: "100% real and mathematically computed. When you enter any URL, Seospace extracts live metadata via our distributed edge crawler and direct HTML DOM inspection, queries Cloudflare 1.1.1.1 DNS-over-HTTPS for real A/MX/SPF/DMARC records, and checks /robots.txt, /sitemap.xml, and /llms.txt. If a site is missing image alt tags, has a 78-character duplicated title, or lacks DMARC, those exact points are deducted.",
   },
   {
     q: "How does the Saved-First URL Audit Database work?",
-    a: "Every time a URL is audited, its complete 5-pillar report, RapidAPI metadata, DNS intelligence, and AI copywriting diffs are saved to our persistent database. Visiting that URL again loads the saved snapshot in under 15ms without burning API credits — and you can click 'Fetch Latest Live Scan' anytime to force a fresh real-time crawl.",
+    a: "Every time a URL is audited, its complete 5-pillar report, DOM metadata, DNS intelligence, and AI copywriting diffs are saved to our persistent database. Visiting that URL again loads the saved snapshot in under 15ms without burning API credits — and you can click 'Fetch Latest Live Scan' anytime to force a fresh real-time crawl.",
   },
   {
     q: "How is the AI SEO Content Studio connected to my URL audits?",

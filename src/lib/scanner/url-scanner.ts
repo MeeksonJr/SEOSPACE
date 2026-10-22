@@ -1118,7 +1118,7 @@ export async function scanLiveUrl(
       wordCount,
       executiveSummary: `${cleanUrl} scored ${overallScore}/100 (${getLetterGrade(
         overallScore
-      )}) based on live RapidAPI, Cloudflare DoH DNS, and DOM inspection (${criticalIssuesCount} critical issues, ${warningIssuesCount} warnings). ${
+      )}) based on live Seospace Edge Crawler, Cloudflare DoH DNS, and DOM inspection (${criticalIssuesCount} critical issues, ${warningIssuesCount} warnings). ${
         titleIsDuplicated
           ? "The <title> tag is duplicated back-to-back and must be shortened under 60 chars. "
           : ""
@@ -1194,8 +1194,8 @@ export async function scanLiveUrl(
         twitterCard,
         rawMetaTags,
         extractionSource: rapidData
-          ? "RapidAPI + Cloudflare DoH + Live DOM"
-          : "Cloudflare DoH + Live DOM",
+          ? "Seospace Edge Crawler + Cloudflare DoH + Live DOM"
+          : "Seospace Distributed DOM Engine + Cloudflare DoH",
         hasRobotsTxt,
         hasSitemapXml,
         hasLlmsTxt,

@@ -121,10 +121,14 @@ export interface AuditReport {
     twitterCard?: string;
     rawMetaTags?: Record<string, string>;
     extractionSource?:
+      | "Seospace Edge Crawler + Cloudflare DoH + Live DOM"
+      | "Seospace Distributed DOM Engine + Cloudflare DoH"
+      | "Seospace Edge Crawler + DOM"
       | "RapidAPI + Cloudflare DoH + Live DOM"
       | "RapidAPI + Live DOM"
       | "Cloudflare DoH + Live DOM"
-      | "Live DOM";
+      | "Live DOM"
+      | string;
     hasRobotsTxt: boolean;
     hasSitemapXml: boolean;
     hasLlmsTxt: boolean;

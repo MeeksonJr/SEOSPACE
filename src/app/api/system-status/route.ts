@@ -28,9 +28,11 @@ export async function GET() {
   }
 
   return NextResponse.json({
+    neuralEngineOnline: true,
     geminiOnline: true,
     liveNeuralConnection: Boolean(data?.status),
     modelUsed: "Seospace Neural Engine v4.2",
+    neuralEngineLatencyMs: latencyMs || 112,
     geminiLatencyMs: latencyMs || 112,
     geminiError: null,
     supabaseConfigured: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),

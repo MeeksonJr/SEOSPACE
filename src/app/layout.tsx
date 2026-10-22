@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Seospace AI — Your Always-On AI SEO & CRO Growth Engine",
     description:
-      "Run real-time RapidAPI metadata + Cloudflare DoH DNS + DOM website audits and generate 95+/100 SEO articles in 1 click.",
+      "Run real-time Edge Crawler metadata + Cloudflare DoH DNS + DOM website audits and generate 95+/100 SEO articles in 1 click.",
   },
 };
 
@@ -89,7 +89,7 @@ const jsonLdSchema = {
       },
       featureList: [
         "35-Point Technical SEO, CRO, GEO & WCAG 2.2 Website Scanner",
-        "RapidAPI Live Metadata & OpenGraph Extraction",
+        "Distributed Edge Crawler Live Metadata & OpenGraph Extraction",
         "Cloudflare 1.1.1.1 DNS-over-HTTPS SPF, DMARC & MX Security Inspector",
         "Autonomous AI SEO Article Studio with Real-Time 0-100 Mathematical Grader",
         "Agency White-Label PDF Export & Embeddable Lead Capture Widget",

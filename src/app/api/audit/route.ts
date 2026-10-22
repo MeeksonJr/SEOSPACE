@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Otherwise execute a fresh live scan (RapidAPI url-to-metadata + Cloudflare DoH DNS + DOM + Seospace Neural Engine v4.2)
+    // 2. Otherwise execute a fresh live scan (Edge Crawler metadata + Cloudflare DoH DNS + DOM + Seospace Neural Engine v4.2)
     const targetUrl = rawUrl || existingSaved?.url || "https://stripe.com";
     const { report: baseReport, bodyExcerpt } = await scanLiveUrl(targetUrl);
     const enrichedReport = await enrichReportWithGemini(

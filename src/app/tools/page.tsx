@@ -29,7 +29,7 @@ export default function FreeSeoToolsPage() {
   );
   const [faqQ1, setFaqQ1] = useState("How does Seospace Neural Engine v4.2 grade URLs?");
   const [faqA1, setFaqA1] = useState(
-    "It extracts live DOM tags, RapidAPI metadata, and Cloudflare 1.1.1.1 DNS records to compute an uninflated 5-pillar score."
+    "It extracts live DOM tags, distributed edge metadata, and Cloudflare 1.1.1.1 DNS records to compute an uninflated 5-pillar score."
   );
 
   // Tool 3: AI Crawler robots.txt Builder State

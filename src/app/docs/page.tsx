@@ -24,7 +24,7 @@ const ENDPOINTS: EndpointDef[] = [
     path: "/api/audit",
     title: "Saved-First URL Audit & Metadata / DNS Extraction",
     description:
-      "Returns the saved database snapshot for any previously audited URL in <15ms, or runs a full live RapidAPI + Cloudflare DoH DNS + DOM scan when forceRefresh: true is passed.",
+      "Returns the saved database snapshot for any previously audited URL in <15ms, or runs a full live Edge Crawler + Cloudflare DoH DNS + DOM scan when forceRefresh: true is passed.",
     defaultBody: JSON.stringify(
       { url: "https://voice-one.com/services/", forceRefresh: false },
       null,
@@ -373,6 +373,61 @@ export default function ApiDocsPage() {
                 <p className="text-xs text-mute leading-relaxed">
                   Call our endpoints asynchronously via httpx or requests with built-in Pydantic model validation.
                 </p>
+              </div>
+            </div>
+
+            {/* Public Data Sources & Infrastructure Architecture Section */}
+            <div className="bg-card border border-line rounded-3xl p-6 sm:p-8 sp-card-shadow space-y-5">
+              <div>
+                <span className="sp-eyebrow text-accent">Public Disclosure &amp; Telemetry</span>
+                <h3 className="text-xl font-bold font-display text-ink mt-1">
+                  Data Ingestion Architecture &amp; Upstream Providers
+                </h3>
+                <p className="text-xs text-mute mt-1 leading-relaxed">
+                  Seospace aggregates and cross-validates data across multiple independent edge networks, authoritative registries, and AI search engines to generate zero-fluff, mathematical audits.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-4 rounded-2xl bg-stage border border-line space-y-1.5">
+                  <div className="font-bold font-mono text-ink text-[11px] uppercase text-accent">
+                    01 • Edge Crawler &amp; DOM
+                  </div>
+                  <div className="font-bold text-ink">Distributed Edge &amp; RapidAPI</div>
+                  <p className="text-mute leading-relaxed text-[11px]">
+                    Global headless edge workers and RapidAPI metadata microservices extracting raw DOM, OpenGraph, Twitter Cards, and canonical tags.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-stage border border-line space-y-1.5">
+                  <div className="font-bold font-mono text-ink text-[11px] uppercase text-cobalt">
+                    02 • DNS Security &amp; SPF
+                  </div>
+                  <div className="font-bold text-ink">Cloudflare 1.1.1.1 DoH</div>
+                  <p className="text-mute leading-relaxed text-[11px]">
+                    Authoritative real-time DNS-over-HTTPS queries for A, AAAA (IPv6), MX, SPF TXT, and _dmarc records with zero local cache latency.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-stage border border-line space-y-1.5">
+                  <div className="font-bold font-mono text-ink text-[11px] uppercase text-[#141413] bg-butter px-2 py-0.5 rounded-md inline-block font-bold">
+                    03 • History &amp; Trust
+                  </div>
+                  <div className="font-bold text-ink">Internet Archive CDX</div>
+                  <p className="text-mute leading-relaxed text-[11px]">
+                    Wayback Machine snapshot history to verify historical domain creation year, crawl depth, and backlink authority continuity.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-stage border border-line space-y-1.5">
+                  <div className="font-bold font-mono text-ink text-[11px] uppercase text-emerald-600">
+                    04 • AI Search Intelligence
+                  </div>
+                  <div className="font-bold text-ink">Seospace Neural Engine v4.2</div>
+                  <p className="text-mute leading-relaxed text-[11px]">
+                    Multi-dimensional semantic scoring evaluating generative search visibility (GEO), WCAG 2.2 accessibility, and conversion copy lift.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
