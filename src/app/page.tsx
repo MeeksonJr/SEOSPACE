@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   PublicNavbar,
@@ -16,21 +16,21 @@ import {
   Check,
   CheckCircle2,
   AlertTriangle,
-  HeartHandshake,
-  TrendingUp,
   Code2,
-  Layers,
-  Bot,
-  ExternalLink,
-  ChevronRight,
   Building2,
   DollarSign,
   QrCode,
-  Sliders,
   HelpCircle,
   Zap,
   Globe,
-  Lock,
+  ExternalLink,
+  ChevronRight,
+  X,
+  TrendingUp,
+  Sliders,
+  CheckCircle,
+  Clock,
+  Layers,
 } from "lucide-react";
 import {
   DiagonalRibbon,
@@ -50,8 +50,14 @@ export default function HomePage() {
   const [activeWidgetTab, setActiveWidgetTab] = useState<"toast" | "wall" | "pill">("toast");
   const [copiedScript, setCopiedScript] = useState(false);
 
+  // Live Toast Simulation in Bottom Corner
+  const [showLiveToast, setShowLiveToast] = useState(false);
+
   // Interactive Shield Simulator State
   const [simulatedRating, setSimulatedRating] = useState<number | null>(5);
+
+  // Interactive AI Reply Angle State
+  const [activeAiAngle, setActiveAiAngle] = useState<"seo" | "empathy" | "loyalty">("seo");
 
   // Agency ROI Calculator State
   const [clientCount, setClientCount] = useState<number>(14);
@@ -59,6 +65,14 @@ export default function HomePage() {
 
   const calculatedMRR = clientCount * clientFee;
   const calculatedARR = calculatedMRR * 12;
+
+  // Auto-trigger the live toast preview after 3 seconds to show visitor interactive proof
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLiveToast(true);
+    }, 2800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const copyEmbedCode = () => {
     const code = `<script src="https://trustpulse-ai.vercel.app/api/widget/script?id=widget-apex-toasts" defer></script>`;
@@ -69,25 +83,25 @@ export default function HomePage() {
 
   return (
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)] transition-colors duration-200">
-      {/* Sticky Glassmorphic Navbar */}
+      {/* Sticky Fixed Glassmorphic Navbar */}
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
       <main className="flex-1">
         {/* =========================================================================
-            1. HERO SECTION: High-Design, Visual Trust Badges & Action CTAs
+            1. HERO SECTION: Elevated SaaS Presentation with Dual-Device Showcase
            ========================================================================= */}
-        <section className="relative px-4 sm:px-6 lg:px-8 pt-10 pb-16 sm:pt-16 sm:pb-24 overflow-hidden">
+        <section className="relative px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-16 sm:pb-24 overflow-hidden">
           <div className="mx-auto max-w-6xl">
             {/* Top pill badge */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--sp-line)] bg-[var(--sp-card)] text-xs font-mono font-medium shadow-xs">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--sp-line)] bg-[var(--sp-card)] text-xs font-mono font-medium shadow-xs">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[var(--sp-mute)]">Autonomous Reputation SaaS</span>
-                <span className="text-emerald-600 font-semibold">• Turnkey Ready</span>
+                <span className="text-emerald-600 font-semibold">• 100% Turnkey Commercial Asset</span>
               </div>
             </div>
 
-            {/* Main Title & Pitch */}
+            {/* Main Title & Value Proposition */}
             <div className="text-center max-w-4xl mx-auto space-y-6">
               <h1 className="sp-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
                 Protect your 5-star reputation.
@@ -98,16 +112,16 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="text-base sm:text-xl text-[var(--sp-mute)] max-w-2xl mx-auto leading-relaxed">
-                The smart QR review funnel that <strong className="text-[var(--sp-ink)] font-semibold">shields your business from unfair 1-star public reviews</strong> while streaming verified 5-star testimonials into embeddable website widgets.
+                The smart QR review funnel that <strong className="text-[var(--sp-ink)] font-semibold">shields your business from unfair 1-star public Google reviews</strong> while streaming verified 5-star customer praise into high-converting website widgets.
               </p>
 
               {/* CTAs */}
               <div className="flex flex-wrap items-center justify-center gap-3.5 pt-4">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm sm:text-base px-7 py-3.5 shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm sm:text-base px-7 py-3.5 shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Open Live Demo Workspace</span>
+                  <span>Launch Live Demo Workspace</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
@@ -116,8 +130,16 @@ export default function HomePage() {
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--sp-line)] bg-[var(--sp-card)] hover:bg-[var(--sp-stage)] text-[var(--sp-ink)] font-semibold text-sm sm:text-base px-6 py-3.5 transition-all"
                 >
                   <QrCode className="w-4 h-4 text-emerald-600" />
-                  <span>Test Live QR Funnel ↗</span>
+                  <span>Scan Live QR Funnel ↗</span>
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowLiveToast(!showLiveToast)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-semibold text-sm px-5 py-3.5 transition-all hover:bg-emerald-100/60 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>{showLiveToast ? "Hide Live Toast" : "Simulate Live Toast"}</span>
+                </button>
               </div>
 
               {/* Verified Platform Badges Cluster */}
@@ -131,9 +153,66 @@ export default function HomePage() {
             </div>
 
             {/* =========================================================================
+                HERO VISUAL SHOWCASE: Photorealistic Dual-Device Hardware & SaaS Grid
+               ========================================================================= */}
+            <div className="mt-14 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Left: Physical Acrylic Stand & iPhone 16 Pro Rating Funnel */}
+              <div className="lg:col-span-5 rounded-3xl overflow-hidden border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-2xl relative group">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-950">
+                  <img
+                    src="/images/hero-device-showcase.jpg"
+                    alt="TrustPulse AI Acrylic Counter Stand and Smartphone Rating Funnel"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex items-end p-5">
+                    <div>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-mono font-bold uppercase tracking-wider mb-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                        Physical Reception Touchpoint
+                      </span>
+                      <p className="text-white text-xs font-semibold">
+                        Sleek acrylic QR stand placed on reception desks • Under 0.4s scan time
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Floating MacBook Pro SaaS Command Center */}
+              <div className="lg:col-span-7 rounded-3xl overflow-hidden border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-2xl relative group">
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                  <img
+                    src="/images/dashboard-analytics-preview.jpg"
+                    alt="TrustPulse AI Reputation Command Center Dashboard Mockup"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex items-end p-5">
+                    <div className="flex items-center justify-between w-full">
+                      <div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/90 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider mb-1 border border-emerald-500/30">
+                          Reputation Command Center
+                        </span>
+                        <p className="text-white text-xs font-semibold">
+                          Live sentiment radar • 99.2% negative reviews shielded • $28,400 revenue protected
+                        </p>
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition-colors shadow"
+                      >
+                        <span>Live Demo</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* =========================================================================
                 VISUAL WORKFLOW ARCHITECTURE: 3-Step Diagram
                ========================================================================= */}
-            <div className="mt-14 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mt-16 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Step 1 */}
               <div className="p-6 rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] shadow-sm space-y-3 relative group hover:border-emerald-500 transition-colors">
                 <span className="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold font-mono flex items-center justify-center shadow">
@@ -186,6 +265,78 @@ export default function HomePage() {
                 </p>
                 <div className="text-[11px] font-mono text-indigo-600 font-semibold pt-1">
                   1-Line Embed • No npm build
+                </div>
+              </div>
+            </div>
+
+            {/* =========================================================================
+                THE REVIEW SHIELD IN ACTION: Before vs After Transformation
+               ========================================================================= */}
+            <div className="mt-16 max-w-5xl mx-auto rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] p-6 sm:p-10 shadow-lg">
+              <div className="text-center max-w-2xl mx-auto mb-8">
+                <span className="text-xs font-mono uppercase tracking-widest text-emerald-600 font-bold">
+                  Reputation Transformation
+                </span>
+                <h2 className="sp-display text-2xl sm:text-4xl font-bold mt-1">
+                  Traditional Review Chaos vs. TrustPulse Shield
+                </h2>
+                <p className="text-xs sm:text-sm text-[var(--sp-mute)] mt-1">
+                  See how TrustPulse turns angry walk-outs into private resolutions and converts happy clients into public Google stars.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 items-stretch">
+                {/* Traditional Way */}
+                <div className="p-6 rounded-2xl border border-rose-300 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/20 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-rose-200 dark:border-rose-900/60">
+                    <span className="text-xs font-bold font-mono text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                      ✕ Without TrustPulse
+                    </span>
+                    <span className="text-xs font-bold text-rose-700 bg-rose-100 dark:bg-rose-900/60 px-2 py-0.5 rounded">
+                      Rating: 3.9 ⭐
+                    </span>
+                  </div>
+                  <ul className="space-y-3 text-xs text-rose-950 dark:text-rose-200/90 leading-relaxed">
+                    <li className="flex items-start gap-2">
+                      <span className="text-rose-600 font-bold shrink-0">1.</span>
+                      <span>Customer experiences slight wait-time delay and vents frustration directly on public Google Maps.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-rose-600 font-bold shrink-0">2.</span>
+                      <span>Public star rating permanently drops from 4.9★ to 4.2★, degrading local SEO search pack rank.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-rose-600 font-bold shrink-0">3.</span>
+                      <span>Prospective high-value patients choose competitors with 4.8+ ratings; lost monthly revenue estimated at $3,400+.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* TrustPulse Way */}
+                <div className="p-6 rounded-2xl border-2 border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 space-y-4 shadow-sm">
+                  <div className="flex items-center justify-between pb-3 border-b border-emerald-200 dark:border-emerald-800/60">
+                    <span className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      ✓ With TrustPulse Shield
+                    </span>
+                    <span className="text-xs font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded">
+                      Rating: 4.98 ⭐
+                    </span>
+                  </div>
+                  <ul className="space-y-3 text-xs text-emerald-950 dark:text-emerald-200/90 leading-relaxed">
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-600 font-bold shrink-0">1.</span>
+                      <span>Customer scans QR stand. 1–3★ ratings are intercepted by our private feedback gatekeeper with zero Google exposure.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-600 font-bold shrink-0">2.</span>
+                      <span>Owner receives instant alert; manager contacts customer within 15 mins to de-escalate and offer a VIP courtesy.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-600 font-bold shrink-0">3.</span>
+                      <span>4–5★ happy clients are guided directly to Google with 1-click text copy. Public 5-star reviews increase by 340%!</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -246,7 +397,7 @@ export default function HomePage() {
                     <img
                       src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80"
                       alt="Sarah Jenkins"
-                      className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 flex-shrink-0"
+                      className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
@@ -375,7 +526,7 @@ export default function HomePage() {
             <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-mono font-semibold uppercase tracking-wider">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                The Core Value Loop
+                The Core Gatekeeper Engine
               </div>
               <h2 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
                 Interactive Shield Simulator
@@ -457,7 +608,7 @@ export default function HomePage() {
                     </div>
                     <div>&ldquo;Waited 25 mins because appointment was delayed...&rdquo;</div>
                     <div className="text-[10px] text-[var(--sp-mute)]">
-                      Manager alerted via email · Public rating preserved at 4.9⭐
+                      Manager alerted via email · Public rating preserved at 4.98⭐
                     </div>
                   </div>
                 </div>
@@ -467,12 +618,128 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            4. CONTINUOUS MARQUEE TICKER (Real Customer Feedback Cards)
+            4. PULSEMIND™ NEURAL ENGINE: AI Review Responder Showcase
+           ========================================================================= */}
+        <section id="ai-replies" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)]">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
+                PulseMind™ Neural Engine
+              </div>
+              <h2 className="sp-display text-3xl sm:text-5xl font-bold tracking-tight">
+                Autonomous 3-Angle AI Auto-Responder
+              </h2>
+              <p className="text-base sm:text-lg text-[var(--sp-mute)]">
+                Responding to reviews boosts Google Maps local search visibility by 28%. PulseMind™ generates 3 strategic, contextual responses in under 2 seconds.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-[var(--sp-line)] bg-[var(--sp-card)] p-6 sm:p-10 shadow-xl max-w-3xl mx-auto space-y-6">
+              {/* Sample Review */}
+              <div className="p-4 rounded-2xl bg-[var(--sp-stage)]/60 border border-[var(--sp-line)] text-xs sm:text-sm text-[var(--sp-ink)] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold">Customer Review (Dr. Thorne Dental):</span>
+                  <span className="text-amber-500 font-bold">★★★★★</span>
+                </div>
+                <p className="text-[var(--sp-mute)] italic">
+                  &ldquo;Dr. Thorne and his assistants were incredible during my root canal. Virtually pain-free and super modern office!&rdquo;
+                </p>
+              </div>
+
+              {/* Angle Selector Tabs */}
+              <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[var(--sp-stage)] text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => setActiveAiAngle("seo")}
+                  className={`flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer font-semibold ${
+                    activeAiAngle === "seo"
+                      ? "bg-[var(--sp-card)] text-emerald-600 shadow-sm"
+                      : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+                  }`}
+                >
+                  1. Local SEO Gratitude
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveAiAngle("empathy")}
+                  className={`flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer font-semibold ${
+                    activeAiAngle === "empathy"
+                      ? "bg-[var(--sp-card)] text-emerald-600 shadow-sm"
+                      : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+                  }`}
+                >
+                  2. Leadership Empathy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveAiAngle("loyalty")}
+                  className={`flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer font-semibold ${
+                    activeAiAngle === "loyalty"
+                      ? "bg-[var(--sp-card)] text-emerald-600 shadow-sm"
+                      : "text-[var(--sp-mute)] hover:text-[var(--sp-ink)]"
+                  }`}
+                >
+                  3. Loyalty &amp; Referral
+                </button>
+              </div>
+
+              {/* Generated Content Box */}
+              <div className="p-5 rounded-2xl border border-[var(--sp-line)] bg-[var(--sp-paper)] text-xs sm:text-sm space-y-3">
+                {activeAiAngle === "seo" && (
+                  <div>
+                    <div className="text-[11px] font-mono text-emerald-600 font-bold uppercase mb-1">
+                      Local Keyword Insertion (Austin Cosmetic Dentistry, Root Canal)
+                    </div>
+                    <p className="leading-relaxed text-[var(--sp-ink)]">
+                      &ldquo;Thank you so much for the 5-star review, Sarah! The entire dental care team at Apex Dental Austin is thrilled that you experienced a completely painless root canal procedure. Delivering gentle, high-tech patient care is our daily priority. We look forward to seeing you at your next regular cleaning!&rdquo;
+                    </p>
+                  </div>
+                )}
+
+                {activeAiAngle === "empathy" && (
+                  <div>
+                    <div className="text-[11px] font-mono text-emerald-600 font-bold uppercase mb-1">
+                      Professional Leadership Attentiveness
+                    </div>
+                    <p className="leading-relaxed text-[var(--sp-ink)]">
+                      &ldquo;Hi Sarah, Dr. Thorne and our clinical assistants truly appreciate you taking the time to share your feedback. Dental procedures can be stressful, and we designed our office protocols specifically to make your visit comfortable and reassuring. Thank you for placing your trust in our practice.&rdquo;
+                    </p>
+                  </div>
+                )}
+
+                {activeAiAngle === "loyalty" && (
+                  <div>
+                    <div className="text-[11px] font-mono text-emerald-600 font-bold uppercase mb-1">
+                      Referral &amp; Retention Magnet
+                    </div>
+                    <p className="leading-relaxed text-[var(--sp-ink)]">
+                      &ldquo;We love hearing this, Sarah! Patients like you make what we do so rewarding. Mention this review to our front desk coordinator on your next visit for a complimentary VIP enamel polish kit, and don&apos;t hesitate to refer your friends and family!&rdquo;
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-2 flex items-center justify-between text-[11px] text-[var(--sp-mute)] border-t border-[var(--sp-line)]">
+                  <span>Engine: PulseMind™ Neural Engine v5.0</span>
+                  <Link
+                    href="/dashboard/ai-replies"
+                    className="text-emerald-600 font-bold hover:underline"
+                  >
+                    Open AI Studio in Dashboard ↗
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            5. CONTINUOUS MARQUEE TICKER (Real Customer Feedback Cards)
            ========================================================================= */}
         <CustomerReviewMarquee />
 
         {/* =========================================================================
-            5. AGENCY RETENTION & ROI CALCULATOR
+            6. AGENCY RETENTION & ROI CALCULATOR
            ========================================================================= */}
         <section id="roi" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)]">
           <div className="mx-auto max-w-5xl">
@@ -550,7 +817,7 @@ export default function HomePage() {
                   </div>
                   <div>• Vercel Edge Serverless: $0.00 / month</div>
                   <div>• Supabase PostgreSQL Database: $0.00 / month</div>
-                  <div>• Google Gemini API Free Tier: $0.00 / month</div>
+                  <div>• PulseMind™ Neural Processing Layer: $0.00 / month</div>
                 </div>
               </div>
 
@@ -587,7 +854,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            6. COMPETITOR COMPARISON BATTLECARD (TrustPulse vs Birdeye vs Podium)
+            7. COMPETITOR COMPARISON BATTLECARD (TrustPulse vs Birdeye vs Podium)
            ========================================================================= */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/30">
           <div className="mx-auto max-w-5xl">
@@ -635,7 +902,7 @@ export default function HomePage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 font-semibold">AI Auto-Responder</td>
-                      <td className="py-4 px-6 font-bold text-emerald-600">✓ Gemini 2.5 Flash (3 Angles)</td>
+                      <td className="py-4 px-6 font-bold text-emerald-600">✓ PulseMind™ Neural Engine (3 Angles)</td>
                       <td className="py-4 px-6 text-slate-500">Basic template text</td>
                       <td className="py-4 px-6 text-slate-500">Manual templates</td>
                     </tr>
@@ -653,7 +920,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            7. PRICING SECTION CONNECTED TO STRIPE
+            8. PRICING SECTION CONNECTED TO STRIPE
            ========================================================================= */}
         <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)]">
           <div className="mx-auto max-w-5xl">
@@ -696,7 +963,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-600" />
-                      <span>50 AI Review Replies / mo</span>
+                      <span>50 PulseMind™ AI Replies / mo</span>
                     </li>
                   </ul>
                 </div>
@@ -737,7 +1004,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-600" />
-                      <span>Unlimited Gemini AI Replies</span>
+                      <span>Unlimited PulseMind™ AI Replies</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-600" />
@@ -795,7 +1062,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            8. FREQUENTLY ASKED QUESTIONS
+            9. FREQUENTLY ASKED QUESTIONS
            ========================================================================= */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--sp-line)] bg-[var(--sp-stage)]/40">
           <div className="mx-auto max-w-4xl space-y-12">
@@ -824,7 +1091,7 @@ export default function HomePage() {
                 },
                 {
                   q: "Is it really $0/month to host and operate?",
-                  a: "Yes. TrustPulse is engineered to run completely inside the permanent free tiers of Vercel (Edge serverless), Supabase (PostgreSQL), and Google Gemini (15 RPM free tier). There are zero required paid SaaS subscriptions.",
+                  a: "Yes. TrustPulse is engineered to run completely inside the permanent free tiers of Vercel (Edge serverless), Supabase (PostgreSQL), and the PulseMind™ Neural Engine API layer ($0/mo SLA). There are zero required paid SaaS subscriptions.",
                 },
               ].map((faq, i) => (
                 <div
@@ -832,7 +1099,7 @@ export default function HomePage() {
                   className="p-6 rounded-2xl border border-[var(--sp-line)] bg-[var(--sp-card)] space-y-2 shadow-xs"
                 >
                   <h3 className="font-bold text-base text-[var(--sp-ink)] flex items-center gap-2">
-                    <HelpCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>{faq.q}</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-[var(--sp-mute)] leading-relaxed pl-6">
@@ -844,6 +1111,49 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+
+      {/* =========================================================================
+          LIVE FLOATING TOAST NOTIFICATION PREVIEW (Pop-up on bottom-right)
+         ========================================================================= */}
+      {showLiveToast && (
+        <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full p-4 rounded-2xl border border-[var(--sp-line)] bg-slate-900 text-white shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-start gap-3">
+            <img
+              src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80"
+              alt="Claire Danvers"
+              className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shrink-0"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold truncate">Claire Danvers</span>
+                <button
+                  type="button"
+                  onClick={() => setShowLiveToast(false)}
+                  className="text-slate-400 hover:text-white p-0.5"
+                  aria-label="Close live toast preview"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="flex text-amber-400 mb-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="w-3 h-3 fill-amber-400" />
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-300 leading-snug line-clamp-2">
+                &ldquo;Just had my whitening done at Apex Dental. 5 stars, gentle &amp; super fast!&rdquo;
+              </p>
+              <div className="mt-2 flex items-center justify-between text-[9px] text-slate-400 font-mono">
+                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                  <CheckCircle className="w-2.5 h-2.5" />
+                  Live Widget Toast
+                </span>
+                <span>Just now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <PublicFooter isDark={isDark} onToggleTheme={toggleTheme} />

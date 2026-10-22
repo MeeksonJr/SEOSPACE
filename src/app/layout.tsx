@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     "Wall of Love Widget",
     "Toast Notification Widget",
     "AI Review Responder",
-    "Gemini Review Reply",
+    "PulseMind Review Reply",
     "Agency Reputation SaaS",
     "TrustPulse AI",
   ],
@@ -92,7 +92,7 @@ const jsonLdSchema = {
       featureList: [
         "Smart Negative Review Shield QR Funnel with Star Gatekeeping",
         "1-Line Embeddable Social Proof Toasts & Wall of Love Masonry Widgets",
-        "Google Gemini AI Review Auto-Responder (SEO, De-escalation & Loyalty)",
+        "PulseMind™ AI Review Auto-Responder (SEO, De-escalation & Loyalty)",
         "Multi-Platform Review Aggregator (Google Places, Trustpilot, CSV)",
         "Agency White-Label Multi-Workspace Management with PDF Client Reports",
       ],

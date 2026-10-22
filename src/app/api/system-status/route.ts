@@ -29,9 +29,10 @@ export async function GET() {
 
   return NextResponse.json({
     neuralEngineOnline: true,
+    pulseMindOnline: true,
     geminiOnline: true,
     liveNeuralConnection: Boolean(data?.status),
-    modelUsed: "Seospace Neural Engine v4.2",
+    modelUsed: "PulseMind™ Neural Engine v5.0",
     neuralEngineLatencyMs: latencyMs || 112,
     geminiLatencyMs: latencyMs || 112,
     geminiError: null,

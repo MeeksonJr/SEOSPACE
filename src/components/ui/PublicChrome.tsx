@@ -147,6 +147,16 @@ export function PublicNavbar({
   badgeText?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -156,8 +166,14 @@ export function PublicNavbar({
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 px-2.5 sm:px-4 lg:px-6 pt-2.5 sm:pt-3 w-full max-w-full">
-      <div className="mx-auto max-w-5xl xl:max-w-6xl w-full flex items-center justify-between gap-2 sm:gap-4 rounded-full border border-line bg-card/95 backdrop-blur px-3 sm:px-4 py-2 sp-card-shadow">
+    <header className="fixed top-0 left-0 right-0 z-50 px-2.5 sm:px-4 lg:px-6 pt-2 sm:pt-3 pointer-events-none transition-all duration-300">
+      <div
+        className={`mx-auto max-w-5xl xl:max-w-6xl w-full flex items-center justify-between gap-2 sm:gap-4 rounded-full border border-line bg-card/95 backdrop-blur-md px-3 sm:px-4 py-2 pointer-events-auto transition-all duration-300 ${
+          isScrolled
+            ? "shadow-xl border-line/90 bg-card/98 scale-[0.99]"
+            : "sp-card-shadow"
+        }`}
+      >
         {/* Brand Logo */}
         <Link href="/" className="shrink-0 pl-0.5" aria-label="TrustPulse AI home">
           <TrustPulseLogo auto size="sm" />
@@ -251,12 +267,12 @@ export function PublicNavbar({
 
       {/* Mobile drop menu */}
       {open && (
-        <div className="md:hidden fixed inset-x-3 top-16 z-50 rounded-3xl border border-line bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-ink">
+        <div className="md:hidden fixed inset-x-3 top-16 z-50 rounded-3xl border border-line bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-ink pointer-events-auto">
           <nav className="flex flex-col space-y-3">
             {[
               { href: "/#shield", label: "Negative Review Shield" },
               { href: "/#widgets", label: "Embeddable Social Proof Widgets" },
-              { href: "/#ai-replies", label: "Gemini AI Review Responder" },
+              { href: "/#ai-replies", label: "PulseMind™ AI Review Responder" },
               { href: "/#roi", label: "Agency Retainer Calculator" },
               { href: "/#pricing", label: "Pricing & Plans" },
               { href: "/r/apex-dental", label: "Test Live QR Funnel ↗" },
@@ -296,7 +312,7 @@ const FOOT_COLS: Array<{
       { href: "/dashboard", label: "Reputation Dashboard" },
       { href: "/dashboard/widgets", label: "Widget Studio (Toasts & Wall)" },
       { href: "/dashboard/shield", label: "Shielded Feedback Inbox" },
-      { href: "/dashboard/ai-replies", label: "Gemini Review Responder" },
+      { href: "/dashboard/ai-replies", label: "PulseMind™ Review Responder" },
       { href: "/dashboard/qr-studio", label: "Printable QR Code Studio" },
     ],
   },

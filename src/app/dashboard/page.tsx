@@ -154,7 +154,7 @@ export default function DashboardPage() {
             href="/dashboard/ai-replies"
             className="py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap"
           >
-            <span>Gemini Auto-Responder</span>
+            <span>PulseMind™ AI Responder</span>
           </Link>
         </nav>
       </div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-emerald-600" />
                 <h3 className="font-bold text-lg text-slate-900">
-                  Gemini AI Review Responder
+                  PulseMind™ AI Review Responder
                 </h3>
               </div>
               <button
@@ -452,7 +452,7 @@ export default function DashboardPage() {
               <div className="py-12 text-center space-y-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
                 <p className="text-xs text-slate-600">
-                  Google Gemini 2.5 Flash is analyzing sentiment and generating 3 strategic response angles...
+                  PulseMind™ Neural Engine is analyzing sentiment and generating 3 strategic response angles...
                 </p>
               </div>
             )}

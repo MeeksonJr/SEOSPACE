@@ -75,7 +75,7 @@ Output strictly valid JSON with this shape:
         }
       }
     } catch (err) {
-      console.warn("Gemini API call failed, falling back to heuristic engine:", err);
+      console.warn("PulseMind AI engine fallback triggered:", err);
     }
   }
 

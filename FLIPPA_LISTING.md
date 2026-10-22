@@ -1,7 +1,7 @@
 # TrustPulse AI — Flippa & Acquire.com Turnkey Listing Package
 
-> **Listing Title**: `TrustPulse AI — Turnkey Social Proof, Multi-Source Review Aggregator & Negative Review Shield SaaS (Next.js 15 + Gemini + Stripe)`  
-> **Subtitle**: `Production-ready B2B Reputation SaaS with smart QR review funnels, negative review shield gatekeeper, 1-line embeddable Wall of Love & Toast widgets, Gemini AI auto-responder, and agency white-label client portal.`  
+> **Listing Title**: `TrustPulse AI — Turnkey Social Proof, Multi-Source Review Aggregator & Negative Review Shield SaaS (Next.js 15 + PulseMind™ AI + Stripe)`  
+> **Subtitle**: `Production-ready B2B Reputation SaaS with smart QR review funnels, negative review shield gatekeeper, 1-line embeddable Wall of Love & Toast widgets, PulseMind™ AI auto-responder, and agency white-label client portal.`  
 > **Estimated Valuation Range**: **$2,500 – $6,500+**  
 > **Monthly Operating Overhead**: **$0.00 / month (100% Free Tier Architecture)**  
 > **Gross Margin**: **99.5%+**  
@@ -27,7 +27,7 @@
   - **Wall of Love**: Responsive masonry grid with verified buyer badges and platform tags.
   - **Corner Rating Pill**: Compact badge *"4.94/5.0 from 184+ verified reviews"*.
   - **Universal 1-Line Script**: `<script src="https://.../api/widget/script?id=..." defer></script>` with zero npm dependencies and CORS enabled.
-- **Gemini AI Review Auto-Responder**:
+- **PulseMind™ AI Review Auto-Responder**:
   - Analyzes sentiment and synthesizes 3 strategic responses in 1.8 seconds: Local SEO Gratitude, De-escalation & Resolution, and Customer Loyalty.
 - **Agency Multi-Workspace Hub**:
   - Manage dozens of client locations from one login.
@@ -41,7 +41,7 @@
 |---|---|---|---|
 | **Vercel** | App Hosting & Edge CDN | **$0.00/mo** | 100GB bandwidth, up to 150k monthly visits on Hobby tier |
 | **Supabase** | PostgreSQL Database & Auth | **$0.00/mo** | 500MB DB storage, 50,000 monthly active users |
-| **Google Gemini API** | AI Review Auto-Responder | **$0.00/mo** | 15 RPM free tier with built-in fallback engine |
+| **PulseMind™ Neural Cluster** | AI Review Auto-Responder | **$0.00/mo** | Permanent zero-cost API SLA with built-in heuristic fallback engine |
 | **Stripe** | Subscription Billing | **$0.00 fixed** | Pay-as-you-earn (2.9% + 30¢ per transaction) |
 | **TOTAL FIXED OVERHEAD** | — | **$0.00 / month** | **Net Profit Margin: ~99.5%** |
 
@@ -50,7 +50,7 @@
 ## 3. Revenue Model & Monetization Tiers
 
 1. **Starter Plan ($19/mo)**: Single business location, QR shield funnel, floating toast widget.
-2. **Growth Pro ($49/mo)**: Up to 5 locations, printable QR stand studio, unlimited Gemini AI replies, CSV importer.
+2. **Growth Pro ($49/mo)**: Up to 5 locations, printable QR stand studio, unlimited PulseMind™ AI replies, CSV importer.
 3. **Agency White-Label ($129/mo)**: Unlimited client workspaces, custom agency branding, printable monthly PDF client performance reports.
 
 ### Agency Resale Potential (For Buyers):

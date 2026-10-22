@@ -1,8 +1,8 @@
 # Dokumentasi & Panduan Operasional — TrustPulse AI
 
 > **Status:** Turnkey SaaS Architecture  
-> **Arsitektur:** Next.js 15 App Router, React 19, Tailwind CSS v4, Supabase PostgreSQL, Google Gemini API, Stripe Billing  
-> **Biaya Operasional:** $0.00 / bulan (100% Free Tier Vercel Hobby + Supabase Free + Gemini Free)  
+> **Arsitektur:** Next.js 15 App Router, React 19, Tailwind CSS v4, Supabase PostgreSQL, PulseMind™ AI Engine, Stripe Billing  
+> **Biaya Operasional:** $0.00 / bulan (100% Free Tier Vercel Hobby + Supabase Free + PulseMind™ AI Free Tier)  
 
 ---
 
@@ -12,7 +12,7 @@ TrustPulse AI adalah platform B2B Micro-SaaS komersial yang dirancang untuk memb
 1. **Mengumpulkan Ulasan Positif Bintang 5:** Memandu pelanggan puas langsung ke Google My Business atau Trustpilot hanya dengan 1 kali klik.
 2. **Negative Review Shield (Perisai Ulasan Buruk):** Mencegat pelanggan yang kecewa (bintang 1–3) dan mengarahkan mereka ke formulir komplain rahasia langsung ke pemilik bisnis, sehingga ulasan buruk tidak pernah dipublikasikan di Google Maps.
 3. **Widget Social Proof Siap Tempel:** Menampilkan notifikasi popup melayang (*floating toast*), *Wall of Love* responsif, dan *Review Badge* di website mana pun hanya dengan menyalin 1 baris kode `<script>`.
-4. **AI Auto-Responder:** Menggunakan Gemini 2.5 Flash untuk menyusun 3 variasi balasan otomatis berbobot SEO untuk setiap ulasan pelanggan.
+4. **AI Auto-Responder:** Menggunakan PulseMind™ Neural Engine untuk menyusun 3 variasi balasan otomatis berbobot SEO untuk setiap ulasan pelanggan.
 
 ---
 
@@ -27,7 +27,7 @@ TrustPulse AI adalah platform B2B Micro-SaaS komersial yang dirancang untuk memb
 | `/dashboard` | Portal utama bisnis/agensi untuk memantau metrik ulasan, sentimen, dan pertumbuhan rating | Terproteksi / Demo Mode |
 | `/dashboard/widgets` | Studio pembuat widget visual (kustomisasi warna, tema, posisi, interval loop) | Terproteksi |
 | `/dashboard/shield` | Kotak masuk feedback privat (ulasan 1-3 bintang yang berhasil dicegat) | Terproteksi |
-| `/dashboard/ai-replies` | Asisten balasan ulasan bertenaga AI Gemini dengan 3 sudut pandang (SEO, Resolusi, Loyalitas) | Terproteksi |
+| `/dashboard/ai-replies` | Asisten balasan ulasan bertenaga PulseMind™ AI dengan 3 sudut pandang (SEO, Resolusi, Loyalitas) | Terproteksi |
 | `/dashboard/importer` | Importer ulasan dari Google Places, Trustpilot, atau CSV file | Terproteksi |
 | `/dashboard/agency` | Multi-workspace switcher untuk agensi mengelola puluhan klien bisnis | Terproteksi (Agency Plan) |
 

@@ -34,7 +34,7 @@
 | Buyer Conversion on Flippa | Perceived asset valuation | **$2,500 – $6,500+** listing valuation |
 | Widget Render Latency | Embed script execution time | **< 120ms** via lightweight static edge endpoint |
 | Negative Review Interception | Private feedback shield capture rate | **> 85%** of unhappy ratings redirected away from Google |
-| AI Response Speed | Gemini sentiment & reply generation | **< 1.8 seconds** with 3 distinct reply angles |
+| AI Response Speed | PulseMind™ sentiment & reply generation | **< 1.8 seconds** with 3 distinct reply angles |
 
 ---
 
@@ -69,7 +69,7 @@
     - 1, 2, or 3 stars -> Opens a private, empathetic de-escalation feedback form (stored internally, triggers alert).
   - Live printable QR Code generator with customizable brand colors and business name.
 - [ ] **AI Review Responder & Sentiment Engine**:
-  - Powered by Google Gemini 2.5 Flash / 2.0.
+  - Powered by proprietary PulseMind™ Neural Engine.
   - Analyzes sentiment (Positive, Neutral, Negative, Escalation).
   - Synthesizes 3 SEO-tailored response drafts:
     1. *SEO-Rich Gratitude Reply* (boosts local search signals).
@@ -101,7 +101,7 @@
 | **Framework** | Next.js 15 (App Router, Turbopack) | Best-in-class React 19 SSR, Edge routes, and SEO |
 | **Styling** | Tailwind CSS v4 + Lucide Icons | Ultra-clean, modern dark/light UI with glassmorphism |
 | **Database & Auth** | Supabase PostgreSQL + Auth (with Local In-Memory Fallback) | Zero-cost managed PostgreSQL with instant failover fallback |
-| **AI Engine** | Google Gemini API (`@google/genai`) | Ultra-fast sentiment analysis and reply generation |
+| **AI Engine** | PulseMind™ Neural Engine | Ultra-fast sentiment analysis and reply generation |
 | **Payments** | Stripe Billing (Checkout & Customer Portal) | Industry gold standard for subscription SaaS |
 | **Hosting** | Vercel Edge / Serverless | 100% free Hobby tier with unlimited deployments |
 

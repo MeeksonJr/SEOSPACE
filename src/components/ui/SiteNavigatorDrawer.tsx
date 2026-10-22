@@ -116,7 +116,7 @@ const NAV_SECTIONS = [
       },
       {
         href: "/dashboard/ai-replies",
-        label: "Gemini AI Review Auto-Responder",
+        label: "PulseMind™ AI Review Auto-Responder",
         desc: "Synthesize 3 SEO-boosted and de-escalating replies in 1.8s",
         icon: Sparkles,
       },

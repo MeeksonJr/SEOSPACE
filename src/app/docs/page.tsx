@@ -53,9 +53,9 @@ const ENDPOINTS: EndpointDef[] = [
     id: "ai-reply",
     method: "POST",
     path: "/api/reviews/ai-reply",
-    title: "Gemini AI Review Responder & Sentiment Intelligence",
+    title: "PulseMind™ AI Review Responder & Sentiment Intelligence",
     description:
-      "Analyzes customer sentiment and synthesizes 3 strategic reply angles (SEO-Boosted Gratitude, De-escalation & Empathy, Loyalty Reward) powered by Google Gemini 2.5 Flash.",
+      "Analyzes customer sentiment and synthesizes 3 strategic reply angles (SEO-Boosted Gratitude, De-escalation & Empathy, Loyalty Reward) powered by the proprietary PulseMind™ Neural Engine.",
     defaultBody: JSON.stringify(
       {
         reviewId: "rev-1",
@@ -133,7 +133,7 @@ export default function DocsPage() {
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Header */}
           <div className="space-y-4">

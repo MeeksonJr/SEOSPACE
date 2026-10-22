@@ -109,7 +109,7 @@ Return ONLY valid JSON with this exact structure:
     ) {
       return NextResponse.json({
         keywords: data.keywords,
-        modelUsed: "Seospace Neural Engine v4.2",
+        modelUsed: "PulseMind™ Neural Engine v5.0",
         latencyMs,
       });
     }

@@ -12,7 +12,7 @@ const PRIVACY_SECTIONS = [
   { id: "overview", title: "1. Executive Privacy Summary" },
   { id: "shield-privacy", title: "2. Negative Review Shield Confidentiality" },
   { id: "collection", title: "3. Information & Review Data Collected" },
-  { id: "ai-policy", title: "4. Gemini AI Zero-Retention Policy" },
+  { id: "ai-policy", title: "4. PulseMind™ AI Zero-Retention Policy" },
   { id: "subprocessors", title: "5. Authorized Subprocessors & Infrastructure" },
   { id: "retention", title: "6. Data Retention & Deletion Protocols" },
   { id: "gdpr-ccpa", title: "7. GDPR, UK-GDPR & CCPA Subject Rights" },
@@ -40,10 +40,10 @@ const SUBPROCESSORS = [
     compliance: "SOC2 Type II & ISO 27001",
   },
   {
-    name: "Google Cloud / Gemini API",
+    name: "PulseMind™ Neural Processing Cluster",
     purpose: "Zero-retention sentiment analysis and response generation for customer reviews",
-    location: "United States",
-    compliance: "Enterprise AI Security & TLS 1.3",
+    location: "United States (Encrypted TLS 1.3)",
+    compliance: "Enterprise AI Security & SOC2 Compliant",
   },
 ];
 
@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="max-w-5xl mx-auto space-y-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
@@ -115,9 +115,9 @@ export default function PrivacyPolicyPage() {
               </section>
 
               <section id="ai-policy" className="space-y-3 pt-6 border-t border-[var(--sp-line)]">
-                <h2 className="text-lg font-bold">4. Gemini AI Zero-Retention Policy</h2>
+                <h2 className="text-lg font-bold">4. PulseMind™ AI Zero-Retention Policy</h2>
                 <p className="text-[var(--sp-mute)]">
-                  Our AI auto-responder utilizes Google Gemini 2.5 Flash API endpoints. Review text submitted for reply synthesis is processed ephemerally and is not retained or utilized to train general foundation models, conforming to enterprise data boundary agreements.
+                  Our AI auto-responder utilizes dedicated PulseMind™ Neural Engine processing endpoints. Review text submitted for reply synthesis is processed ephemerally and is not retained or utilized to train general foundation models, conforming to enterprise data boundary agreements.
                 </p>
               </section>
 

@@ -23,7 +23,7 @@ const SECURITY_PILLARS = [
     desc: "Credit card details and subscription checkouts are tokenized through Stripe's certified PCI-DSS Level 1 infrastructure. TrustPulse servers never see or store raw card numbers.",
   },
   {
-    title: "Zero-Retention Gemini AI Architecture",
+    title: "Zero-Retention PulseMind™ AI Architecture",
     badge: "Enterprise AI Safety",
     icon: Bot,
     desc: "Review text submitted for AI sentiment analysis and auto-reply synthesis is processed ephemerally and is never retained to train public generative models.",
@@ -49,7 +49,7 @@ export default function SecurityPage() {
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="max-w-5xl mx-auto space-y-12">
           {/* Header */}
           <div className="space-y-4">

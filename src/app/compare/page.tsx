@@ -55,8 +55,8 @@ export default function ComparePage() {
       winner: true,
     },
     {
-      feature: "Gemini AI Review Auto-Responder",
-      trustpulse: "✓ 3 Angles (Local SEO, Empathy, Loyalty)",
+      feature: "PulseMind™ AI Review Auto-Responder",
+      trustpulse: "✓ 3 Strategic Angles (Local SEO, Empathy, Loyalty)",
       birdeye: "Basic templated AI",
       podium: "Manual template snippets",
       generic: "✕ No AI capabilities",
@@ -84,7 +84,7 @@ export default function ComparePage() {
     <div className="sp-page min-h-screen flex flex-col bg-[var(--sp-paper)] text-[var(--sp-ink)]">
       <PublicNavbar isDark={isDark} onToggleTheme={toggleTheme} />
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="max-w-5xl mx-auto space-y-12">
           {/* Header */}
           <div className="space-y-4">
@@ -148,7 +148,7 @@ export default function ComparePage() {
               </div>
               <h3 className="font-bold text-base">Zero Infrastructure Debt</h3>
               <p className="text-xs text-[var(--sp-mute)] leading-relaxed">
-                Operates permanently on Vercel, Supabase, and Gemini free tiers. You pocket 99%+ of every client subscription.
+                Operates permanently on Vercel, Supabase, and PulseMind™ free tiers. You pocket 99%+ of every client subscription.
               </p>
             </div>
 

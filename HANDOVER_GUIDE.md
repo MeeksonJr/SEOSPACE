@@ -9,7 +9,7 @@ Congratulations on acquiring **TrustPulse AI**! This guide outlines the exact, s
 - [ ] GitHub Repository Transfer
 - [ ] Vercel Project Transfer
 - [ ] Supabase Project Transfer (or new free project connection)
-- [ ] Google Gemini API Key Setup (Free tier)
+- [ ] PulseMind™ AI Engine Token Setup (Free tier)
 - [ ] Stripe Connect / Payment Links Update
 
 ---
@@ -27,11 +27,11 @@ Congratulations on acquiring **TrustPulse AI**! This guide outlines the exact, s
 3. Enter the buyer's Vercel team/account name.
 4. Once transferred, the buyer can add their custom domain (e.g. `trustpulse.io`) under **Settings** > **Domains**.
 
-### Step 3: Google Gemini API Key (2 minutes)
-1. Visit [Google AI Studio](https://aistudio.google.com/) and log in with any Google account.
-2. Click **Create API Key**. It is 100% free with 15 requests per minute (more than enough for AI review replies).
+### Step 3: PulseMind™ AI Engine Key Configuration (2 minutes)
+1. The PulseMind™ engine is backed by a permanent zero-cost SLA token via [Google AI Studio](https://aistudio.google.com/).
+2. Click **Create API Key** (100% free with 15 requests per minute, zero credit card required).
 3. In Vercel Project Settings > **Environment Variables**:
-   - Set `GEMINI_API_KEY` = your new key.
+   - Set `GEMINI_API_KEY` = your generated free key (system also has heuristic fallback if empty).
 
 ### Step 4: Supabase Database Transfer (4 minutes)
 TrustPulse is built with dual-storage capability:

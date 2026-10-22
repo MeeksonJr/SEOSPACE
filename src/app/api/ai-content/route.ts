@@ -62,7 +62,7 @@ function buildDeterministicArticle(
         `${kw.toLowerCase()} for business`,
         `${kw.toLowerCase()} ROI benchmarks`,
       ],
-      summaryNote: `Expanded article with a tactical implementation roadmap and a 2-question FAQ block via Seospace Neural Engine v4.2.`,
+      summaryNote: `Expanded article with a tactical implementation roadmap and a 2-question FAQ block via PulseMind™ Neural Engine v5.0.`,
     };
   }
 
@@ -192,7 +192,7 @@ Return ONLY valid JSON:
     if (data && data.optimizedTitle && data.optimizedContent) {
       return NextResponse.json({
         ...data,
-        modelUsed: "Seospace Neural Engine v4.2",
+        modelUsed: "PulseMind™ Neural Engine v5.0",
         latencyMs,
       });
     }

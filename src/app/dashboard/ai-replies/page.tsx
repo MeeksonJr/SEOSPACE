@@ -71,7 +71,7 @@ export default function AIReplyStudioPage() {
           <div>
             <h1 className="font-bold text-base text-slate-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span>Gemini AI Review Responder</span>
+              <span>PulseMind™ AI Review Responder</span>
               <span className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">
                 SEO &amp; Sentiment
               </span>
@@ -182,7 +182,7 @@ export default function AIReplyStudioPage() {
                 <div className="py-12 text-center space-y-3">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto" />
                   <p className="text-xs text-slate-500">
-                    Gemini 2.5 Flash is extracting sentiment and generating SEO-rich responses...
+                    PulseMind™ Neural Engine is extracting sentiment and generating SEO-rich responses...
                   </p>
                 </div>
               )}
