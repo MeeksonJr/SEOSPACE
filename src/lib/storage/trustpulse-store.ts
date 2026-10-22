@@ -5,6 +5,7 @@ import {
   WidgetConfig,
   FeedbackStatus,
 } from "@/types/trustpulse";
+import type { GooglePlaceResult } from "@/lib/places/google-maps";
 
 interface TrustPulseDbSchema {
   workspaces: Workspace[];
@@ -498,5 +499,101 @@ export const TrustPulseStore = {
     store.updatedAt = new Date().toISOString();
     trySavePersisted(store);
     return config;
+  },
+
+  registerGoogleClient(result: GooglePlaceResult): {
+    workspace: Workspace;
+    reviews: ReviewItem[];
+    widgets: WidgetConfig[];
+  } {
+    const wsId = `ws-${result.slug}`;
+
+    const newWs: Workspace = {
+      id: wsId,
+      name: result.name,
+      slug: result.slug,
+      category: result.category,
+      brandColor: result.brandColor,
+      googlePlaceId: result.placeId,
+      googleReviewUrl: result.googleReviewUrl,
+      starThreshold: 4,
+      customHeadline: `How was your experience with ${result.name}?`,
+      customSubheadline: "Your candid feedback helps our team maintain premier standards.",
+      createdAt: new Date().toISOString(),
+      stats: {
+        averageRating: result.rating,
+        totalReviews: result.totalReviews,
+        shieldedReviews: Math.round(result.totalReviews * 0.08),
+        positiveRedirects: Math.round(result.totalReviews * 0.92),
+      },
+    };
+
+    // 1. Save or update workspace
+    this.saveWorkspace(newWs);
+
+    // 2. Save initial customer reviews
+    const createdReviews: ReviewItem[] = [];
+    if (Array.isArray(result.initialReviews)) {
+      for (const rev of result.initialReviews) {
+        const added = this.addReview({
+          id: rev.id,
+          workspaceId: wsId,
+          authorName: rev.authorName,
+          authorAvatar: rev.authorAvatar,
+          authorRole: rev.authorRole,
+          authorLocation: rev.authorLocation,
+          rating: rev.rating,
+          reviewText: rev.reviewText,
+          platform: rev.platform,
+          sentiment: rev.rating >= 4 ? "positive" : "negative",
+          reviewDate: rev.reviewDate,
+          isVerified: rev.isVerified,
+          isFeatured: rev.isFeatured,
+        });
+        createdReviews.push(added);
+      }
+    }
+
+    // 3. Auto-generate embeddable widgets for immediate client website deployment
+    const toastWidget: WidgetConfig = {
+      id: `widget-${result.slug}-toasts`,
+      workspaceId: wsId,
+      type: "toast_notification",
+      theme: "glassmorphism",
+      title: `${result.name} — Live Verified Reviews`,
+      position: "bottom_left",
+      minRating: 4,
+      maxReviews: 10,
+      loopIntervalSeconds: 6,
+      showPlatformBadge: true,
+      showVerifiedCheck: true,
+      showDate: true,
+      customAccentColor: result.brandColor,
+    };
+
+    const wallWidget: WidgetConfig = {
+      id: `widget-${result.slug}-wall`,
+      workspaceId: wsId,
+      type: "wall_of_love",
+      theme: "light",
+      title: `${result.name} — Wall of Love`,
+      position: "embedded",
+      minRating: 4,
+      maxReviews: 20,
+      loopIntervalSeconds: 0,
+      showPlatformBadge: true,
+      showVerifiedCheck: true,
+      showDate: true,
+      customAccentColor: result.brandColor,
+    };
+
+    this.saveWidgetConfig(toastWidget);
+    this.saveWidgetConfig(wallWidget);
+
+    return {
+      workspace: newWs,
+      reviews: createdReviews,
+      widgets: [toastWidget, wallWidget],
+    };
   },
 };

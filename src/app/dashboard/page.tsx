@@ -146,6 +146,14 @@ export default function DashboardPage() {
                 </option>
               ))}
             </select>
+            <Link
+              href="/dashboard/agency"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+              title="Add a new client workspace by pasting their Google Maps link or searching"
+            >
+              <Plus className="w-3 h-3 text-emerald-600" />
+              <span>+ Add Client</span>
+            </Link>
           </div>
         </div>
 
