@@ -128,7 +128,7 @@ export default function ApiDocsPage() {
 
   const curlSnippet = `curl -X ${selectedEndpoint.method} https://seospace-kappa.vercel.app${selectedEndpoint.path} \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer sk_live_seospace_9f8a7d6c5b4e" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '${requestBody.replace(/\n\s*/g, " ")}'`;
 
   function handleCopyCurl() {
