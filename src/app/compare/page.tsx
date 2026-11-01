@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicNavbar, PublicFooter, usePublicTheme } from "@/components/ui/PublicChrome";
 import { SAMPLE_AUDITS } from "@/lib/sample-audits";
-import { saveAuditReport, syncFromServerDb } from "@/lib/storage/workspace-store";
+import { saveAuditReport, syncFromServerDb, getWorkspaceUser, checkAuditQuota, WorkspaceUser } from "@/lib/storage/workspace-store";
+import { PlanUpgradeModal } from "@/components/dashboard/PlanUpgradeModal";
 import { AuditReport, PillarKey } from "@/types/audit";
 
 const PILLAR_KEYS: PillarKey[] = ["seo", "cro", "geo", "a11y", "security"];
@@ -30,6 +31,8 @@ function CompareContent() {
 
   const [loading, setLoading] = useState(false);
   const [forceRefresh, setForceRefresh] = useState(false);
+  const [user, setUser] = useState<WorkspaceUser>(() => getWorkspaceUser());
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>(
     "Loaded saved-first domain snapshots from Server Database"
   );
@@ -61,6 +64,12 @@ function CompareContent() {
     refresh = forceRefresh
   ) {
     if (!urlA.trim() || !urlB.trim()) return;
+
+    const quota = checkAuditQuota(user);
+    if (!quota.allowed && refresh) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setLoading(true);
     setStatusMessage(
       refresh
@@ -89,6 +98,7 @@ function CompareContent() {
         saveAuditReport(repB, !resB.cached);
         setPrimaryReport(repA);
         setCompetitorReport(repB);
+        setUser(getWorkspaceUser());
 
         const winner =
           repA.overallScore >= repB.overallScore ? repA.domain : repB.domain;

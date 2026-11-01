@@ -24,14 +24,18 @@ import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
 import { OpenSiteNavigatorButton } from "@/components/ui/SiteNavigatorDrawer";
 import { usePublicTheme, ThemeToggleButton } from "@/components/ui/PublicChrome";
+import { PlanUpgradeModal } from "@/components/dashboard/PlanUpgradeModal";
 import {
+  checkAuditQuota,
   getAuditById,
   getSavedArticles,
   getWhiteLabelConfig,
+  getWorkspaceUser,
   gradeArticleReal,
   saveAuditReport,
   SavedArticle,
   syncFromServerDb,
+  WorkspaceUser,
 } from "@/lib/storage/workspace-store";
 import { SAMPLE_AUDITS } from "@/lib/sample-audits";
 import { AuditReport, PillarKey, WhiteLabelConfig } from "@/types/audit";
@@ -50,7 +54,10 @@ export default function AuditReportPage() {
   const [whiteLabel, setWhiteLabel] = useState<WhiteLabelConfig>(
     getWhiteLabelConfig()
   );
-  const [whiteLabelPreview, setWhiteLabelPreview] = useState(true);
+  const [user, setUser] = useState<WorkspaceUser>(() => getWorkspaceUser());
+  const [whiteLabelPreview, setWhiteLabelPreview] = useState(() => getWorkspaceUser().plan === "agency");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<"audit_limit" | "feature_locked">("feature_locked");
   const [filterSeverity, setFilterSeverity] = useState<
     "all" | "critical" | "warning" | "pass"
   >("all");
@@ -61,6 +68,7 @@ export default function AuditReportPage() {
   const [freshlyFetched, setFreshlyFetched] = useState(false);
 
   useEffect(() => {
+    setUser(getWorkspaceUser());
     setWhiteLabel(getWhiteLabelConfig());
     setArticles(getSavedArticles());
     setFreshlyFetched(false);
@@ -91,6 +99,12 @@ export default function AuditReportPage() {
   }, [reportId]);
 
   async function handleLiveRescan(targetUrl?: string, forceRefresh = true) {
+    const quota = checkAuditQuota(user);
+    if (!quota.allowed && forceRefresh) {
+      setUpgradeReason("audit_limit");
+      setShowUpgradeModal(true);
+      return;
+    }
     setRescanning(true);
     try {
       const res = await fetch("/api/audit", {
@@ -259,14 +273,25 @@ export default function AuditReportPage() {
             </button>
 
             <button
-              onClick={() => setWhiteLabelPreview(!whiteLabelPreview)}
+              onClick={() => {
+                if (user.plan !== "agency") {
+                  setUpgradeReason("feature_locked");
+                  setShowUpgradeModal(true);
+                  return;
+                }
+                setWhiteLabelPreview(!whiteLabelPreview);
+              }}
               className={`px-3 py-1.5 rounded-xl font-semibold border transition cursor-pointer text-xs ${
-                whiteLabelPreview
+                user.plan !== "agency"
+                  ? "bg-accent/10 border-accent/30 text-accent"
+                  : whiteLabelPreview
                   ? "bg-accent/20 border-accent/40 text-accent font-bold"
                   : "bg-black/30 border-[#2a2a2c] text-[#8a8984] hover:text-[#f3f0e8]"
               }`}
             >
-              {whiteLabelPreview
+              {user.plan !== "agency"
+                ? "🔒 White-Label (Agency Only)"
+                : whiteLabelPreview
                 ? "✓ White-Label Mode: ON"
                 : "White-Label Mode: OFF"}
             </button>
@@ -1144,6 +1169,16 @@ export default function AuditReportPage() {
           )}
         </footer>
       </div>
+    <PlanUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentPlan={user.plan}
+        creditsUsed={user.creditsUsed}
+        creditsLimit={user.creditsLimit}
+        reason={upgradeReason}
+        lockedFeatureName={upgradeReason === "feature_locked" ? "White-Label PDF Branding" : undefined}
+        targetPlan={upgradeReason === "feature_locked" ? "agency" : "pro"}
+      />
     </div>
   );
 }

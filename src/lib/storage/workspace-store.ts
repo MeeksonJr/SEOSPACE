@@ -541,11 +541,99 @@ export function getWorkspaceUser(): WorkspaceUser {
   }
 }
 
+export function getPlanLimit(plan: WorkspaceUser["plan"]): number {
+  if (plan === "agency") return 999;
+  if (plan === "pro") return 100;
+  return 3;
+}
+
+export function checkAuditQuota(user?: WorkspaceUser): {
+  allowed: boolean;
+  used: number;
+  limit: number;
+  remaining: number;
+  isUnlimited: boolean;
+  plan: WorkspaceUser["plan"];
+} {
+  const u = user || getWorkspaceUser();
+  const plan = u.plan || "starter";
+  const limit = u.creditsLimit || getPlanLimit(plan);
+  const used = u.creditsUsed || 0;
+  const isUnlimited = plan === "agency";
+  const remaining = isUnlimited ? 999 : Math.max(0, limit - used);
+  const allowed = isUnlimited || used < limit;
+
+  return { allowed, used, limit, remaining, isUnlimited, plan };
+}
+
+export function checkFeatureAccess(
+  feature: "editor" | "whitelabel" | "widget",
+  user?: WorkspaceUser
+): {
+  allowed: boolean;
+  requiredPlan: "pro" | "agency";
+  requiredPlanName: string;
+  price: number;
+  featureTitle: string;
+  featureDescription: string;
+} {
+  const u = user || getWorkspaceUser();
+  const plan = u.plan || "starter";
+
+  if (feature === "editor") {
+    const allowed = plan === "pro" || plan === "agency";
+    return {
+      allowed,
+      requiredPlan: "pro",
+      requiredPlanName: "Professional",
+      price: 19,
+      featureTitle: "AI SEO Content Studio & 0-100 Grader",
+      featureDescription:
+        "Generate, edit, and rank high-converting SEO articles with real-time mathematical scoring. Included with Professional ($19/mo) and Agency ($49/mo) plans.",
+    };
+  }
+
+  if (feature === "whitelabel") {
+    const allowed = plan === "agency";
+    return {
+      allowed,
+      requiredPlan: "agency",
+      requiredPlanName: "Agency White-Label",
+      price: 49,
+      featureTitle: "Agency White-Label Client PDF Reports",
+      featureDescription:
+        "Replace all Seospace branding with your agency logo, primary brand color, Calendly call CTA, and custom footer. Exclusive to the Agency plan ($49/mo).",
+    };
+  }
+
+  // widget
+  const allowed = plan === "agency";
+  return {
+    allowed,
+    requiredPlan: "agency",
+    requiredPlanName: "Agency White-Label",
+    price: 49,
+    featureTitle: "Embeddable Lead-Capture Widget & Webhook CRM",
+    featureDescription:
+      "Embed a live 35-point audit bar on your agency website and auto-dispatch captured client leads to Discord, Slack, and Zapier webhooks. Exclusive to the Agency plan ($49/mo).",
+  };
+}
+
 export function saveWorkspaceUser(user: Partial<WorkspaceUser>): WorkspaceUser {
   const current = getWorkspaceUser();
+  const targetPlan = user.plan || current.plan || "starter";
+  const resolvedLimit =
+    user.creditsLimit !== undefined
+      ? user.creditsLimit
+      : user.plan && user.plan !== current.plan
+      ? getPlanLimit(targetPlan)
+      : current.creditsLimit || getPlanLimit(targetPlan);
+
   const updated: WorkspaceUser = {
     ...current,
     ...user,
+    plan: targetPlan,
+    creditsLimit: resolvedLimit,
     id:
       user.id ||
       current.id ||

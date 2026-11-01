@@ -31,7 +31,7 @@ function WidgetFormContent() {
   const [loading, setLoading] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
 
-  const iframeSnippet = `<iframe\n  src="https://seospace-kappa.vercel.app/widget?agency=${encodeURIComponent(
+  const iframeSnippet = `<iframe\n  src="https://seospace.pro/widget?agency=${encodeURIComponent(
     agencyName
   )}&color=${encodeURIComponent(primaryColor)}"\n  width="100%"\n  height="540"\n  frameborder="0"\n  style="border-radius: 20px; overflow: hidden;"\n></iframe>`;
 

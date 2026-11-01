@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://seospace-kappa.vercel.app";
+  const baseUrl = "https://seospace.pro";
 
   return {
     rules: [

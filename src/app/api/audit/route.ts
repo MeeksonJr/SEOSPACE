@@ -38,7 +38,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Unless explicitly asked to Fetch Latest (forceRefresh: true), return saved audit from Supabase / Server DB!
+    // 1. Quota Enforcement: Check user quota if plan is provided
+    const userPlan = body?.userPlan;
+    const userCreditsUsed = Number(body?.userCreditsUsed || 0);
+    if (userPlan === "starter" && userCreditsUsed >= 3 && forceRefresh) {
+      return NextResponse.json(
+        {
+          error: "Monthly audit quota reached (3/3). Please upgrade to Pro or Agency to continue scanning.",
+          quotaExceeded: true,
+          plan: "starter",
+          limit: 3,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Unless explicitly asked to Fetch Latest (forceRefresh: true), return saved audit from Supabase / Server DB!
     const existingSaved = await findAuditInServerDbAsync(rawUrl || existingId);
     if (!forceRefresh && existingSaved) {
       return NextResponse.json({

@@ -137,7 +137,7 @@ export default function AdminPortalPage() {
   }
 
   const totalMrr = users.reduce(
-    (acc, u) => acc + (u.plan === "agency" ? 79 : u.plan === "pro" ? 29 : 0),
+    (acc, u) => acc + (u.plan === "agency" ? 49 : u.plan === "pro" ? 19 : 0),
     0
   );
 
@@ -284,7 +284,7 @@ export default function AdminPortalPage() {
                   Stripe Billing ({health?.stripeAccountId || "acct_1Qxf8DFZKCl4K7QE"})
                 </div>
                 <p className="text-mute mt-0.5 leading-relaxed">
-                  Pro ($29/mo) &amp; Agency ($79/mo) live prices &amp; hosted links verified.
+                  Pro ($19/mo) &amp; Agency ($49/mo) live prices &amp; hosted links verified.
                 </p>
               </div>
             </div>
@@ -336,7 +336,7 @@ export default function AdminPortalPage() {
               <tbody className="divide-y divide-line">
                 {users.map((u) => {
                   const mrr =
-                    u.plan === "agency" ? 79 : u.plan === "pro" ? 29 : 0;
+                    u.plan === "agency" ? 49 : u.plan === "pro" ? 19 : 0;
                   return (
                     <tr key={u.id} className="hover:bg-card/75 transition">
                       <td className="py-3.5 px-4 font-bold text-ink">

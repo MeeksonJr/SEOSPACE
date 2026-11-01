@@ -62,6 +62,9 @@ import {
 } from "@/lib/storage/workspace-store";
 import { AuditReport, CapturedLead, WhiteLabelConfig } from "@/types/audit";
 import { PRICING_PLANS } from "@/lib/stripe/plans";
+import { PlanUpgradeModal } from "@/components/dashboard/PlanUpgradeModal";
+import { PlanLockOverlay } from "@/components/dashboard/PlanLockOverlay";
+import { checkAuditQuota, saveWorkspaceUser } from "@/lib/storage/workspace-store";
 
 type DashboardTab = "overview" | "editor" | "whitelabel" | "widget" | "billing";
 
@@ -72,6 +75,16 @@ function DashboardContent() {
 
   const { isDark, toggleTheme } = usePublicTheme(false);
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
+  const [upgradeModalConfig, setUpgradeModalConfig] = useState<{
+    isOpen: boolean;
+    reason?: "audit_limit" | "feature_locked";
+    lockedFeatureName?: string;
+    targetPlan?: "pro" | "agency";
+    currentPlan?: "starter" | "pro" | "agency";
+    creditsUsed?: number;
+    creditsLimit?: number;
+  }>({ isOpen: false });
+  const [upgradedToast, setUpgradedToast] = useState<string | null>(null);
   const [user, setUser] = useState<WorkspaceUser>({
     id: "usr-owner",
     name: "Zaim Maulana",
@@ -156,6 +169,19 @@ function DashboardContent() {
 
   // Handle URL query params (?tab=editor&articleId=... or ?tab=editor&keyword=...&domain=...&auditId=...&autoGenerate=1)
   useEffect(() => {
+    const upgradedParam = searchParams.get("upgraded");
+    if (upgradedParam === "pro" || upgradedParam === "agency") {
+      const nextLimit = upgradedParam === "agency" ? 999 : 100;
+      const updated = saveWorkspaceUser({
+        plan: upgradedParam,
+        creditsLimit: nextLimit,
+      });
+      setUser(updated);
+      setUpgradedToast(
+        `🎉 Your ${upgradedParam.toUpperCase()} plan is now active! All features and quotas are unlocked.`
+      );
+    }
+
     const tabParam = searchParams.get("tab") as DashboardTab;
     if (
       tabParam &&
@@ -261,6 +287,20 @@ function DashboardContent() {
     const urlToScan = (targetOverride || scanUrl).trim();
     if (!urlToScan) return;
 
+    // Strict quota check: Starter is capped at 3 audits/mo, Pro at 100/mo
+    const quota = checkAuditQuota(user);
+    if (!quota.allowed) {
+      setUpgradeModalConfig({
+        isOpen: true,
+        reason: "audit_limit",
+        currentPlan: user.plan,
+        creditsUsed: user.creditsUsed || 0,
+        creditsLimit: user.creditsLimit || (user.plan === "pro" ? 100 : 3),
+        targetPlan: user.plan === "starter" ? "pro" : "agency",
+      });
+      return;
+    }
+
     // 1. Unless forceRefresh is requested, open existing saved audit immediately without re-scanning!
     if (!forceRefresh) {
       const existingSaved = findSavedAuditByUrl(urlToScan);
@@ -297,6 +337,18 @@ function DashboardContent() {
   }
 
   async function handleRescanDomain(report: AuditReport) {
+    const quota = checkAuditQuota(user);
+    if (!quota.allowed) {
+      setUpgradeModalConfig({
+        isOpen: true,
+        reason: "audit_limit",
+        currentPlan: user.plan,
+        creditsUsed: user.creditsUsed || 0,
+        creditsLimit: user.creditsLimit || (user.plan === "pro" ? 100 : 3),
+        targetPlan: user.plan === "starter" ? "pro" : "agency",
+      });
+      return;
+    }
     setRescanningId(report.id);
     await handleQuickScan(undefined, report.url, true, report.id);
   }
@@ -586,7 +638,7 @@ function DashboardContent() {
   const embedSnippet = `<iframe src="${
     typeof window !== "undefined"
       ? window.location.origin
-      : "https://seospace-kappa.vercel.app"
+      : "https://seospace.pro"
   }/widget?agency=${encodeURIComponent(
     whiteLabel.agencyName
   )}&color=${encodeURIComponent(
@@ -780,6 +832,69 @@ function DashboardContent() {
         </div>
       </div>
 
+      <div className="p-3 rounded-2xl bg-stage border border-line">
+          <div className="flex items-center justify-between text-xs font-bold text-ink">
+            <span className="uppercase font-mono tracking-wider">{user.plan} PLAN</span>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                user.plan === "starter" && (user.creditsUsed || 0) >= 3
+                  ? "bg-amber-500/15 text-amber-600 border border-amber-500/25"
+                  : "bg-accent/15 text-accent border border-accent/25"
+              }`}
+            >
+              {user.plan === "agency"
+                ? "Unlimited"
+                : `${user.creditsUsed || 0} / ${
+                    user.creditsLimit || (user.plan === "pro" ? 100 : 3)
+                  } Audits`}
+            </span>
+          </div>
+          <div className="w-full bg-line rounded-full h-1.5 mt-2 overflow-hidden">
+            <div
+              className={`h-full transition-all ${
+                user.plan === "starter" && (user.creditsUsed || 0) >= 3
+                  ? "bg-amber-500"
+                  : "bg-accent"
+              }`}
+              style={{
+                width:
+                  user.plan === "agency"
+                    ? "100%"
+                    : `${Math.min(
+                        100,
+                        Math.round(
+                          ((user.creditsUsed || 0) /
+                            (user.creditsLimit ||
+                              (user.plan === "pro" ? 100 : 3))) *
+                            100
+                        )
+                      )}%`,
+              }}
+            />
+          </div>
+          {user.plan !== "agency" && (
+            <button
+              type="button"
+              onClick={() =>
+                setUpgradeModalConfig({
+                  isOpen: true,
+                  reason:
+                    user.plan === "starter" && (user.creditsUsed || 0) >= 3
+                      ? "audit_limit"
+                      : "feature_locked",
+                  targetPlan: user.plan === "starter" ? "pro" : "agency",
+                  currentPlan: user.plan,
+                  creditsUsed: user.creditsUsed,
+                  creditsLimit: user.creditsLimit,
+                })
+              }
+              className="mt-2.5 w-full py-1.5 px-3 rounded-xl bg-accent text-[#141413] text-[11px] font-bold text-center hover:opacity-90 transition cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+            >
+              <span>Upgrade Plan ↗</span>
+            </button>
+          )}
+        </div>
+
       {/* Fixed Bottom User Profile Bar */}
       <div className="shrink-0 pt-3 border-t border-line flex items-center justify-between px-1.5">
         <div className="flex items-center gap-2.5 truncate">
@@ -881,6 +996,44 @@ function DashboardContent() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() =>
+                setUpgradeModalConfig({
+                  isOpen: true,
+                  reason:
+                    user.plan === "starter" && (user.creditsUsed || 0) >= 3
+                      ? "audit_limit"
+                      : "feature_locked",
+                  targetPlan: user.plan === "starter" ? "pro" : "agency",
+                  currentPlan: user.plan,
+                  creditsUsed: user.creditsUsed,
+                  creditsLimit: user.creditsLimit,
+                })
+              }
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stage border border-line text-[11px] font-mono hover:border-accent transition cursor-pointer"
+            >
+              <span className="font-bold uppercase text-ink">{user.plan}</span>
+              <span className="text-mute">•</span>
+              <span
+                className={
+                  user.plan === "starter" && (user.creditsUsed || 0) >= 3
+                    ? "text-amber-600 font-bold"
+                    : "text-mute"
+                }
+              >
+                {user.plan === "agency"
+                  ? "Unlimited"
+                  : `${user.creditsUsed || 0}/${
+                      user.creditsLimit || (user.plan === "pro" ? 100 : 3)
+                    }`}
+              </span>
+              {user.plan !== "agency" && (
+                <span className="px-1.5 py-0.2 rounded bg-accent text-[#141413] text-[9px] font-bold">
+                  Upgrade ↗
+                </span>
+              )}
+            </button>
             <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
             <Link
               href="/"
@@ -1504,6 +1657,30 @@ function DashboardContent() {
             TAB 2: SEOSPACE AI CONTENT STUDIO (ORGANIZED, GRADED, SHAREABLE)
            ============================================================ */}
         {activeTab === "editor" && (
+          user.plan === "starter" ? (
+            <div className="w-full px-5 sm:px-8 py-10">
+              <PlanLockOverlay
+                requiredPlan="pro"
+                featureTitle="Unlock AI SEO Content Studio"
+                featureDescription="The interactive AI SEO Content Studio with 7-point mathematical grading, live readability checks, keyword density tracking, and Google SERP simulator requires a Professional or Agency plan."
+                bulletPoints={[
+                  "Write & auto-generate 95+/100 mathematically graded SEO articles",
+                  "Real-time keyword density, readability & heading structure scoring",
+                  "Live Google SERP desktop & mobile preview simulator",
+                  "Export to clean Markdown or HTML in 1-click",
+                ]}
+                onOpenUpgradeModal={() =>
+                  setUpgradeModalConfig({
+                    isOpen: true,
+                    reason: "feature_locked",
+                    lockedFeatureName: "AI SEO Content Studio",
+                    targetPlan: "pro",
+                    currentPlan: user.plan,
+                  })
+                }
+              />
+            </div>
+          ) : (
           <div className="min-h-full flex flex-col bg-paper text-ink">
             {/* Top Document Action Bar — Non-sticky so it never overlaps the sticky workspace header */}
             <div className="min-h-16 px-4 sm:px-6 py-3 border-b border-line flex flex-wrap items-center justify-between gap-3 bg-card text-ink">
@@ -2308,12 +2485,37 @@ function DashboardContent() {
               </div>
             )}
           </div>
+          )
         )}
 
         {/* ============================================================
             TAB 3: WHITE-LABEL AGENCY PDF BRANDING STUDIO
            ============================================================ */}
         {activeTab === "whitelabel" && (
+          user.plan !== "agency" ? (
+            <div className="w-full px-5 sm:px-8 py-10">
+              <PlanLockOverlay
+                requiredPlan="agency"
+                featureTitle="Unlock White-Label Agency PDF Suite"
+                featureDescription="Brand every audit report and client-facing PDF with your agency's logo, primary brand color, custom company name, Calendly booking link, and custom copyright footer."
+                bulletPoints={[
+                  "Custom agency logo & primary brand color across all audit reports",
+                  "Replace Seospace branding with your own agency name & footer",
+                  "Embed your Calendly or consultation booking link in client reports",
+                  "Export 100% white-labeled client-ready presentation PDFs",
+                ]}
+                onOpenUpgradeModal={() =>
+                  setUpgradeModalConfig({
+                    isOpen: true,
+                    reason: "feature_locked",
+                    lockedFeatureName: "White-Label Agency PDF Suite",
+                    targetPlan: "agency",
+                    currentPlan: user.plan,
+                  })
+                }
+              />
+            </div>
+          ) : (
           <div className="w-full px-5 sm:px-8 py-6 space-y-6 text-ink">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -2502,12 +2704,37 @@ function DashboardContent() {
               </div>
             </form>
           </div>
+          )
         )}
 
         {/* ============================================================
             TAB 4: EMBEDDABLE LEAD-CAPTURE WIDGET & INTERACTIVE CRM
            ============================================================ */}
         {activeTab === "widget" && (
+          user.plan !== "agency" ? (
+            <div className="w-full px-5 sm:px-8 py-10">
+              <PlanLockOverlay
+                requiredPlan="agency"
+                featureTitle="Unlock Embeddable Lead Widget & CRM"
+                featureDescription="Embed the real-time Seospace website audit engine directly on your agency website to capture high-intent prospect emails automatically with instant webhook alerts."
+                bulletPoints={[
+                  "1-line copy-and-paste iframe embed for WordPress, Webflow, Framer & Next.js",
+                  "Real-time prospect capture directly into your built-in CRM table",
+                  "Real-time webhook notifications for Discord, Slack, and Zapier",
+                  "1-click lead export to CSV and JSON formats",
+                ]}
+                onOpenUpgradeModal={() =>
+                  setUpgradeModalConfig({
+                    isOpen: true,
+                    reason: "feature_locked",
+                    lockedFeatureName: "Embeddable Lead Widget & CRM",
+                    targetPlan: "agency",
+                    currentPlan: user.plan,
+                  })
+                }
+              />
+            </div>
+          ) : (
           <div className="w-full px-5 sm:px-8 py-6 space-y-6 text-ink">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -2744,6 +2971,7 @@ function DashboardContent() {
               </div>
             </div>
           </div>
+          )
         )}
 
         {/* ============================================================
@@ -2824,6 +3052,30 @@ function DashboardContent() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        <PlanUpgradeModal
+          isOpen={upgradeModalConfig.isOpen}
+          onClose={() => setUpgradeModalConfig({ isOpen: false })}
+          reason={upgradeModalConfig.reason}
+          lockedFeatureName={upgradeModalConfig.lockedFeatureName}
+          targetPlan={upgradeModalConfig.targetPlan}
+          currentPlan={user.plan}
+          creditsUsed={user.creditsUsed || 0}
+          creditsLimit={user.creditsLimit || (user.plan === "pro" ? 100 : 3)}
+        />
+
+        {upgradedToast && (
+          <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-emerald-600 text-white shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 max-w-md">
+            <span className="text-xs font-semibold">{upgradedToast}</span>
+            <button
+              type="button"
+              onClick={() => setUpgradedToast(null)}
+              className="p-1 rounded-full hover:bg-emerald-700 cursor-pointer shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
       </main>

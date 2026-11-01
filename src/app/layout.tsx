@@ -29,7 +29,7 @@ const mono = JetBrains_Mono({
 const themeBootScript = `try{var t=localStorage.getItem('seospace_theme_mode');document.documentElement.dataset.spTheme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.spTheme='light'}`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://seospace-kappa.vercel.app"),
+  metadataBase: new URL("https://seospace.pro"),
   title: "Seospace AI — Autonomous SEO, CRO & GEO Growth Engine",
   description:
     "Automate technical SEO, CRO heuristics, AI Search (GEO) and Cloudflare DNS audits with instant white-label client PDF reports. Run your free live audit today.",
@@ -44,13 +44,13 @@ export const metadata: Metadata = {
     "Seospace Neural Engine v4.2",
   ],
   alternates: {
-    canonical: "https://seospace-kappa.vercel.app",
+    canonical: "https://seospace.pro",
   },
   openGraph: {
     title: "Seospace AI — Autonomous SEO, CRO, GEO & DNS Growth Engine",
     description:
       "Automate technical SEO, CRO heuristics, AI Search (GEO) and Cloudflare DNS audits with instant white-label client PDF reports. Run your free live audit today.",
-    url: "https://seospace-kappa.vercel.app",
+    url: "https://seospace.pro",
     siteName: "Seospace AI",
     locale: "en_US",
     type: "website",
@@ -80,7 +80,7 @@ const jsonLdSchema = {
     {
       "@type": "Organization",
       name: "Seospace AI",
-      url: "https://seospace-kappa.vercel.app",
+      url: "https://seospace.pro",
       description:
         "Autonomous AI SEO, CRO, Generative Engine Optimization (GEO), and White-Label Agency Reporting Platform powered by Seospace Neural Engine v4.2.",
       sameAs: ["https://github.com/MeeksonJr/SEOSPACE"],
@@ -90,7 +90,7 @@ const jsonLdSchema = {
       name: "Seospace AI",
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
-      url: "https://seospace-kappa.vercel.app",
+      url: "https://seospace.pro",
       softwareVersion: "4.2",
       offers: {
         "@type": "AggregateOffer",

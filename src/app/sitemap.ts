@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://seospace-kappa.vercel.app";
+  const baseUrl = "https://seospace.pro";
   const lastModified = new Date();
 
   const routes: Array<{

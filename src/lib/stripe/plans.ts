@@ -41,9 +41,9 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: "Professional",
     badge: "Most Popular",
     tagline: "Best for growing businesses, marketers & SEO consultants.",
-    monthlyPrice: 29,
-    annualPricePerMonth: 23,
-    annualTotal: 276,
+    monthlyPrice: 19,
+    annualPricePerMonth: 15,
+    annualTotal: 180,
     monthlyPriceId:
       process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID ||
       "price_1UT5vaFZKCl4K7QEY7LlKX4v",
@@ -73,9 +73,9 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: "Agency White-Label",
     badge: "Unlimited + CRM",
     tagline: "For agencies closing high-ticket retainers with branded audits.",
-    monthlyPrice: 79,
-    annualPricePerMonth: 63,
-    annualTotal: 756,
+    monthlyPrice: 49,
+    annualPricePerMonth: 39,
+    annualTotal: 468,
     monthlyPriceId:
       process.env.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID ||
       "price_1UT5vnFZKCl4K7QE3bSWBV22",
