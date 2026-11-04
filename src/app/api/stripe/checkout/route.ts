@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Otherwise use our live Hosted Stripe Payment Link on acct_1Qxf8DFZKCl4K7QE
+    // Otherwise use our live Hosted Stripe Payment Link
     const urlWithParams = email
       ? `${directPaymentLink}?prefilled_email=${encodeURIComponent(email)}`
       : directPaymentLink;

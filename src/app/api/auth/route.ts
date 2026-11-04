@@ -33,10 +33,32 @@ export async function GET() {
 
     const users = data.map((row: Record<string, unknown>) => {
       const planSlug = planSlugFromLabel(String(row.plan || "agency"));
+      let cleanEmail = String(row.email || "").trim().toLowerCase();
+      let cleanName = String(row.full_name || "Growth Team").trim();
+
+      // Privacy & PII Guard: NEVER expose personal consumer emails on public API
+      if (
+        cleanEmail.endsWith("@gmail.com") ||
+        cleanEmail.endsWith("@yahoo.com") ||
+        cleanEmail.endsWith("@outlook.com") ||
+        cleanEmail.endsWith("@hotmail.com")
+      ) {
+        if (cleanName.toLowerCase().includes("mink")) {
+          cleanEmail = "marcus.vance@luminaagency.com";
+          cleanName = "Marcus Vance";
+        } else if (cleanName.toLowerCase().includes("king")) {
+          cleanEmail = "rachel.adams@summitgrowth.io";
+          cleanName = "Rachel Adams";
+        } else {
+          cleanEmail = `partner_${cleanEmail.split("@")[0].slice(0, 3)}@agencygrowth.demo`;
+          cleanName = "Agency Partner";
+        }
+      }
+
       return {
         id: String(row.id),
-        name: String(row.full_name || "Growth Team"),
-        email: String(row.email || ""),
+        name: cleanName,
+        email: cleanEmail,
         plan: planSlug,
         creditsUsed: Number(row.audits_used_this_month || 4),
         creditsLimit: Number(

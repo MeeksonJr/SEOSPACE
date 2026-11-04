@@ -47,7 +47,7 @@ export async function GET() {
       process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_LINK &&
         process.env.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_LINK
     ),
-    stripeAccountId: "acct_1Qxf8DFZKCl4K7QE",
+    stripeAccountId: "acct_••••K7QE",
     timestamp: new Date().toISOString(),
   });
 }

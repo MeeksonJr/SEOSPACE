@@ -222,7 +222,7 @@ export default function TermsOfServicePage() {
                 </table>
               </div>
               <p className="text-xs text-mute leading-relaxed">
-                All paid plans are backed by our <strong>30-Day Money-Back Guarantee</strong>. If Seospace AI does not measurably accelerate your SEO workflow or agency sales within your first 30 days, contact <a href="mailto:billing@seospace.ai" className="text-accent underline">billing@seospace.ai</a> for a full refund.
+                All paid plans are backed by our <strong>30-Day Money-Back Guarantee</strong>. If Seospace AI does not measurably accelerate your SEO workflow or agency sales within your first 30 days, contact <a href="mailto:billing@seospace.pro" className="text-accent underline">billing@seospace.pro</a> for a full refund.
               </p>
             </section>
 
@@ -246,7 +246,7 @@ export default function TermsOfServicePage() {
             <section id="governing-law" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">8. Governing Law &amp; Dispute Resolution</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
-                This Agreement is governed by the laws of the State of Delaware and the federal laws of the United States, without regard to conflict of law principles. Questions regarding commercial licensing may be directed to <a href="mailto:legal@seospace.ai" className="text-accent font-semibold hover:underline">legal@seospace.ai</a>.
+                This Agreement is governed by the laws of the State of Delaware and the federal laws of the United States, without regard to conflict of law principles. Questions regarding commercial licensing may be directed to <a href="mailto:legal@seospace.pro" className="text-accent font-semibold hover:underline">legal@seospace.pro</a>.
               </p>
             </section>
           </div>

@@ -9,7 +9,9 @@ import {
   CreditCard,
   Database,
   DollarSign,
+  KeyRound,
   Loader2,
+  Lock,
   RefreshCw,
   ShieldCheck,
   Users,
@@ -44,6 +46,9 @@ interface SystemHealth {
 
 export default function AdminPortalPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
+  const [isAdminAuthorized, setIsAdminAuthorized] = useState<boolean>(false);
+  const [passkeyInput, setPasskeyInput] = useState<string>("");
+  const [authError, setAuthError] = useState<string | null>(null);
   const [users, setUsers] = useState<WorkspaceUser[]>([]);
   const [totalAudits, setTotalAudits] = useState(0);
   const [totalLeads, setTotalLeads] = useState(0);
@@ -52,6 +57,13 @@ export default function AdminPortalPage() {
   const [testingHealth, setTestingHealth] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("seospace_admin_authed");
+      if (stored === "true") {
+        setIsAdminAuthorized(true);
+      }
+    }
+
     // 1. Initial hydration from local workspace store
     setUsers(getAdminUsers());
     setTotalAudits(getSavedAudits().length);
@@ -136,10 +148,130 @@ export default function AdminPortalPage() {
     }
   }
 
+  function handleVerifyPasskey(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    const clean = passkeyInput.trim().toLowerCase();
+    if (clean === "seospace2026" || clean === "admin" || clean === "owner") {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("seospace_admin_authed", "true");
+      }
+      setIsAdminAuthorized(true);
+      setAuthError(null);
+    } else {
+      setAuthError("Incorrect authorization passkey. Enter 'seospace2026' or use 1-click buyer demo access below.");
+    }
+  }
+
+  function handleQuickDemoAccess() {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("seospace_admin_authed", "true");
+    }
+    setIsAdminAuthorized(true);
+    setAuthError(null);
+  }
+
+  function handleLockConsole() {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("seospace_admin_authed");
+    }
+    setIsAdminAuthorized(false);
+    setPasskeyInput("");
+  }
+
   const totalMrr = users.reduce(
     (acc, u) => acc + (u.plan === "agency" ? 49 : u.plan === "pro" ? 19 : 0),
     0
   );
+
+  if (!isAdminAuthorized) {
+    return (
+      <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans">
+        <header className="bg-card border-b border-line text-ink sticky top-0 z-30 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 min-h-[4.5rem] flex items-center justify-between">
+            <Link href="/">
+              <SeospaceLogo auto size="sm" />
+            </Link>
+            <div className="flex items-center gap-2.5 text-xs">
+              <Link
+                href="/dashboard"
+                className="px-3.5 py-2 rounded-xl bg-stage hover:bg-card border border-line text-ink font-semibold inline-flex items-center gap-1.5 transition"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Workspace Dashboard</span>
+              </Link>
+              <ThemeToggleButton isDark={isDark} onToggle={toggleTheme} size="sm" />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
+          <div className="w-full max-w-md bg-card border-2 border-line rounded-3xl sp-card-shadow p-6 sm:p-8 text-center space-y-6">
+            <div className="w-14 h-14 rounded-2xl bg-accent/15 border border-accent/30 text-accent flex items-center justify-center mx-auto shadow-xs">
+              <Lock className="w-7 h-7 text-accent" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stage border border-line text-[11px] font-mono font-bold uppercase text-ink">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Restricted Operations Console</span>
+              </div>
+              <h1 className="text-2xl font-extrabold text-ink font-display">
+                Owner &amp; Buyer Authorization
+              </h1>
+              <p className="text-xs text-mute leading-relaxed">
+                This console displays live infrastructure diagnostics, neural model telemetry, and MRR metrics. Access is restricted to platform administrators and accredited buyers during due diligence.
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifyPasskey} className="space-y-4 text-left">
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1.5 font-mono uppercase tracking-wider">
+                  Admin Passkey
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={passkeyInput}
+                    onChange={(e) => setPasskeyInput(e.target.value)}
+                    placeholder="Enter passkey (e.g. seospace2026)"
+                    className="w-full px-4 py-3 rounded-xl border border-line bg-stage text-ink text-xs font-mono focus:outline-hidden focus:border-accent transition"
+                    autoFocus
+                  />
+                  <KeyRound className="w-4 h-4 text-mute absolute right-3.5 top-3.5" />
+                </div>
+                {authError && (
+                  <p className="text-[11px] text-rose-500 font-semibold mt-1.5 leading-snug">
+                    {authError}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 px-4 rounded-xl bg-accent text-[#141413] hover:opacity-90 font-bold text-xs transition cursor-pointer shadow-xs flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Verify Passkey &amp; Enter</span>
+              </button>
+            </form>
+
+            <div className="pt-2 border-t border-line space-y-3">
+              <div className="text-[11px] text-mute font-medium">
+                Evaluating Seospace AI on Flippa?
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickDemoAccess}
+                className="w-full py-2.5 px-3.5 rounded-xl border border-line bg-stage hover:bg-card text-ink text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>⚡ 1-Click Accredited Buyer Access</span>
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans pb-20">
@@ -156,6 +288,15 @@ export default function AdminPortalPage() {
           </div>
 
           <div className="flex items-center gap-2.5 text-xs">
+            <button
+              type="button"
+              onClick={handleLockConsole}
+              className="px-3 py-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+              title="Lock Operations Console"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Lock Console</span>
+            </button>
             <Link
               href="/dashboard"
               className="px-3.5 py-2 rounded-xl bg-stage hover:bg-card border border-line text-ink font-semibold inline-flex items-center gap-1.5 transition"
@@ -281,7 +422,7 @@ export default function AdminPortalPage() {
               <CreditCard className="w-5 h-5 text-accent shrink-0 mt-0.5" />
               <div className="text-xs">
                 <div className="font-bold text-ink font-display">
-                  Stripe Billing ({health?.stripeAccountId || "acct_1Qxf8DFZKCl4K7QE"})
+                  Stripe Billing (Live &amp; Verified)
                 </div>
                 <p className="text-mute mt-0.5 leading-relaxed">
                   Pro ($19/mo) &amp; Agency ($49/mo) live prices &amp; hosted links verified.

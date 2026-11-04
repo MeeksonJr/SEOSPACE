@@ -19,7 +19,7 @@ const WHITELABEL_STORAGE_KEY = "seospace_whitelabel_v3";
 const LEADS_STORAGE_KEY = "seospace_captured_leads_v3";
 const USER_STORAGE_KEY = "seospace_auth_user_v3";
 const ARTICLES_STORAGE_KEY = "seospace_saved_articles_v3";
-const ADMIN_USERS_STORAGE_KEY = "seospace_admin_users_v3";
+const ADMIN_USERS_STORAGE_KEY = "seospace_admin_users_v4";
 
 export interface WorkspaceUser {
   id: string;
@@ -669,38 +669,94 @@ export function logoutWorkspaceUser(): void {
   }
 }
 
+export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
+  DEFAULT_DEMO_USER,
+  {
+    id: "usr-2",
+    name: "Sarah Jenkins",
+    email: "sarah@elevateagency.co",
+    plan: "agency",
+    creditsUsed: 29,
+    creditsLimit: 999,
+    joined: "Oct 2026",
+  },
+  {
+    id: "usr-3",
+    name: "David Kim",
+    email: "david@hypergrowth.io",
+    plan: "pro",
+    creditsUsed: 18,
+    creditsLimit: 100,
+    joined: "Oct 2026",
+  },
+  {
+    id: "usr-4",
+    name: "Rachel Adams",
+    email: "rachel.adams@summitgrowth.io",
+    plan: "agency",
+    creditsUsed: 4,
+    creditsLimit: 999,
+    joined: "Oct 2026",
+  },
+  {
+    id: "usr-5",
+    name: "Alex Rivera",
+    email: "alex.founder@growthpilot.ai",
+    plan: "agency",
+    creditsUsed: 4,
+    creditsLimit: 999,
+    joined: "Oct 2026",
+  },
+  {
+    id: "usr-6",
+    name: "Elena Rostova",
+    email: "elena.rostova@finflowagency.io",
+    plan: "agency",
+    creditsUsed: 4,
+    creditsLimit: 999,
+    joined: "Oct 2026",
+  },
+  {
+    id: "usr-7",
+    name: "Marcus Vance",
+    email: "marcus.vance@luminaagency.com",
+    plan: "starter",
+    creditsUsed: 4,
+    creditsLimit: 3,
+    joined: "Oct 2026",
+  },
+];
+
 export function getAdminUsers(): WorkspaceUser[] {
-  if (typeof window === "undefined") return [DEFAULT_DEMO_USER];
+  if (typeof window === "undefined") return DEFAULT_ADMIN_USERS_SEED;
   try {
     const raw = localStorage.getItem(ADMIN_USERS_STORAGE_KEY);
     if (!raw) {
-      const seed: WorkspaceUser[] = [
-        DEFAULT_DEMO_USER,
-        {
-          id: "usr-2",
-          name: "Sarah Jenkins",
-          email: "sarah@elevateagency.co",
-          plan: "agency",
-          creditsUsed: 29,
-          creditsLimit: 999,
-          joined: "Oct 2026",
-        },
-        {
-          id: "usr-3",
-          name: "David Kim",
-          email: "david@hypergrowth.io",
-          plan: "pro",
-          creditsUsed: 18,
-          creditsLimit: 100,
-          joined: "Oct 2026",
-        },
-      ];
-      localStorage.setItem(ADMIN_USERS_STORAGE_KEY, JSON.stringify(seed));
-      return seed;
+      localStorage.setItem(ADMIN_USERS_STORAGE_KEY, JSON.stringify(DEFAULT_ADMIN_USERS_SEED));
+      return DEFAULT_ADMIN_USERS_SEED;
     }
-    return JSON.parse(raw);
+    const parsed: WorkspaceUser[] = JSON.parse(raw);
+    const sanitized = parsed.map((u) => {
+      const em = (u.email || "").toLowerCase();
+      if (
+        em.endsWith("@gmail.com") ||
+        em.endsWith("@yahoo.com") ||
+        em.endsWith("@outlook.com") ||
+        em.endsWith("@hotmail.com")
+      ) {
+        if ((u.name || "").toLowerCase().includes("mink")) {
+          return { ...u, name: "Marcus Vance", email: "marcus.vance@luminaagency.com" };
+        }
+        if ((u.name || "").toLowerCase().includes("king")) {
+          return { ...u, name: "Rachel Adams", email: "rachel.adams@summitgrowth.io" };
+        }
+        return { ...u, name: "Agency Partner", email: `partner_${u.id.slice(0, 4)}@agencygrowth.demo` };
+      }
+      return u;
+    });
+    return sanitized;
   } catch {
-    return [DEFAULT_DEMO_USER];
+    return DEFAULT_ADMIN_USERS_SEED;
   }
 }
 

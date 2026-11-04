@@ -347,11 +347,11 @@ export default function PrivacyPolicyPage() {
                 <div>
                   <div className="font-bold text-ink">Seospace AI — Privacy &amp; Trust Office</div>
                   <div className="text-mute mt-0.5">
-                    Email: <a href="mailto:privacy@seospace.ai" className="text-accent font-semibold hover:underline">privacy@seospace.ai</a> • SLA: &lt; 24 Business Hours
+                    Email: <a href="mailto:privacy@seospace.pro" className="text-accent font-semibold hover:underline">privacy@seospace.pro</a> • SLA: &lt; 24 Business Hours
                   </div>
                 </div>
                 <a
-                  href="mailto:privacy@seospace.ai"
+                  href="mailto:privacy@seospace.pro"
                   className="sp-btn sp-btn-primary !py-2.5 !px-4 text-xs shrink-0"
                 >
                   Contact Privacy Team
