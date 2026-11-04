@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   PublicFooter,
@@ -22,6 +22,59 @@ const TERMS_SECTIONS = [
 export default function TermsOfServicePage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
   const [activeSection, setActiveSection] = useState("acceptance");
+
+  // Real-time ScrollSpy to keep the active section tab synchronized as the user scrolls
+  useEffect(() => {
+    const sectionIds = TERMS_SECTIONS.map((s) => s.id);
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (elements.length === 0) return;
+
+    // Check on initial load if there is a hash in the URL
+    if (window.location.hash) {
+      const targetHash = window.location.hash.replace("#", "");
+      if (sectionIds.includes(targetHash)) {
+        setActiveSection(targetHash);
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          visible.sort(
+            (a, b) =>
+              Math.abs(a.boundingClientRect.top - 120) -
+              Math.abs(b.boundingClientRect.top - 120)
+          );
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: "-100px 0px -55% 0px",
+        threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollToSection(id: string) {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const topOffset = 110;
+      const yPos = el.getBoundingClientRect().top + window.scrollY - topOffset;
+      window.scrollTo({
+        top: Math.max(0, yPos),
+        behavior: "smooth",
+      });
+      window.history.replaceState(null, "", `#${id}`);
+    }
+  }
 
   return (
     <div className="sp-page min-h-screen flex flex-col bg-paper text-ink font-sans transition-colors duration-300">
@@ -91,42 +144,55 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* ====================================================================
-            MAIN CLAUSES WITH STICKY TOC
+            MAIN CLAUSES WITH STICKY TOC & REAL-TIME SCROLLSPY
             ==================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Sticky Sidebar */}
-          <aside className="lg:col-span-4 lg:sticky lg:top-24 space-y-4 no-print">
-            <div className="p-6 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
-              <div className="sp-eyebrow text-accent">Clauses &amp; Schedules</div>
-              <nav className="space-y-1">
-                {TERMS_SECTIONS.map((sec) => (
-                  <a
-                    key={sec.id}
-                    href={`#${sec.id}`}
-                    onClick={() => setActiveSection(sec.id)}
-                    className={`block px-3.5 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
-                      activeSection === sec.id
-                        ? "bg-ink text-paper font-bold"
-                        : "text-mute hover:text-ink hover:bg-stage"
-                    }`}
-                  >
-                    {sec.title}
-                  </a>
-                ))}
-              </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+          {/* Sticky Sidebar Column: Stretches full track height, sticky inner container stays pinned */}
+          <aside className="lg:col-span-4 no-print">
+            <div className="sticky top-28 space-y-4 max-h-[calc(100vh-8.5rem)] overflow-y-auto pr-1">
+              <div className="p-6 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="sp-eyebrow text-accent">Clauses &amp; Schedules</span>
+                  <span className="text-[10px] font-mono font-bold text-mute px-2 py-0.5 rounded-full bg-stage border border-line">
+                    {TERMS_SECTIONS.findIndex((s) => s.id === activeSection) + 1} of {TERMS_SECTIONS.length}
+                  </span>
+                </div>
+                <nav className="space-y-1">
+                  {TERMS_SECTIONS.map((sec) => {
+                    const isActive = activeSection === sec.id;
+                    return (
+                      <button
+                        key={sec.id}
+                        type="button"
+                        onClick={() => scrollToSection(sec.id)}
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-between group ${
+                          isActive
+                            ? "bg-ink text-paper font-bold shadow-xs translate-x-1"
+                            : "text-mute hover:text-ink hover:bg-stage"
+                        }`}
+                      >
+                        <span className="truncate pr-2">{sec.title}</span>
+                        {isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
 
-              <div className="pt-4 border-t border-line text-xs space-y-2">
-                <div className="font-bold text-ink">Related Hubs:</div>
-                <div className="flex flex-col gap-1.5 text-accent font-medium">
-                  <Link href="/legal/privacy" className="hover:underline">
-                    → Privacy Policy &amp; GDPR DPA
-                  </Link>
-                  <Link href="/security" className="hover:underline">
-                    → Security, SOC2 &amp; Trust Center
-                  </Link>
-                  <Link href="/dashboard?tab=billing" className="hover:underline">
-                    → Manage Subscription &amp; Billing
-                  </Link>
+                <div className="pt-4 border-t border-line text-xs space-y-2">
+                  <div className="font-bold text-ink">Related Hubs:</div>
+                  <div className="flex flex-col gap-1.5 text-accent font-medium">
+                    <Link href="/legal/privacy" className="hover:underline">
+                      → Privacy Policy &amp; GDPR DPA
+                    </Link>
+                    <Link href="/security" className="hover:underline">
+                      → Security, SOC2 &amp; Trust Center
+                    </Link>
+                    <Link href="/dashboard?tab=billing" className="hover:underline">
+                      → Manage Subscription &amp; Billing
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -135,7 +201,7 @@ export default function TermsOfServicePage() {
           {/* Right Detailed Clauses */}
           <div className="lg:col-span-8 space-y-8">
             {/* Section 1 */}
-            <section id="acceptance" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="acceptance" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">1. Acceptance of Terms &amp; Scope</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 By creating a workspace, running a live or cached URL diagnostic, generating AI SEO content, or embedding the Seospace Lead-Capture Widget, you (&ldquo;Customer&rdquo;, &ldquo;Agency&rdquo;, or &ldquo;User&rdquo;) agree to be bound by these Terms of Service (&ldquo;Agreement&rdquo;) with Seospace AI Inc. If you are entering into this Agreement on behalf of a digital agency or corporate entity, you represent that you have authority to bind that entity.
@@ -143,7 +209,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 2 */}
-            <section id="whitelabel" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="whitelabel" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">2. Commercial White-Label Agency License</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Subscribers on active <strong>Professional Growth</strong> and <strong>Agency White-Label</strong> plans are granted a worldwide, royalty-free commercial license to:
@@ -171,7 +237,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 3 */}
-            <section id="ai-ownership" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="ai-ownership" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">3. Ownership of AI SEO Articles &amp; Reports</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 As between Seospace AI and Customer, Customer owns all right, title, and interest in and to all long-form articles, HTML/Markdown exports, meta tag rewrites, JSON-LD schema snippets, and <code className="font-mono text-accent">/llms.txt</code> files generated for Customer by the <strong>Seospace Neural Engine v4.2</strong>. Customer may publish, syndicate, modify, or transfer such generated works to end clients without attribution to Seospace AI.
@@ -179,7 +245,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 4 */}
-            <section id="acceptable-use" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="acceptable-use" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">4. Ethical URL Scanning &amp; Acceptable Use</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Seospace AI is designed for ethical technical SEO, competitive benchmarking, and compliance auditing. You agree not to use the platform or REST API (<code className="font-mono text-accent">/api/audit</code>, <code className="font-mono text-accent">/api/dns-check</code>) to conduct denial-of-service (DoS) attacks, probe non-public intranet endpoints (SSRF), or harvest personally identifiable information from third-party websites.
@@ -187,7 +253,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 5 */}
-            <section id="billing" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="billing" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">5. Subscriptions, Stripe Billing &amp; 30-Day Guarantee</h2>
               <div className="overflow-x-auto rounded-2xl border border-line">
                 <table className="w-full text-left text-xs">
@@ -227,7 +293,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 6 */}
-            <section id="api-sla" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="api-sla" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">6. REST API Quotas &amp; 99.98% Uptime SLA</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Seospace AI maintains a 99.98% monthly uptime Service Level Agreement across our web workspace and headless REST API endpoints. Cached database lookups (<code className="font-mono text-accent">forceRefresh: false</code>) do not count against external RapidAPI rate limits and resolve in under 15ms.
@@ -235,7 +301,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 7 */}
-            <section id="liability" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="liability" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">7. Disclaimers &amp; Limitation of Liability</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Search engine rankings and AI answer engine citations depend on third-party algorithms operated by Google, OpenAI, Perplexity, and Anthropic. While Seospace AI provides deterministic mathematical grading and best-practice optimizations, we do not guarantee specific SERP positions. In no event shall Seospace AI&apos;s aggregate liability exceed the total subscription fees paid by Customer in the twelve (12) months preceding a claim.
@@ -243,7 +309,7 @@ export default function TermsOfServicePage() {
             </section>
 
             {/* Section 8 */}
-            <section id="governing-law" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="governing-law" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">8. Governing Law &amp; Dispute Resolution</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 This Agreement is governed by the laws of the State of Delaware and the federal laws of the United States, without regard to conflict of law principles. Questions regarding commercial licensing may be directed to <a href="mailto:legal@seospace.pro" className="text-accent font-semibold hover:underline">legal@seospace.pro</a>.

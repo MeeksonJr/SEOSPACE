@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   PublicFooter,
@@ -62,6 +62,59 @@ const SUBPROCESSORS = [
 export default function PrivacyPolicyPage() {
   const { isDark, toggleTheme } = usePublicTheme(false);
   const [activeSection, setActiveSection] = useState("overview");
+
+  // Real-time ScrollSpy to keep the active section tab synchronized as the user scrolls
+  useEffect(() => {
+    const sectionIds = PRIVACY_SECTIONS.map((s) => s.id);
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (elements.length === 0) return;
+
+    // Check on initial load if there is a hash in the URL
+    if (window.location.hash) {
+      const targetHash = window.location.hash.replace("#", "");
+      if (sectionIds.includes(targetHash)) {
+        setActiveSection(targetHash);
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          visible.sort(
+            (a, b) =>
+              Math.abs(a.boundingClientRect.top - 120) -
+              Math.abs(b.boundingClientRect.top - 120)
+          );
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: "-100px 0px -55% 0px",
+        threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollToSection(id: string) {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const topOffset = 110;
+      const yPos = el.getBoundingClientRect().top + window.scrollY - topOffset;
+      window.scrollTo({
+        top: Math.max(0, yPos),
+        behavior: "smooth",
+      });
+      window.history.replaceState(null, "", `#${id}`);
+    }
+  }
 
   function handleDownloadDpa() {
     if (typeof window !== "undefined") {
@@ -135,42 +188,55 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* ====================================================================
-            MAIN CLAUSES WITH STICKY TOC
+            MAIN CLAUSES WITH STICKY TOC & REAL-TIME SCROLLSPY
             ==================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Sticky Sidebar */}
-          <aside className="lg:col-span-4 lg:sticky lg:top-24 space-y-4 no-print">
-            <div className="p-6 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
-              <div className="sp-eyebrow text-accent">Document Sections</div>
-              <nav className="space-y-1">
-                {PRIVACY_SECTIONS.map((sec) => (
-                  <a
-                    key={sec.id}
-                    href={`#${sec.id}`}
-                    onClick={() => setActiveSection(sec.id)}
-                    className={`block px-3.5 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
-                      activeSection === sec.id
-                        ? "bg-ink text-paper font-bold"
-                        : "text-mute hover:text-ink hover:bg-stage"
-                    }`}
-                  >
-                    {sec.title}
-                  </a>
-                ))}
-              </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+          {/* Sticky Sidebar Column: Stretches full track height, sticky inner container stays pinned */}
+          <aside className="lg:col-span-4 no-print">
+            <div className="sticky top-28 space-y-4 max-h-[calc(100vh-8.5rem)] overflow-y-auto pr-1">
+              <div className="p-6 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="sp-eyebrow text-accent">Document Sections</span>
+                  <span className="text-[10px] font-mono font-bold text-mute px-2 py-0.5 rounded-full bg-stage border border-line">
+                    {PRIVACY_SECTIONS.findIndex((s) => s.id === activeSection) + 1} of {PRIVACY_SECTIONS.length}
+                  </span>
+                </div>
+                <nav className="space-y-1">
+                  {PRIVACY_SECTIONS.map((sec) => {
+                    const isActive = activeSection === sec.id;
+                    return (
+                      <button
+                        key={sec.id}
+                        type="button"
+                        onClick={() => scrollToSection(sec.id)}
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-between group ${
+                          isActive
+                            ? "bg-ink text-paper font-bold shadow-xs translate-x-1"
+                            : "text-mute hover:text-ink hover:bg-stage"
+                        }`}
+                      >
+                        <span className="truncate pr-2">{sec.title}</span>
+                        {isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
 
-              <div className="pt-4 border-t border-line text-xs space-y-2">
-                <div className="font-bold text-ink">Related Documents:</div>
-                <div className="flex flex-col gap-1.5 text-accent font-medium">
-                  <Link href="/legal/terms" className="hover:underline">
-                    → Terms of Service &amp; Agency License
-                  </Link>
-                  <Link href="/security" className="hover:underline">
-                    → Security, SOC2 &amp; Crawler Center
-                  </Link>
-                  <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                    → Public AI Manifest (/llms.txt)
-                  </a>
+                <div className="pt-4 border-t border-line text-xs space-y-2">
+                  <div className="font-bold text-ink">Related Documents:</div>
+                  <div className="flex flex-col gap-1.5 text-accent font-medium">
+                    <Link href="/legal/terms" className="hover:underline">
+                      → Terms of Service &amp; Agency License
+                    </Link>
+                    <Link href="/security" className="hover:underline">
+                      → Security, SOC2 &amp; Crawler Center
+                    </Link>
+                    <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      → Public AI Manifest (/llms.txt)
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,10 +245,10 @@ export default function PrivacyPolicyPage() {
           {/* Right Clauses */}
           <div className="lg:col-span-8 space-y-8">
             {/* Section 1 */}
-            <section id="overview" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="overview" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">1. Executive Privacy Summary</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
-                Seospace AI Inc. (&ldquo;Seospace AI&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) provides an autonomous Technical SEO, Conversion Rate Optimization (CRO), Generative Engine Optimization (GEO), WCAG 2.2 accessibility, and live DNS security auditing platform for digital agencies, SaaS founders, and marketing teams. This Privacy Policy &amp; Data Processing Agreement (DPA) explains how we collect, process, store, and protect information across <code className="font-mono text-accent">https://seospace-kappa.vercel.app</code> and all associated APIs.
+                Seospace AI Inc. (&ldquo;Seospace AI&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) provides an autonomous Technical SEO, Conversion Rate Optimization (CRO), Generative Engine Optimization (GEO), WCAG 2.2 accessibility, and live DNS security auditing platform for digital agencies, SaaS founders, and marketing teams. This Privacy Policy &amp; Data Processing Agreement (DPA) explains how we collect, process, store, and protect information across <code className="font-mono text-accent">https://seospace.pro</code> and all associated APIs.
               </p>
               <div className="p-4 rounded-2xl border border-accent/20 bg-accent/5 text-xs text-ink leading-relaxed">
                 <strong className="text-accent">Core Commitment:</strong> We never sell, rent, or broker personal data, audited client domain lists, white-label PDF reports, or leads captured through embeddable agency widgets to any third-party data broker or advertiser.
@@ -190,7 +256,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 2 */}
-            <section id="collection" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="collection" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">2. Information &amp; Telemetry We Collect</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 We collect only the minimum data necessary to operate your workspace, persist saved URL audits and AI articles, and process subscriptions:
@@ -224,7 +290,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 3 */}
-            <section id="scanner" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="scanner" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">3. URL Scanner, RapidAPI &amp; Cloudflare DNS Data</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 When you initiate a website audit on the homepage, dashboard, or via <code className="font-mono text-accent">POST /api/audit</code>:
@@ -246,7 +312,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 4 */}
-            <section id="ai-policy" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="ai-policy" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <div className="sp-eyebrow text-accent">Enterprise AI Privacy Guarantee</div>
               <h2 className="text-xl font-extrabold text-ink tracking-tight">4. Seospace Neural Engine v4.2 Zero-Training Policy</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
@@ -255,7 +321,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 5 */}
-            <section id="subprocessors" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="subprocessors" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">5. Authorized Subprocessors &amp; Infrastructure</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 To deliver sub-15ms cached audit lookups and global edge availability, Seospace AI engages the following vetted infrastructure subprocessors:
@@ -289,7 +355,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 6 */}
-            <section id="retention" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="retention" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">6. Saved-First Database Retention &amp; Deletion</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Audited URLs and generated SEO articles are persisted in our saved-first database so your team can revisit historical reports, track domain score improvements over time, and share public report links without re-running crawls. You may overwrite any cached snapshot with fresh live scans or request permanent deletion of any record at any time.
@@ -297,7 +363,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 7 */}
-            <section id="gdpr-ccpa" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="gdpr-ccpa" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">7. GDPR, UK-GDPR &amp; CCPA Data Subject Rights</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Regardless of your geographic location, we extend full GDPR and CCPA/CPRA rights to all users:
@@ -330,7 +396,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 8 */}
-            <section id="cookies" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="cookies" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">8. Cookies, LocalStorage &amp; Session Tokens</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 Seospace AI uses strictly necessary browser storage keys (<code className="font-mono text-accent">seospace_theme_mode</code> for Light/Dark theme persistence, <code className="font-mono text-accent">seospace_auth_session_v1</code> for workspace authentication, and <code className="font-mono text-accent">seospace_saved_audits_v2</code> for instant client-side cache hydration). We do not load third-party ad tracking pixels.
@@ -338,7 +404,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             {/* Section 9 */}
-            <section id="contact" className="p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
+            <section id="contact" className="scroll-mt-28 p-6 sm:p-8 rounded-3xl border border-line bg-card sp-card-shadow space-y-4">
               <h2 className="text-xl font-extrabold text-ink tracking-tight">9. Data Protection Officer (DPO) &amp; Contact</h2>
               <p className="text-xs sm:text-sm text-mute leading-relaxed">
                 For privacy inquiries, custom Enterprise Data Processing Agreements (DPAs), SOC2 questionnaires, or GDPR/CCPA erasure requests, contact our Data Protection &amp; Trust office:
