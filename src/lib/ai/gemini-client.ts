@@ -1,10 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
 const CANDIDATE_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-3.5-flash-lite",
-  "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
+  "gemini-3.1-flash-lite",
 ];
 
 export async function generateGeminiJson<T>(

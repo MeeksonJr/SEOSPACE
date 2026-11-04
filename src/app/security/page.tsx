@@ -248,7 +248,7 @@ export default function SecurityTrustCenterPage() {
               <div className="rounded-2xl bg-night text-[#f3f0e8] border border-[#2a2a2c] overflow-hidden sp-card-shadow">
                 <div className="px-4 py-3 border-b border-[#2a2a2c] flex items-center justify-between text-xs">
                   <div className="font-mono text-[11px] text-[#a5a5a0] truncate">
-                    GET https://seospace-kappa.vercel.app{selectedManifest.path}
+                    GET https://seospace.pro{selectedManifest.path}
                   </div>
                   <button
                     type="button"

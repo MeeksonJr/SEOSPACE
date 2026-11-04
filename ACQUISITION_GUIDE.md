@@ -1,7 +1,7 @@
 # Seospace AI — Acquisition & Turnkey Handover Guide
 
 > **Asset:** Seospace AI (Autonomous Technical SEO, CRO, Generative Engine Optimization (GEO) & Agency White-Label Growth SaaS)  
-> **Deployment:** Production live on Vercel Edge (`https://seospace-kappa.vercel.app/`)  
+> **Deployment:** Production live on Vercel Edge (`https://seospace.pro/`)  
 > **Repository:** Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Supabase PostgreSQL, Stripe Billing  
 
 ---

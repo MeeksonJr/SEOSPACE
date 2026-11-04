@@ -23,7 +23,7 @@ export default function FreeSeoToolsPage() {
   // Tool 2: JSON-LD Schema Studio State
   const [schemaType, setSchemaType] = useState<"Organization" | "SoftwareApplication" | "FAQPage">("Organization");
   const [schemaName, setSchemaName] = useState("Seospace AI");
-  const [schemaUrl, setSchemaUrl] = useState("https://seospace-kappa.vercel.app");
+  const [schemaUrl, setSchemaUrl] = useState("https://seospace.pro");
   const [schemaDesc, setSchemaDesc] = useState(
     "Autonomous Technical SEO, CRO, AI Search (GEO) & Live DNS Intelligence Platform."
   );

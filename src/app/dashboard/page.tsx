@@ -71,7 +71,8 @@ type DashboardTab = "overview" | "editor" | "whitelabel" | "widget" | "billing";
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as DashboardTab) || "overview";
+  const rawInitialTab = searchParams.get("tab");
+  const initialTab: DashboardTab = rawInitialTab === "leads" ? "widget" : (rawInitialTab as DashboardTab) || "overview";
 
   const { isDark, toggleTheme } = usePublicTheme(false);
   const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
@@ -182,7 +183,8 @@ function DashboardContent() {
       );
     }
 
-    const tabParam = searchParams.get("tab") as DashboardTab;
+    const rawTab = searchParams.get("tab");
+    const tabParam = (rawTab === "leads" ? "widget" : rawTab) as DashboardTab;
     if (
       tabParam &&
       ["overview", "editor", "whitelabel", "widget", "billing"].includes(
@@ -1274,28 +1276,35 @@ function DashboardContent() {
                         </span>
                       </div>
                       <div className="space-y-2 text-xs">
-                        {audits.slice(0, 6).map((a) => (
-                          <Link
-                            key={a.id}
-                            href={`/report/${a.id}`}
-                            className="flex items-center justify-between py-2 hover:bg-stage rounded-xl px-2.5 transition border border-transparent hover:border-line"
-                          >
-                            <span className="font-semibold text-ink truncate pr-2">
-                              {a.domain}
-                            </span>
-                            <span
-                              className={`font-bold shrink-0 ${
-                                a.overallScore >= 85
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : a.overallScore >= 60
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : "text-rose-600 dark:text-rose-400"
-                              }`}
+                        {audits.length === 0 ? (
+                          <div className="py-6 px-4 text-center rounded-2xl bg-stage border border-line text-mute">
+                            <p className="font-semibold text-ink">No saved audits yet</p>
+                            <p className="text-[11px] text-mute mt-1">Run your first 35-point real-time audit above.</p>
+                          </div>
+                        ) : (
+                          audits.slice(0, 6).map((a) => (
+                            <Link
+                              key={a.id}
+                              href={`/report/${a.id}`}
+                              className="flex items-center justify-between py-2 hover:bg-stage rounded-xl px-2.5 transition border border-transparent hover:border-line"
                             >
-                              {a.overallScore}/100 ({a.letterGrade})
-                            </span>
-                          </Link>
-                        ))}
+                              <span className="font-semibold text-ink truncate pr-2">
+                                {a.domain}
+                              </span>
+                              <span
+                                className={`font-bold shrink-0 ${
+                                  a.overallScore >= 85
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : a.overallScore >= 60
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : "text-rose-600 dark:text-rose-400"
+                                }`}
+                              >
+                                {a.overallScore}/100 ({a.letterGrade})
+                              </span>
+                            </Link>
+                          ))
+                        )}
                       </div>
                     </div>
                     <div className="pt-3 mt-3 border-t border-line text-[11px] text-mute">
@@ -1548,7 +1557,19 @@ function DashboardContent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
-                    {audits.map((item) => {
+                    {audits.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 px-4 text-center text-mute">
+                          <div className="max-w-sm mx-auto space-y-2">
+                            <p className="font-bold text-ink text-sm">No saved audits in watchlist</p>
+                            <p className="text-xs text-mute">
+                              Enter a target domain in the scan box above to crawl its live DOM, DNS records, and compute a 35-point audit.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      audits.map((item) => {
                       const domainArticles = articles.filter(
                         (art) =>
                           art.linkedAuditId === item.id ||
@@ -1645,7 +1666,8 @@ function DashboardContent() {
                           </td>
                         </tr>
                       );
-                    })}
+                    })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2874,7 +2896,7 @@ function DashboardContent() {
             </div>
 
             {/* Captured Leads CRM Table with Status Cycling & Delete */}
-            <div className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow text-ink">
+            <div id="leads-crm" className="bg-card rounded-3xl border border-line p-6 sm:p-8 sp-card-shadow text-ink">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <h3 className="text-base font-bold text-ink font-display">
@@ -2901,7 +2923,19 @@ function DashboardContent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
-                    {leads.map((lead) => {
+                    {leads.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 px-4 text-center text-mute">
+                          <div className="max-w-sm mx-auto space-y-2">
+                            <p className="font-bold text-ink text-sm">No captured leads yet</p>
+                            <p className="text-xs text-mute">
+                              Embed the audit widget snippet above on your agency site or blog to capture inbound client leads automatically.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      leads.map((lead) => {
                       const nextStatusMap: Record<
                         CapturedLead["status"],
                         CapturedLead["status"]
@@ -2965,7 +2999,8 @@ function DashboardContent() {
                           </td>
                         </tr>
                       );
-                    })}
+                    })
+                    )}
                   </tbody>
                 </table>
               </div>

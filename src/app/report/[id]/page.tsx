@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -40,10 +40,14 @@ import {
 import { SAMPLE_AUDITS } from "@/lib/sample-audits";
 import { AuditReport, PillarKey, WhiteLabelConfig } from "@/types/audit";
 
-export default function AuditReportPage() {
+function ReportContent() {
   const { isDark, toggleTheme } = usePublicTheme(false);
   const params = useParams();
+  const searchParams = useSearchParams();
   const reportId = (params?.id as string) || "voice-one-com";
+  const wlQuery = searchParams.get("whitelabel");
+  const agencyQuery = searchParams.get("agency");
+  const colorQuery = searchParams.get("color");
 
   const [report, setReport] = useState<AuditReport>(
     SAMPLE_AUDITS[reportId] ||
@@ -55,7 +59,13 @@ export default function AuditReportPage() {
     getWhiteLabelConfig()
   );
   const [user, setUser] = useState<WorkspaceUser>(() => getWorkspaceUser());
-  const [whiteLabelPreview, setWhiteLabelPreview] = useState(() => getWorkspaceUser().plan === "agency");
+  const [whiteLabelPreview, setWhiteLabelPreview] = useState(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("whitelabel") === "1" || sp.get("agency")) return true;
+    }
+    return getWorkspaceUser().plan === "agency";
+  });
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<"audit_limit" | "feature_locked">("feature_locked");
   const [filterSeverity, setFilterSeverity] = useState<
@@ -68,10 +78,20 @@ export default function AuditReportPage() {
   const [freshlyFetched, setFreshlyFetched] = useState(false);
 
   useEffect(() => {
-    setUser(getWorkspaceUser());
-    setWhiteLabel(getWhiteLabelConfig());
+    const curUser = getWorkspaceUser();
+    setUser(curUser);
+    const baseWl = getWhiteLabelConfig();
+    if (agencyQuery) baseWl.agencyName = agencyQuery;
+    if (colorQuery) baseWl.primaryColor = colorQuery;
+    setWhiteLabel(baseWl);
     setArticles(getSavedArticles());
     setFreshlyFetched(false);
+
+    if (wlQuery === "1" || wlQuery === "true" || agencyQuery) {
+      setWhiteLabelPreview(true);
+    } else if (curUser.plan === "agency") {
+      setWhiteLabelPreview(true);
+    }
 
     const found = getAuditById(reportId);
     if (found) {
@@ -194,7 +214,21 @@ export default function AuditReportPage() {
 
   function handleCopyShareLink() {
     if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(window.location.href);
+    try {
+      const url = new URL(window.location.href);
+      if (whiteLabelPreview) {
+        url.searchParams.set("whitelabel", "1");
+        if (whiteLabel.agencyName) url.searchParams.set("agency", whiteLabel.agencyName);
+        if (whiteLabel.primaryColor) url.searchParams.set("color", whiteLabel.primaryColor);
+      } else {
+        url.searchParams.delete("whitelabel");
+        url.searchParams.delete("agency");
+        url.searchParams.delete("color");
+      }
+      navigator.clipboard.writeText(url.toString());
+    } catch {
+      navigator.clipboard.writeText(window.location.href);
+    }
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   }
@@ -1180,5 +1214,13 @@ export default function AuditReportPage() {
         targetPlan={upgradeReason === "feature_locked" ? "agency" : "pro"}
       />
     </div>
+  );
+}
+
+export default function AuditReportPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-paper" />}>
+      <ReportContent />
+    </Suspense>
   );
 }

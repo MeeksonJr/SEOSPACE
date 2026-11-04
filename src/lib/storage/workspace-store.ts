@@ -428,7 +428,7 @@ export function saveArticle(article: SavedArticle): SavedArticle[] {
 export function deleteArticle(id: string): SavedArticle[] {
   if (typeof window === "undefined") return INITIAL_ARTICLES;
   const current = getSavedArticles().filter((a) => a.id !== id);
-  const finalArticles = current.length > 0 ? current : INITIAL_ARTICLES;
+  const finalArticles = current;
   localStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(finalArticles));
   fetch("/api/db", {
     method: "POST",

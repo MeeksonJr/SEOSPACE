@@ -200,5 +200,42 @@ html:not(.sp-js) [data-reveal] { opacity: 1; transform: none; }
 
 @media print {
   .no-print, .sp-progress { display: none !important; }
-  body { background: #ffffff !important; }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #121214 !important;
+  }
+  /* Force high-contrast crisp text in print regardless of user theme mode */
+  html[data-theme="dark"], body[data-theme="dark"] {
+    --sp-paper: #ffffff !important;
+    --sp-card: #ffffff !important;
+    --sp-ink: #121214 !important;
+    --sp-mute: #5a5955 !important;
+    --sp-line: #e2dfd6 !important;
+    --sp-stage: #f8f6f0 !important;
+  }
+  .bg-night, .bg-card, .bg-stage {
+    background: #ffffff !important;
+    color: #121214 !important;
+  }
+  .text-ink {
+    color: #121214 !important;
+  }
+  .text-mute {
+    color: #5a5955 !important;
+  }
+  .border-line {
+    border-color: #e2dfd6 !important;
+  }
+  .sp-card-shadow {
+    box-shadow: none !important;
+  }
+  /* Avoid breaking audit cards across printed page boundaries */
+  .break-inside-avoid, [class*="rounded-3xl"], [class*="rounded-2xl"] {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }

@@ -24,27 +24,27 @@ async function run() {
   const captures = [
     {
       name: '01-landing-page-hero.png',
-      url: 'https://seospace-kappa.vercel.app',
+      url: 'https://seospace.pro',
       waitFor: 2500,
     },
     {
       name: '02-audit-report-gauge.png',
-      url: 'https://seospace-kappa.vercel.app/report/voice-one-com',
+      url: 'https://seospace.pro/report/voice-one-com',
       waitFor: 3000,
     },
     {
       name: '03-domain-compare-battlecard.png',
-      url: 'https://seospace-kappa.vercel.app/compare',
+      url: 'https://seospace.pro/compare',
       waitFor: 2500,
     },
     {
       name: '04-free-tools-suite.png',
-      url: 'https://seospace-kappa.vercel.app/tools',
+      url: 'https://seospace.pro/tools',
       waitFor: 2500,
     },
     {
       name: '05-api-docs-interactive.png',
-      url: 'https://seospace-kappa.vercel.app/docs',
+      url: 'https://seospace.pro/docs',
       waitFor: 2500,
     }
   ];
@@ -70,7 +70,7 @@ async function run() {
   // Now take dashboard screenshot by simulating 1-click demo login
   try {
     console.log('Navigating to login for 1-click demo dashboard screenshot...');
-    await page.goto('https://seospace-kappa.vercel.app/login', { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto('https://seospace.pro/login', { waitUntil: 'networkidle2', timeout: 30000 });
     await new Promise(r => setTimeout(r, 1500));
 
     // Find and click the 1-click demo button

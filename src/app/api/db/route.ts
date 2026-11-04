@@ -38,7 +38,28 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ article: found || null });
   }
 
-  return NextResponse.json(db);
+  // Privacy & Data Protection: Sanitize captured prospect emails and webhook tokens
+  const sanitizedLeads = (db.leads || []).map((lead) => ({
+    ...lead,
+    email: lead.email
+      ? lead.email.replace(/(.{2})(.*)(@.*)/, "$1***$3")
+      : "prospect@client.demo",
+  }));
+
+  const sanitizedWhiteLabel = db.whiteLabel
+    ? {
+        ...db.whiteLabel,
+        webhookUrl: db.whiteLabel.webhookUrl
+          ? db.whiteLabel.webhookUrl.split("/").slice(0, 5).join("/") + "/••••••••"
+          : undefined,
+      }
+    : undefined;
+
+  return NextResponse.json({
+    ...db,
+    leads: sanitizedLeads,
+    whiteLabel: sanitizedWhiteLabel,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -79,7 +100,30 @@ export async function POST(req: NextRequest) {
       // Asynchronously trigger agency webhook if configured
       const currentDb = readServerDb();
       const webhookUrl = currentDb.whiteLabel?.webhookUrl;
+      let isAllowedWebhook = false;
       if (webhookUrl && /^https?:\/\//i.test(webhookUrl)) {
+        try {
+          const parsed = new URL(webhookUrl);
+          const host = parsed.hostname.toLowerCase();
+          if (
+            host !== "localhost" &&
+            host !== "127.0.0.1" &&
+            host !== "0.0.0.0" &&
+            host !== "::1" &&
+            !host.endsWith(".local") &&
+            !host.endsWith(".internal") &&
+            !/^10\./.test(host) &&
+            !/^192\.168\./.test(host) &&
+            !/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) &&
+            !/^169\.254\./.test(host)
+          ) {
+            isAllowedWebhook = true;
+          }
+        } catch {
+          // ignore malformed
+        }
+      }
+      if (isAllowedWebhook && webhookUrl) {
         const isDiscord = /discord(?:app)?\.com\/api\/webhooks/i.test(webhookUrl);
         const isSlack = /hooks\.slack\.com/i.test(webhookUrl);
         let payload: Record<string, unknown>;

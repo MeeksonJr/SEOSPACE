@@ -126,7 +126,7 @@ export default function ApiDocsPage() {
     }
   }
 
-  const curlSnippet = `curl -X ${selectedEndpoint.method} https://seospace-kappa.vercel.app${selectedEndpoint.path} \\
+  const curlSnippet = `curl -X ${selectedEndpoint.method} https://seospace.pro${selectedEndpoint.path} \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '${requestBody.replace(/\n\s*/g, " ")}'`;
@@ -174,7 +174,7 @@ export default function ApiDocsPage() {
 
           <div className="pt-4 border-t border-line flex flex-wrap items-center gap-6 text-xs text-mute font-mono">
             <div>
-              Base URL: <span className="text-ink font-bold">https://seospace-kappa.vercel.app</span>
+              Base URL: <span className="text-ink font-bold">https://seospace.pro</span>
             </div>
             <div>
               Auth: <span className="text-ink font-bold">Bearer &lt;API_KEY&gt;</span>

@@ -45,3 +45,14 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# CS Coursework & untracked artifacts
+cs410/
+cs410*.json
+cs463*
+evalPreviousProject.html
+previous_projects.html
+project_home.html
+refillme_text.txt
+.agents/
+skills-lock.json

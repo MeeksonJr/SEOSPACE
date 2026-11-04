@@ -11,6 +11,33 @@ export async function POST(req: Request) {
       );
     }
 
+    try {
+      const parsed = new URL(webhookUrl);
+      const host = parsed.hostname.toLowerCase();
+      if (
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "0.0.0.0" ||
+        host === "::1" ||
+        host.endsWith(".local") ||
+        host.endsWith(".internal") ||
+        /^10\./.test(host) ||
+        /^192\.168\./.test(host) ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+        /^169\.254\./.test(host)
+      ) {
+        return NextResponse.json(
+          { error: "Webhook URL cannot point to internal or private addresses." },
+          { status: 400 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Malformed webhook URL." },
+        { status: 400 }
+      );
+    }
+
     const isDiscord = /discord(?:app)?\.com\/api\/webhooks/i.test(webhookUrl);
     const isSlack = /hooks\.slack\.com/i.test(webhookUrl);
 
@@ -19,7 +46,7 @@ export async function POST(req: Request) {
     if (isDiscord) {
       payload = {
         username: "Seospace Lead Engine",
-        avatar_url: "https://seospace-kappa.vercel.app/favicon.ico",
+        avatar_url: "https://seospace.pro/favicon.ico",
         embeds: [
           {
             title: "🎯 New Inbound Agency Lead Captured!",
