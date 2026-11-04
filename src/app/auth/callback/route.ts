@@ -4,7 +4,8 @@ import { getServerSupabaseAdmin } from "@/lib/supabase/client";
 export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") || "/dashboard";
+  const rawNext = requestUrl.searchParams.get("next") || "/dashboard";
+  const next = rawNext.includes("?") ? `${rawNext}&verified=true` : `${rawNext}?verified=true`;
   const errorDescription =
     requestUrl.searchParams.get("error_description") ||
     requestUrl.searchParams.get("error");
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
               plan: "starter",
               credits_used: 0,
               credits_limit: 10,
+              email_verified: true,
               updated_at: new Date().toISOString(),
             },
             { onConflict: "id" }

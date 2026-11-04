@@ -29,6 +29,7 @@ export interface WorkspaceUser {
   creditsUsed: number;
   creditsLimit: number;
   joined: string;
+  emailVerified?: boolean;
 }
 
 export interface ArticleCheckResult {
@@ -273,6 +274,7 @@ export const DEFAULT_DEMO_USER: WorkspaceUser = {
   creditsUsed: 4,
   creditsLimit: 999,
   joined: "Oct 2026",
+    emailVerified: true,
 };
 
 export { INITIAL_ARTICLES };
@@ -679,6 +681,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 29,
     creditsLimit: 999,
     joined: "Oct 2026",
+    emailVerified: true,
   },
   {
     id: "usr-3",
@@ -688,6 +691,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 18,
     creditsLimit: 100,
     joined: "Oct 2026",
+    emailVerified: true,
   },
   {
     id: "usr-4",
@@ -697,6 +701,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 4,
     creditsLimit: 999,
     joined: "Oct 2026",
+    emailVerified: true,
   },
   {
     id: "usr-5",
@@ -706,6 +711,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 4,
     creditsLimit: 999,
     joined: "Oct 2026",
+    emailVerified: true,
   },
   {
     id: "usr-6",
@@ -715,6 +721,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 4,
     creditsLimit: 999,
     joined: "Oct 2026",
+    emailVerified: true,
   },
   {
     id: "usr-7",
@@ -724,6 +731,7 @@ export const DEFAULT_ADMIN_USERS_SEED: WorkspaceUser[] = [
     creditsUsed: 4,
     creditsLimit: 3,
     joined: "Oct 2026",
+    emailVerified: true,
   },
 ];
 

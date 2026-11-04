@@ -21,6 +21,7 @@ import {
   Home,
   LayoutGrid,
   Loader2,
+  Mail,
   Menu,
   Palette,
   PanelLeftClose,
@@ -180,6 +181,15 @@ function DashboardContent() {
       setUser(updated);
       setUpgradedToast(
         `🎉 Your ${upgradedParam.toUpperCase()} plan is now active! All features and quotas are unlocked.`
+      );
+    }
+
+    const verifiedParam = searchParams.get("verified");
+    if (verifiedParam === "true" || verifiedParam === "1") {
+      const updated = saveWorkspaceUser({ emailVerified: true });
+      setUser(updated);
+      setUpgradedToast(
+        "🎉 Your email address has been verified successfully! Your Seospace workspace is fully activated."
       );
     }
 
@@ -1064,6 +1074,24 @@ function DashboardContent() {
             <OpenSiteNavigatorButton label="All Pages" />
           </div>
         </header>
+        {user.emailVerified === false && (
+          <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-200 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Action Required:</strong> Your email (<strong>{user.email}</strong>) has not been verified yet. Please confirm your email to activate full white-label report sharing.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(user.email)}`}
+                className="px-3 py-1 rounded-xl bg-amber-500 text-[#141413] font-bold text-xs hover:opacity-90 transition cursor-pointer"
+              >
+                Verify Email Now →
+              </Link>
+            </div>
+          </div>
+        )}
         {/* ============================================================
             TAB 1: 100% DATA-DRIVEN EXECUTIVE INTELLIGENCE DASHBOARD
            ============================================================ */}

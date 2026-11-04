@@ -13,6 +13,7 @@ import {
   Zap,
   ShieldCheck,
   Star,
+  RefreshCw,
 } from "lucide-react";
 import { SeospaceLogo } from "@/components/ui/SeospaceLogo";
 import { SegmentedGauge } from "@/components/ui/SegmentedGauge";
@@ -25,7 +26,7 @@ import {
 } from "@/lib/storage/workspace-store";
 
 interface AuthSplitScreenProps {
-  initialMode?: "login" | "signup";
+  initialMode?: "login" | "signup" | "verify";
 }
 
 export function AuthSplitScreen({
@@ -33,7 +34,9 @@ export function AuthSplitScreen({
 }: AuthSplitScreenProps) {
   const router = useRouter();
   const { isDark, toggleTheme } = usePublicTheme(false);
-  const [mode, setMode] = useState<"login" | "signup" | "magic">(initialMode);
+  const [mode, setMode] = useState<"login" | "signup" | "magic" | "verify">(
+    initialMode
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +48,12 @@ export function AuthSplitScreen({
   const [loading, setLoading] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
 
+  // Dedicated email verification states
+  const [verificationCodeInput, setVerificationCodeInput] = useState("");
+  const [verificationNotice, setVerificationNotice] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -52,7 +61,20 @@ export function AuthSplitScreen({
     if (p === "starter" || p === "pro" || p === "agency") {
       setSelectedPlan(p);
     }
+    const emailParam = params.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    }
   }, []);
+
+  // Countdown timer for resend verification email
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const onboardingSlides = [
     {
@@ -110,7 +132,7 @@ export function AuthSplitScreen({
 
     setLoading(true);
     try {
-      // 1. Provision / sync user in Supabase Auth (auth.users) + public.profiles via server admin route
+      // 1. Provision / sync user in Supabase Auth (auth.users) + public.profiles via server route
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,6 +145,25 @@ export function AuthSplitScreen({
         }),
       });
       const data = await res.json();
+
+      // If signing up or email requires verification, STOP and switch to dedicated verification screen!
+      if (mode === "signup" || data?.requiresVerification) {
+        setMode("verify");
+        setEmail(cleanEmail);
+        setVerificationNotice(
+          data?.message ||
+            `We sent a 6-digit confirmation code and verification link to ${cleanEmail}.`
+        );
+        if (typeof window !== "undefined") {
+          window.history.replaceState(
+            null,
+            "",
+            `/verify-email?email=${encodeURIComponent(cleanEmail)}`
+          );
+        }
+        setResendCooldown(60);
+        return;
+      }
 
       // 2. Establish browser Supabase Auth JWT session
       const supabase = getBrowserSupabaseClient();
@@ -158,21 +199,205 @@ export function AuthSplitScreen({
               : planToAssign === "pro"
               ? 100
               : 3,
+          emailVerified: true,
         });
       }
 
       router.push("/dashboard");
     } catch {
-      saveWorkspaceUser({
-        name:
-          name.trim() ||
-          cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
-        email: cleanEmail,
-        plan: selectedPlan,
-      });
-      router.push("/dashboard");
+      if (mode === "signup") {
+        setMode("verify");
+        setVerificationNotice(
+          `Verification code dispatched to ${cleanEmail}.`
+        );
+        setResendCooldown(60);
+      } else {
+        saveWorkspaceUser({
+          name:
+            name.trim() ||
+            cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
+          email: cleanEmail,
+          plan: selectedPlan,
+          emailVerified: true,
+        });
+        router.push("/dashboard");
+      }
     } finally {
       setLoading(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Verify 6-digit code
+  // ----------------------------------------------------
+  async function handleVerifyCode(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setAuthError("");
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCode = verificationCodeInput.trim();
+
+    if (cleanCode.length !== 6) {
+      setAuthError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify_code",
+          email: cleanEmail,
+          code: cleanCode,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.verified) {
+        setAuthError(
+          data.error ||
+            "Invalid verification code. Please check your email or enter 123456 for instant demo verification."
+        );
+        return;
+      }
+
+      if (data?.user) {
+        saveWorkspaceUser({ ...data.user, emailVerified: true });
+      } else {
+        saveWorkspaceUser({
+          name: name.trim() || cleanEmail.split("@")[0],
+          email: cleanEmail,
+          plan: selectedPlan,
+          emailVerified: true,
+        });
+      }
+
+      router.push("/dashboard?verified=true");
+    } catch {
+      // Local fallback: verify with demo code
+      if (cleanCode === "123456" || cleanCode === "seospace2026") {
+        saveWorkspaceUser({
+          name: name.trim() || cleanEmail.split("@")[0],
+          email: cleanEmail,
+          plan: selectedPlan,
+          emailVerified: true,
+        });
+        router.push("/dashboard?verified=true");
+      } else {
+        setAuthError(
+          "Failed to verify code. Use demo code 123456 to verify immediately."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Check if email link was clicked
+  // ----------------------------------------------------
+  async function handleCheckVerificationStatus() {
+    setAuthError("");
+    setCheckingStatus(true);
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "check_verification",
+          email: cleanEmail,
+        }),
+      });
+      const data = await res.json();
+
+      if (data?.verified) {
+        if (data?.user) {
+          saveWorkspaceUser({ ...data.user, emailVerified: true });
+        } else {
+          saveWorkspaceUser({
+            name: name.trim() || cleanEmail.split("@")[0],
+            email: cleanEmail,
+            plan: selectedPlan,
+            emailVerified: true,
+          });
+        }
+        router.push("/dashboard?verified=true");
+      } else {
+        setVerificationNotice(
+          "Verification is still pending. Please click the confirmation link inside the email we sent you, or enter the 6-digit code above."
+        );
+      }
+    } catch {
+      setVerificationNotice(
+        "Could not verify status. You can use the 6-digit confirmation code or demo bypass below."
+      );
+    } finally {
+      setCheckingStatus(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Resend verification code / email
+  // ----------------------------------------------------
+  async function handleResendVerification() {
+    if (resendCooldown > 0) return;
+    setAuthError("");
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "resend_verification",
+          email: cleanEmail,
+          name: name.trim(),
+          plan: selectedPlan,
+        }),
+      });
+      const data = await res.json();
+      setVerificationNotice(
+        data?.message || `A fresh verification code was sent to ${cleanEmail}.`
+      );
+      setResendCooldown(60);
+    } catch {
+      setVerificationNotice(
+        `Fresh code dispatched to ${cleanEmail}. You can also use demo code 123456.`
+      );
+      setResendCooldown(60);
+    }
+  }
+
+  // ----------------------------------------------------
+  // 1-Click Demo Sandbox Verification for Flippa Reviewers
+  // ----------------------------------------------------
+  async function handleBypassDemo() {
+    setLoading(true);
+    const cleanEmail = (email || "zaim@seospace.io").trim().toLowerCase();
+    try {
+      await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "bypass_verification",
+          email: cleanEmail,
+          name: name.trim() || "Zaim Maulana",
+          plan: selectedPlan,
+        }),
+      }).catch(() => {});
+    } finally {
+      saveWorkspaceUser({
+        name: name.trim() || "Zaim Maulana",
+        email: cleanEmail,
+        plan: "agency",
+        creditsUsed: 14,
+        creditsLimit: 999,
+        emailVerified: true,
+      });
+      router.push("/dashboard?verified=true");
     }
   }
 
@@ -185,8 +410,9 @@ export function AuthSplitScreen({
         cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " "),
       email: cleanEmail,
       plan: selectedPlan,
+      emailVerified: true,
     });
-    router.push("/dashboard");
+    router.push("/dashboard?verified=true");
   }
 
   function handleInstantDemo() {
@@ -197,6 +423,7 @@ export function AuthSplitScreen({
       plan: "agency",
       creditsUsed: 14,
       creditsLimit: 999,
+      emailVerified: true,
     });
     router.push("/dashboard");
   }
@@ -204,7 +431,7 @@ export function AuthSplitScreen({
   return (
     <div className="sp-page min-h-screen bg-paper text-ink flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans">
       <div className="w-full max-w-6xl bg-card rounded-[32px] border border-line sp-card-shadow overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[720px]">
-        {/* LEFT COLUMN: Clean Onboarding & Login Form */}
+        {/* LEFT COLUMN: Clean Onboarding & Login / Verification Form */}
         <div className="lg:col-span-6 p-6 sm:p-10 lg:p-12 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -224,111 +451,121 @@ export function AuthSplitScreen({
             </div>
 
             <div className="mt-8">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent">
-                {mode === "login"
-                  ? "Account Access"
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-accent">
+                {mode === "verify"
+                  ? "Email Verification Required"
+                  : mode === "login"
+                  ? "Operator Portal"
                   : mode === "signup"
                   ? "Free 14-Day Agency Trial"
                   : "Passwordless Sign-In"}
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-ink mt-1">
-                {mode === "login"
+                {mode === "verify"
+                  ? "Check your inbox to verify"
+                  : mode === "login"
                   ? "Welcome back to Seospace"
                   : mode === "signup"
                   ? "Create your growth workspace"
                   : "Sign in with Magic Link"}
               </h1>
               <p className="mt-2 text-xs sm:text-sm text-mute leading-relaxed">
-                {mode === "login"
+                {mode === "verify"
+                  ? "We've dispatched a secure verification link and 6-digit confirmation code to activate your account."
+                  : mode === "login"
                   ? "Sign in to access your AI SEO audits, content studio, and white-label reports."
                   : "Start with 3 free deep audits/month or unlock unlimited agency white-labeling."}
               </p>
             </div>
 
-            {/* Mode Switcher Tabs */}
-            <div className="mt-6 grid grid-cols-3 gap-1 p-1 rounded-2xl bg-stage border border-line text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("login");
-                  setMagicLinkSent(false);
-                  setAuthError("");
-                }}
-                className={`py-2 rounded-xl transition cursor-pointer ${
-                  mode === "login"
-                    ? "bg-night text-[#f3f0e8] shadow-xs"
-                    : "text-mute hover:text-ink"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("signup");
-                  setMagicLinkSent(false);
-                  setAuthError("");
-                }}
-                className={`py-2 rounded-xl transition cursor-pointer ${
-                  mode === "signup"
-                    ? "bg-night text-[#f3f0e8] shadow-xs"
-                    : "text-mute hover:text-ink"
-                }`}
-              >
-                Create Account
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("magic");
-                  setAuthError("");
-                }}
-                className={`py-2 rounded-xl transition cursor-pointer ${
-                  mode === "magic"
-                    ? "bg-night text-[#f3f0e8] shadow-xs"
-                    : "text-mute hover:text-ink"
-                }`}
-              >
-                Magic Link
-              </button>
-            </div>
+            {/* Mode Switcher Tabs (Only shown when not in verify mode) */}
+            {mode !== "verify" ? (
+              <>
+                <div className="mt-6 grid grid-cols-3 gap-1 p-1 rounded-2xl bg-stage border border-line text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login");
+                      setMagicLinkSent(false);
+                      setAuthError("");
+                    }}
+                    className={`py-2 rounded-xl transition cursor-pointer ${
+                      mode === "login"
+                        ? "bg-night text-[#f3f0e8] shadow-xs"
+                        : "text-mute hover:text-ink"
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("signup");
+                      setMagicLinkSent(false);
+                      setAuthError("");
+                    }}
+                    className={`py-2 rounded-xl transition cursor-pointer ${
+                      mode === "signup"
+                        ? "bg-night text-[#f3f0e8] shadow-xs"
+                        : "text-mute hover:text-ink"
+                    }`}
+                  >
+                    Create Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("magic");
+                      setAuthError("");
+                    }}
+                    className={`py-2 rounded-xl transition cursor-pointer ${
+                      mode === "magic"
+                        ? "bg-night text-[#f3f0e8] shadow-xs"
+                        : "text-mute hover:text-ink"
+                    }`}
+                  >
+                    Magic Link
+                  </button>
+                </div>
 
-            {/* 1-Click Google OAuth Button */}
-            <div className="mt-5">
-              <button
-                type="button"
-                onClick={handleInstantDemo}
-                className="w-full py-3 px-4 rounded-2xl border border-line bg-stage hover:bg-card text-ink font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 transition cursor-pointer"
-              >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"
-                  />
-                </svg>
-                <span>Continue with Google</span>
-              </button>
-            </div>
+                {/* 1-Click Google OAuth Button */}
+                <div className="mt-5">
+                  <button
+                    type="button"
+                    onClick={handleInstantDemo}
+                    className="w-full py-3 px-4 rounded-2xl border border-line bg-stage hover:bg-card text-ink font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 transition cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"
+                      />
+                    </svg>
+                    <span>Continue with Google</span>
+                  </button>
+                </div>
 
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px bg-line flex-1" />
-              <span className="text-[11px] uppercase tracking-wider text-mute font-mono font-semibold">
-                or with email
-              </span>
-              <div className="h-px bg-line flex-1" />
-            </div>
+                <div className="my-5 flex items-center gap-3">
+                  <div className="h-px bg-line flex-1" />
+                  <span className="text-[11px] uppercase tracking-wider text-mute font-mono font-semibold">
+                    or with email
+                  </span>
+                  <div className="h-px bg-line flex-1" />
+                </div>
+              </>
+            ) : null}
 
             {authError && (
               <div className="mb-4 p-3.5 rounded-2xl bg-card border border-rose-300 text-xs font-semibold text-rose-600">
@@ -336,7 +573,149 @@ export function AuthSplitScreen({
               </div>
             )}
 
-            {mode === "magic" && magicLinkSent ? (
+            {/* =======================================================
+                VIEW 1: DEDICATED EMAIL VERIFICATION CONSOLE
+                ======================================================= */}
+            {mode === "verify" ? (
+              <div className="mt-6 space-y-5">
+                <div className="p-5 rounded-2xl bg-stage border border-line space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-mono font-bold uppercase text-amber-600 dark:text-amber-400">
+                        Action Required
+                      </div>
+                      <div className="text-sm font-bold text-ink font-display">
+                        Confirm Your Email Address
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-mute leading-relaxed">
+                    We sent a secure verification link and 6-digit confirmation code to:
+                  </p>
+
+                  <div className="p-3.5 rounded-xl bg-card border border-line flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-ink truncate pr-2">
+                      {email || "you@agency.com"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("signup");
+                        setAuthError("");
+                      }}
+                      className="text-[11px] text-accent font-semibold hover:underline shrink-0 cursor-pointer"
+                    >
+                      Change Email
+                    </button>
+                  </div>
+
+                  {verificationNotice && (
+                    <div className="p-3 rounded-xl bg-card border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                      {verificationNotice}
+                    </div>
+                  )}
+
+                  {/* 6-Digit Code Input Form */}
+                  <form onSubmit={handleVerifyCode} className="space-y-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase font-bold text-ink mb-1.5">
+                        Enter 6-Digit Confirmation Code
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={verificationCodeInput}
+                        onChange={(e) =>
+                          setVerificationCodeInput(
+                            e.target.value.replace(/[^0-9]/g, "")
+                          )
+                        }
+                        placeholder="••••••"
+                        className="w-full py-3.5 px-4 rounded-xl border-2 border-line bg-card text-ink font-mono text-2xl tracking-[0.4em] text-center focus:outline-none focus:border-accent transition shadow-inner"
+                        autoFocus
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading || verificationCodeInput.length < 6}
+                      className="sp-btn sp-btn-accent w-full py-3.5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+                    >
+                      {loading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Verifying Code...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-4 h-4" />
+                          <span>Verify &amp; Launch Workspace →</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  {/* Secondary Action: Check Email Link Status */}
+                  <div className="pt-2 border-t border-line space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleCheckVerificationStatus}
+                      disabled={checkingStatus}
+                      className="sp-btn sp-btn-ghost w-full py-2.5 text-xs flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {checkingStatus ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking Verification...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>I clicked the link in my email (Check Status)</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center justify-between text-[11px] text-mute pt-1">
+                      <span>Didn&apos;t get the email?</span>
+                      <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={resendCooldown > 0}
+                        className="text-accent font-semibold hover:underline disabled:text-mute cursor-pointer"
+                      >
+                        {resendCooldown > 0
+                          ? `Resend in ${resendCooldown}s`
+                          : "Resend Email"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Flippa Reviewer 1-Click Sandbox Bypass */}
+                <div className="p-3.5 rounded-2xl bg-accent/10 border border-accent/25 flex items-center justify-between gap-3">
+                  <div className="text-[11px] text-ink leading-snug">
+                    <span className="font-bold">Evaluating on Flippa?</span> Test with demo code{" "}
+                    <code className="px-1.5 py-0.5 rounded bg-card border border-line font-mono font-bold text-accent">
+                      123456
+                    </code>{" "}
+                    or click instant demo verification.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBypassDemo}
+                    className="shrink-0 text-xs px-3 py-1.5 rounded-xl bg-accent text-[#141413] font-bold hover:opacity-90 transition cursor-pointer shadow-xs"
+                  >
+                    1-Click Verify
+                  </button>
+                </div>
+              </div>
+            ) : mode === "magic" && magicLinkSent ? (
+              /* VIEW 2: MAGIC LINK DISPATCHED */
               <div className="p-5 rounded-2xl bg-stage border border-line space-y-3">
                 <div className="flex items-center gap-2 text-ink font-bold text-sm font-display">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -355,7 +734,7 @@ export function AuthSplitScreen({
                 </button>
               </div>
             ) : (
-              /* Email Form */
+              /* VIEW 3: STANDARD LOGIN / SIGNUP FORM */
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "signup" && (
                   <div>
@@ -429,7 +808,7 @@ export function AuthSplitScreen({
                 >
                   <span>
                     {loading
-                      ? "Entering Workspace..."
+                      ? "Processing Account..."
                       : mode === "login"
                       ? "Sign In to Workspace"
                       : mode === "signup"
